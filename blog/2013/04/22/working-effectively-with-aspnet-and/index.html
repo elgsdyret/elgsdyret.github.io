@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Working Effectively with ASP.NET and HttpContext - Developer's Perception</title>
+  <meta name="author" content="Nikolaj Kaare Nørskov">
+
+  
+  <meta name="description" content="Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Perception" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Perception</a></h1>
+  
+    <h2>Odd thoughts from a developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:elgsdyret.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Working Effectively With ASP.NET and HttpContext</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-22T19:15:00+02:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div class='post'>
+Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.<br /><br />This often appears in the form of code like this:<br /><script class="brush: c#" type="syntaxhighlighter"><![CDATA[public void DoSomeCoreStuff()  {    var userId = (string)HttpContext.Current.Session["userId"];    DoSomeMoreCoreStuff(userId); }]]></script> This code could be located anywhere in you codebase, and I have seen examples of such calls to session being done more or less inline in a string describing an SQL query. It does not necessarily have to be the Session property that is accessed though, the problem is the same if Application or other bits of the current http context is accessed this way.<br /><br />There is a number of problems with this approach.<br /><ul><li>Using a string like this is not strongly typed, which easily leads to errors. For instance the session variables might have had a different casing like &#8220;CurrentUserId&#8221;.</li><li>A static reference to HttpContext.Current causes a number of problems. Firstly, it will be hard to use the code in question outside the ASP.NET stack, and secondly it will be equally hard to write meaningful tests for the code in questions.</li></ul><br /><h3>Options</h3>There are a number of ways to solve this problem leading to a much cleaner design enabling testing and reuse. All the options involves pushing the actual call to HttpContext.Current as far up in the call chain as possible, meaning in the code behind of the aspx page.<br /><br /><h4>Simple Types</h4>Given that the currentUserId in our example above is an string (or any other simple type or object that can be easily constructed) why not just use that? It can be injected through the constructor or the method in question.<br /><script class="brush: c#" type="syntaxhighlighter"><![CDATA[public void DoSomeCoreStuff(string userId)  {    DoSomeMoreCoreStuff(userId); }]]></script> <br /><br /><h4>Domain Specific Wrapper Class&nbsp;</h4>Often it is not as simple as a single entry that you want to retrieve from the session. Maybe there is a group of related entries that you want to use.<br /><script class="brush: c#" type="syntaxhighlighter"><![CDATA[public void DoSomeCoreStuff() {   var userId = (string)HttpContext.Current.Session["currentUserId"];   var userColor = (string)HttpContext.Current.Session["favoriteColor"];   var userNickname = (string)HttpContext.Current.Session["nick"];   DoSomeMoreCoreStuff(userId, userColor, userNickname); }]]></script> In that case an interface named according to the relation (for instance UserContext in our example) and injected can solve this problem. The key is to have an implementation of the interface that actually wraps Session and ensure that the string key for the entry is not copied all over the code. The wrapper implementation is instantiated at the top level of the web stack, most often in the code behind class and elsewhere we code against the interface in a inversion of control style.<br /><script class="brush: c#" type="syntaxhighlighter"><![CDATA[public void DoSomeCoreStuff(UserContext userContext) {   var userId = userContext.Id;   var userColor = userContext.FavoriteColor;   var userNickname = userContext.NickName;   DoSomeMoreCoreStuff(userId, userColor, userNickname); }]]></script> The implementation of the interface looks something like this: <br /><script class="brush: c#" type="syntaxhighlighter"><![CDATA[public class HttpContextUserContext : UserContext {   HttpContext context;    public HttpContextUserContext(HttpContext context)   {     this.context = context;   }    public string Id   {     get     {       return (string)context.Session["currentUserId"];     }   }    public string FavoriteColor   {     get     {       return (string)context.Session["favoriteColor"];     }   }    public string NickName   {     get     {       return (string)context.Session["nick"];     }   } }]]></script> It might seem like a lot of code, but the flexibility is definitely worth the small overhead of adding this. <br /><h4></h4><h4>HttpContextBase</h4><div><br /></div>The main problem with the original implementation of the HttpContext class is that it is not based on an interface nor an abstract base class. This means that reusing code that depends on HttpContext can be hard, and testing equally hard. Microsoft realized this problen when they released the MVC framework and added a class called HttpContextBase. The funny thing is that HttpContext does not inherit from HttpContextBase as that would be a breaking change, but it has the exact same API.<br /><br />Thus, our problem from above with the static dependency could be solved as the following stepwise refactoring:<br /><br /><ul><li>Ensure that HttpContext is injected through the constructor or the method in question and ensure that HttpContext.Current is passed in as that value.</li><li>Replace HttpContext in the constructor or method with HttpContextBase and replace HttpContext.Current with new HttpContextWrapper(HttpContext.Current)</li></ul>And our example would then look something like this: <br /><script class="brush: c#" type="syntaxhighlighter"><![CDATA[public void DoSomeCoreStuff(HttpContextBase context)  {    var userId = (string)context.Session["userId"];    DoSomeMoreCoreStuff(userId); }]]></script>This might seem a bit overkill, but we are now able to use our method with a different implementation of HttpContextBase for reuse and testing purposes.<br /><br />When doing a different implementation you should know that every base implementation in HttpContextBase just throws a NotImplementedException. Thus, you will need to override that different bits in your test and reuse implementations depending on what you really require. Alternatively, there are a couple of generic open source implementations available if you want to pull in that extra dependency.<br /><br />In general I would recommend using one of the first approaches, but if you are working with a fairly large system that adheres to the big ball of mud &#8220;design&#8221; antipattern this might be difficult. Maybe it is just to difficult to discern any meaningful relation between the different data retrieved from HttpContext, and with this approach you can at least start writing some tests to get control back of the code.<br /><br />As I mentioned earlier this is just one simple example as HttpContext have a lot of data and functionality built in.<br /><div><br /><br /></div></div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nikolaj Kaare Nørskov</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-22T19:15:00+02:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/dot-net/'>.NET</a>, <a class='category' href='/blog/categories/asp-dot-net/'>ASP.NET</a>, <a class='category' href='/blog/categories/c-number/'>C#</a>, <a class='category' href='/blog/categories/web-forms/'>Web Forms</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and/" data-via="nikolaj_k_n" data-counturl="http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/03/24/playing-with-dynamic-keyword/" title="Previous Post: Playing With the dynamic Keyword">&laquo; Playing With the dynamic Keyword</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/05/02/getting-started-with-go/" title="Next Post: Getting Started with Go">Getting Started with Go &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/05/27/porting-to-octopress/">Porting to Octopress</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/25/code-generation-in-net/">Code Generation in .NET</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/02/getting-started-with-go/">Getting Started With Go</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/22/working-effectively-with-aspnet-and/">Working Effectively With ASP.NET and HttpContext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/24/playing-with-dynamic-keyword/">Playing With the Dynamic Keyword</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/elgsdyret">@elgsdyret</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'elgsdyret',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Nikolaj Kaare Nørskov -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

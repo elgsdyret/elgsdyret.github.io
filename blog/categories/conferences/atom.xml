@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: conferences | Developer's Perception]]></title>
+  <link href="http://elgsdyret.github.io/blog/categories/conferences/atom.xml" rel="self"/>
+  <link href="http://elgsdyret.github.io/"/>
+  <updated>2013-05-27T19:44:42+02:00</updated>
+  <id>http://elgsdyret.github.io/</id>
+  <author>
+    <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[#oredev The Bad Parts]]></title>
+    <link href="http://elgsdyret.github.io/blog/2011/11/13/oredev-bad-parts/"/>
+    <updated>2011-11-13T10:59:00+01:00</updated>
+    <id>http://elgsdyret.github.io/blog/2011/11/13/oredev-bad-parts</id>
+    <content type="html"><![CDATA[<div class='post'>
+<br />Thankfully, this post if going to be a lot shorter than the <a href="http://nikolajkn.blogspot.com/2011/11/oredev-good-parts.html">good parts</a>, but I think with a bit of improvement Øredev can move from being a very good conference, to a brilliant conference.<br /><br /><br /><ol><li>The&nbsp;WiFi&nbsp;was a&nbsp;disgrace!&nbsp;Shouldn't be that hard to get working.&nbsp;</li><li>Too many sessions were delayed due to faulty cables, projectors, or other technical problems. With a bit more testing and backup cables, projectors, and such readily available, it should be possible to minimize these kinds of problems.</li><li>The venue is quite good due to it's location very close to the train station, but the structure of the building makes it hard to move from session to session, and at lunch the main area becomes as crowded as a metro in a reasonably sized city.</li></ol><br /><br />If this is fixed (at least the first 2 items) and the speaker quality stays high, Øredev 2012 is going to be brilliant.<br /><br /><br /></div>
+
+
+<h2>Comments</h2>
+
+
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Nikolaj K N</div>
+<div class='content'>
+Hi Emily,<br /><br />Really nice to hear from you, means my feedback ended up the right place.<br /><br />I hope you will be able to push the boundaries of the WiFi even further, and improve the experience for all.<br /><br />I am looking forward to see it and will be sure to test it again next year.<br /><br />Best Regards<br /><br />/Nikolaj</div>
+</div>
+<div class='comment'>
+<div class='author'>Emily Holweck</div>
+<div class='content'>
+Hi,<br /><br />as the organiser of the event, I want to answer your post :) I did read the nice post as well and thank you for both your posts!!!! <br /> I asked our technician Andreas, who has done a fantastic job, why we have so many difficulties with the network, here is his answer: <br /><br />&quot;I was checking the wifi in different locations every day several times and got good throughput (10mbs/11mbs). We build a completely new hotspot network in 1½ week, The building it self is made of stonewalls and there is allot of steel frameworks in the building so we tried to fine tune the radio during the conference.<br /> <br />The wifi on the paper should handle more than 5000 simultaneous connections, it was the hotspots itself that where the bottleneck and we placed about 20 of those and they should hold 256 simultaneous connections each. The backend delivers more than 3Gbit throughput and up to 500.000 packets per second.&quot; <br /><br />Well, it is not that easy! <br />I hope we can improve next year. And I hope you will visit us again!<br /><br />Kind regards,<br />Emily Holweck, Öredev AB</div>
+</div>
+<div class='comment'>
+<div class='author'>rafek</div>
+<div class='content'>
+That&#39;s funny because last year I wasn&#39;t able to actually connect to the WiFi with my Samsung smartphone.. but this year, the very same Samsung and I tweeted all the time :)</div>
+</div>
+<div class='comment'>
+<div class='author'>Nikolaj K N</div>
+<div class='content'>
+My recollection is that it was bad last year as well (albeit I recall it as being slightly better back then). Either way I don&#39;t think it was good enough. To compare at the GotoCON conference in Copenhagen this year I experienced almost no problems with the WiFi</div>
+</div>
+<div class='comment'>
+<div class='author'>rafek</div>
+<div class='content'>
+WiFi was muuuch better than last year..</div>
+</div>
+</div>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[#oredev - The Good Parts]]></title>
+    <link href="http://elgsdyret.github.io/blog/2011/11/13/oredev-good-parts/"/>
+    <updated>2011-11-13T09:42:00+01:00</updated>
+    <id>http://elgsdyret.github.io/blog/2011/11/13/oredev-good-parts</id>
+    <content type="html"><![CDATA[<div class='post'>
+<br />The Øredev conference 2011 is now over and at this point I have even managed to catch up on missing sleep and cut down on the coffee usage!<br /><br />As usual the conference was a success (from my perspective) with brilliant speakers and interesting topics, and this is my presentation of the good parts.<br /><br /><b>Monday</b><br />This day I was fortunate enough to have TDD training with <a href="http://www.coreyhaines.com/">Corey Haines</a>. We started out with a simple code kata, and quickly more followed, which were solved in pairs or alone.<br />During these exercises the <a href="http://cleancoder.posterous.com/the-transformation-priority-premise">Transformation Priority Premise</a> &nbsp;was introduced, something I originally discovered when Uncle Bob invented it a while ago. Didn't really get it back then, but now at least I get the concept and can apply it albeit clumsily.<br />In the late afternoon Corey spoke a bit about Mocking and general challenges encountered by the different attendants.&nbsp;Even though, I did get a lot of value from this part it did at times seem unstructured and slightly random.<br />In general a very good day, and maybe next time Corey will have a Mocking kata up his sleeve in the event that it is requested?<br /><br /><b>Tuesday</b><br />Another day of training, this day I attended the Git Bootcamp with&nbsp;<a href="http://www.ambientideas.com/blog/">Matthew J. McCullough</a>. I have been using Git for a few months now with a central SVN repository, and felt I was ready to move to the next level.<br />With the energetic guidance of Matthew the entire room was quickly up and running and within a few hours I discovered the first new gem of Git (watch the blog for a later post on this).<br /><br />Before lunch Matthew promised to show us something truly&nbsp;mind blowing&nbsp;with Git, but unfortunately I had seen the trick before and was slightly&nbsp;disappointed. This got me thinking how fast you become used to Source Control being a welcome tool in your everyday developer life with Git, as opposed to all the pain felt before starting to use Git.<br />Again a very good day, and I do believe I managed to move to the next level. If you are looking for a day of Git training, this&nbsp;definitely&nbsp;seems like the way to do it.<br /><br /><b>Wednesday</b><br />The conference was properly kicked off with an inspiring keynote from&nbsp;<a href="http://alexisohanian.com/">Alexis Ohanian</a>&nbsp;regarding getting your mother away from your website, or was it getting other users than your mother? Seems our business is slowly&nbsp;realizing that all that really matters is the users. Fortunately, there are plenty of companies that have yet to realize and act on this, leaving a ton of opportunities to grab their customers if you execute!<br /><br />I had really looked forward to seeing <a href="http://yehudakatz.com/">Yehuda Katz</a>&nbsp;and both his talk on <a href="http://www.sproutcore.com/">SproutCore</a> and <a href="http://rubyonrails.org/">Rails</a> Serializer were quite brilliant. Very intriguing technique he applied for the first talk having slides with inline&nbsp;JavaScript&nbsp;console - worked quite well, when the dependency on being online was removed.<br /><br />In the afternoon I hadn't really figured out what to see, and ended up attending a session on TDD with JavaScript. I expected to see some random Swedish or Danish dude named Christian Johansen, but turned out it was THE <a href="http://cjohansen.no/">Christian Johansen</a>, author of&nbsp;Test-Driven JavaScript Development, creator of <a href="http://sinonjs.org/">Sinon.JS</a>, and&nbsp;Norwegian.&nbsp;This session was the most impressive live coding session I have ever seen with Christian creating a small JQuery plugin in 50 minutes - test driven and everything. Very impressive!<br /><br /><b>Thursday</b><br />This day I started out with watching Greg Young explaining how not to apply CQRS. Greg chose to forego slides and coding, and just slowly wandered back and forth on the stage while visualizing his points with war-stories from the real world. Mainly:<br />- Do not apply CQRS as a top level architecture, creating a monolithic CQRS system. You will fail.<br />- Apply CQRS in a bounded context - but only if the context gives you a competitive advantage. Otherwise you will fail.<br />- Do not create a CQRS framework, at least not before you have implemented CQRS in at least 5 different systems.<br /><br />I think few speakers have the charisma, memory (no notes), and voice (I am not even sure the mike worked) to pull this off - Greg Young does.<br /><br /><b>Friday</b><br />Unfortunately, I could no attend Friday's sessions. How was it?<br /><br /><br /><br /><br /></div>
+
+
+<h2>Comments</h2>
+
+
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Alexander Beletsky</div>
+<div class='content'>
+That sounds like a great boost you got there).. Øredev is cool, hope some videos will be available soon.</div>
+</div>
+</div>
+
+]]></content>
+  </entry>
+  
+</feed>

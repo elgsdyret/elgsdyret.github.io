@@ -1,0 +1,542 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Developer's Perception</title>
+  <meta name="author" content="Nikolaj Kaare Nørskov">
+
+  
+  <meta name="description" content="Since the beginning of the year I have been working on building a new REST based API to be consumed by both internal and external clients in Node.js &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://elgsdyret.github.io/blog/page/2">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Perception" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Perception</a></h1>
+  
+    <h2>Odd thoughts from a developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:elgsdyret.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/06/01/nodejs-when-honeymoon-is-over/">Node.js When the Honeymoon Is Over</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-01T05:33:00+02:00" pubdate data-updated="true">Jun 1<span>st</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<br /><br />Since the beginning of the year I have been working on building a new REST based API to be consumed by both internal and external clients in <a href="http://nodejs.org/">Node.js</a>.<br /><br />The main reason for choosing node and mongo as the main elements in our stack when we started the project was to alleviate a number of pains we experienced with the &#8220;old&#8221; stack of ASP.NET and SQL. Most of this was related to the amount of ceremony that goes in to doing even simple stuff on that stack, which was being made worse by the way the technologies were used. Most if not all of these pains were indeed alleviated, but we gained a couple of new ones, which can be mitigated to some extend.<br /><br /><h4>Debugging and Stack Trace</h4>Having spent many hours the last couple of weeks debugging errors in an application with a codebase that is gaining in size I have come to the conclusion that simply put, the debugging and stack trace in node is&nbsp;inferior to what you would get in a .NET based environment.<br /><br />I have found some of the error messages to be short non descriptive and very generic, making it often fairly hard to understand what is going on. Likely, it is a consequence of the lack of maturity of the technology combined with the lesser experience I have with it, but reading a stack trace in .NET would often mean I know exactly what the problem was, which is not the case with node.<br /><br />Probably, the callback nature of most of the API&#8217;s also is somewhat to blame for this.<br /><br />Most of these challenges can be minimized with a good and solid&nbsp;test suite, as it can help pinpoint more precisely where an error has&nbsp;occurred.<br /><br />A nice little addition to this is that the dynamic nature of the language means simple spelling mistakes in parts of the program that is not executed by tests (bad!) will not get caught. This is an easy problem to fix though - apply <a href="http://www.jshint.com/">J<span id="goog_981159054"></span><span id="goog_981159055"></span>SHint</a>, <a href="http://www.jslint.com/">JSLint</a>, or similar (do it from day one, you owe it to yourself).<br /><br />I tried to find a good &#8220;bad&#8221; error message to put here, but could not easily provoke one intentionally. Will keep a look out for it and make a new post next time I find a good one.<br /><br /><h4>Integration vs Unit Tests -&nbsp;Design and Architecture</h4>The way our application is designed means it is mostly implemented using <a href="http://expressjs.com/">express</a>&nbsp;middleware stack with a little bit of business logic sprinkled here and there. We quickly discovered that this was probably not the best architecture, but still have some leftovers and we have had some challenges to write code that can be unit tested in a meaningful way (without a ton of mocks and fake objects being build).<br /><br />This is mainly a design challenge and not a consequence of node, nor javascript, but it has lead to a side effect. Because the &#8220;units&#8221; are not easily testable, a large percentage of the codebase is mainly tested with integration style tests using &#8221;<a href="https://github.com/danwrong/restler">restler</a>&#8221; (I would actually recommend using &#8221;<a href="https://github.com/mikeal/request">request</a>&#8221; instead). These tests are as good or even better than unit tests to find errors, but (un)fortunately the error data returned from our API does not give me enough information to pinpoint what goes wrong.<br /><br />Thus, the conclusion I have come to is that the middleware should be extremely thin and always defer the bulk of the implementation to another module that can tested. This goes both for middleware implementing cross-cutting concerns and the actual end-point implementation.<br /><br />The platform does not have a large body of known design patterns for implementing maintainable applications. This easily leads to developers trying out a lot of different approaches with different merits and flaws, which means the codebase could suffer from inconsistencies making it hard to maintain.<br /><br /><h4>Hosting</h4>Figure out very early how you are going to host this. If you are going for a cloud based hosting vendor and you are based in the States, there is a number of options.<br /><br />The same options are available in Europe, but from the States, leading to a latency challenge. Trying to get a solid agreement with a hosting partner in Europe has been hard and we have been forced to settle for a worse agreement that we would like.<br /><br />The good part is that due to the traction of the platform almost everyday a new option pops up, and we can always fallback to running off amazon or azure and managing the setup ourselves.<br /><br /><h4>Picking the right Stack</h4>Node.js has been gaining a lot of traction and combined with some of the prime modules it is in general a very nice stack for building the kind of API we are building. I would pick it again if I had to make the choice again today, but this time with the knowledge of what is brings.<br /><br />It has taken longer, and been harder than expected (was almost expected), but we are getting close to being done and can reflect upon what worked and what did not work.<br /><br /><ul><li>Get JSHint or JSLint up and running (as early as possible).</li><li>Get CI up and running (as early as possible) - not after 4 months when you are trying to finish up the project.</li><li>The design and architecture is really important - do not let the speed with which you can whip up new features keep you from worrying about this. Design for tests that can tell you what is wrong with the application when changes are being made.&nbsp;</li><li>Decide as early as possible on standards (to enforce the design and architecture decisions), and make sure the application follows these before moving on. I would recommend starting out with the revealing module pattern, hoisted functions for callback nesting, avoiding control flow libraries such as <a href="https://github.com/caolan/async">async</a>, avoiding inheritance, considering every used external module very carefully, and most importantly keeping it dead simple.&nbsp;</li><li>Start out with testing hosting setups from day one:</li><ul><li>Deploy your app to different platform as service vendors, such as:</li><ul><li><a href="http://www.heroku.com/">Heroku</a></li><li><a href="http://nodejitsu.com/">Nodejitsu</a></li></ul><li>Deploy your app to amazon or similar - if nothing else to get an idea of how the server actually work and what is required.</li><li>Use these experiments to figure out how you want to run your application in production. Figure out which are &#8220;real&#8221; requirements and which are nice to have.&nbsp;</li></ul><li>Consider before you start whether to use <a href="http://coffeescript.org/">CoffeeScript</a>&nbsp;or javascript to write the application. It might seem like a straight forward choice to you, but at least do yourself the favor of spending just a little bit of time researching.</li></ul><br />Happy coding. <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/09/nodejs-first-experiences/">Node.js First Experiences</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-09T10:51:00+02:00" pubdate data-updated="true">Apr 9<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<br /><br />The last 3 months or so I have been busy working on a new backend built in node with mongo as the database. It has been lots of fun, with some frustration, and lots of heureka moments.<br /><br />This is my attempt at describing those experiences, some good and some bad.<br /><br />The two many reasons we opted to work with node was the following:<br /><br /><ul><li>Development speed, due to the simplicity of node and using the same language in both client and server.</li><li>Performance, most of the information we found indicated that we could easier get more performance from using node than the alternative of ASP.NET.</li></ul><br /><br /><span style="font-size: large;">Development Speed</span><br />It seems like the development speed has indeed been increased, but in reality we cannot really measure before we build the next module on top of node. Our first module has also been the proving grounds for the technology stack, as the maturity of the technology means there is not so much information to find on how to write the best node code. Thus, the progress has most likely been slower than what we can expect in the future (yet I still believe I have seen an improvement compared to old projects).<br /><br /><b>Same Language</b><br />So node being javascript, it is in fact the same language is we use in our browser client (built on top of backbone). But, due to the fact that node does not work in the same way as the browser with regards to the code it is not completely trivial to share code between server and client.<br /><br />A given file containing a function in node would have to use<br /><br /><pre class="brush: javascript">module.exports = myFunction; </pre><br />To expose it to being available for use elsewhere. In addition this file would have to be required for the code to actually be used elsewhere. One could argue this is much better than the browser where the same function would probably be attached to some global object (pretending to be a namespace).<br /><br />To give an example of how one could implement code usable for both browser and node, I have taken the liberty of showing a snippet from the brilliant underscore library doing exactly this:<br /><pre class="brush: javascript">if (typeof exports !== 'undefined') {<br />   if (typeof module !== 'undefined' &amp;&amp; module.exports) {<br />       exports = module.exports = _;<br />   }<br />   exports._ = _;<br />} else <br />   root['_'] = _;<br />}<br /></pre><b><br /></b><br /><b>Cross OS Platform</b><br />Having a cross OS platform gives us more freedom in which development machines to use and servers to run in production, which also gives us more freedom regarding hosting partners, whether in the cloud or not. Actually, all the developers are working on windows, as we have found the Webstorm IDE to be the best tool by far, and it does not work well on linux.<br /><br />Running development on windows and production on linux has not been without problems though. The node core is equally good on both OS, but some of the modules we have used have not been properly tested on windows. Additionally, the windows file system is case insensitive, while it is case sensitive on linux, which has led to one error deployment so far.<br /><br /><b>Pyramid of Doom</b><br />Much have been written about the problems the callback nature of most node api&#8217;s lead to. Our solution has been to mainly use function hoisting:<br />Nested: <br /><pre class="brush: javascript">getSomeData(err, function(err, callback){<br />   doSomeStuff(err, function() {<br />   });<br />});<br /></pre>Hoisted: <br /><pre class="brush: javascript">getSomeData(err, dataRetrieved);<br /><br />function dataRetrieved(err, callback) {<br />   doSomeStuff(err, someStuffDone);<br />}<br /><br />function someStuffDone() {<br />}<br /></pre>This is working ok for scenarios where we have a fixed depth of nesting of functions (the example with 2 above is not a bad pyramid of doom by the way - try throwing in a couple of more levels of nesting and you will see the problem). Unfortunately, this method does not work with a dynamic level of nesting (think an array of functions generated and to be called in sequence), and this is where a library such as Async can help.<br /><br />Solving the pyramid of doom this way has not been without challenges, as there have been arguments about using Async or similar library even with a fixed amount of nesting. My standing on this is that code written with Async in that scenario (fixed level of nesting) is much harder to read, understand, and reason about.<br /><br /><b>Express and middleware</b><br />Like most developers doing services in node exposed on the web, we have chosen the express web framework. There are a lot of features built into express, and to be honest we only use a fraction of them. Mainly the middleware stack (from the connect sub module) has been used for good, but certainly also for bad.<br /><br />Cross cutting concerns like logging, authorization, and gzipping are all examples where benefit can be reaped from the stack and it is easy to apply a certain behaviour to all requests and responses. Unfortunately, the ease of implementation has lead to data access and business logic being implemented as middleware. This went well for a while, but it is harder to reuse and test the middleware as they are dependent on the (request, reponse, next) - triple &nbsp;of arguments, as opposed to business relevant objects.<br /><br />Thus, we are moving towards not using middleware for data access and business logic, having one function, registered as middleware, for each end-point which then delegates to business and data oriented modules.<br /><br /><b>Require (Cyclic)</b><br />As we move along and introduce more files and more modules, I have noticed a tendency to let all dependencies be resolved with require. This leads to some scenarios where we have fairly low level functionality (such as configuration api) require high level functionality (the user module). This easily leads to cyclic require loops, causing bugs that can be hard to resolve. Like any software it is good practise also in node to let high level functionality depend on low level functionality - not the other way.<br /><br />The solution to reusing bits is, as with many frameworks, to divide and conquer. If a high level module contains a function that would be really usable in a low level module, extract it in a seperate module and break the cycle that way.<br /><br /><b>Return Callback</b><br />Just an observation on the nature of some of the node code I have been writing recently:<br /><pre class="brush: javascript">function doSomeStuff(err, callback) {<br />     if (err) {<br />        callback(err, 'bad stuff happened');<br />     }<br />     callback(null, 'wuhuuuu bad stuff did not happen');<br />}<br /></pre>Did you find the bug? This is the most simple example I could come up with, but when it gets a bit more complex I find myself forgetting the return statement in front of the first callback, leading to some funky debugging session:<br /><pre class="brush: javascript">function doSomeStuff(err, callback) {<br />     if (err) {<br />        return callback(err, 'bad stuff happened');<br />     }<br />     callback(null, 'wuhuuuu bad stuff did not happen');<br />}<br /></pre>Maybe it is just a quirk of how many brain process the code, but consider yourself warned! ;-D<br /><br /><b>Simplicity</b><br />This is the one point where I believe node really shows its&nbsp;strength, it is dead simple to implement a server. Recently, we had a potential candidate who had written the server part of his test in less than 100 lines of coffee-script, and I really think this says it all.<br /><br /><span style="font-size: large;">Performance</span><br />I have written a lot about my experiences with developing on node, and very little regarding the awesome earth-shattering speed of node.<br /><br />Some claim that the way node works (event-loop and such) is the coolest thing since the invention of the wheel, while others claim that it is borderline stupid. I am not going to join that discussion, but just tell that what I have seen so far and the experiments done show that node is indeed fast, and also faster than what we did before. That being said our team does not have good large scale measurements or experiments of our own to prove this.<br /><br /><br />Is node the best choice available for us? Maybe, it could be, but at least until now it has proven to be a very good choice.<br /><br /></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/01/29/mapping-screen-mockup-to-backboneviews/">Mapping Screen Mockup to Backbone.View(s)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-29T10:38:00+01:00" pubdate data-updated="true">Jan 29<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: left;">One thing I have noticed after working on a Backbone powered application for 4 months is that developers have very different views on how to split a screen mockup into Backbone views in the code.&nbsp;</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">I have seen re-use of code with each and every input field being wrapped by a view and named as a control (&#8230;smells like ASP.NET web forms controls - shudders&#8230;.) and potentially you could also have all the markup handled by one view.</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">Given a small example screen mockup for gathering simple information about a person, like this:</div><div class="separator" style="clear: both; text-align: center;"><br /></div><table align="center" cellpadding="0" cellspacing="0" class="tr-caption-container" style="margin-left: auto; margin-right: auto; text-align: center;"><tbody><tr><td style="text-align: center;"><a href="http://1.bp.blogspot.com/-xg1e1uDa7gk/TyUJMJYIvsI/AAAAAAAABnI/NmMq715UayM/s1600/Simple_Mockup.png" imageanchor="1" style="margin-left: auto; margin-right: auto;"><img border="0" src="http://1.bp.blogspot.com/-xg1e1uDa7gk/TyUJMJYIvsI/AAAAAAAABnI/NmMq715UayM/s1600/Simple_Mockup.png" /></a></td></tr><tr><td class="tr-caption" style="text-align: center;">Our very simple screen mockup</td></tr></tbody></table>Lets try to look at the different ways we could implement this with Backbone views, but first let us look at the requirements:<br /><br /><ul><li>There is a message area that greets the person when the full name has been given (should be triggered when the user leaves either field if both are filled), and similarly the message area will contain errors if something goes wrong when clicking the save button.</li><li>FirstName and SurName only allows characters (yes I am aware this excludes some people with dots in names or similarly). This should be checked when leaving the field.</li><li>Country is actually a dropdown that lists the Scandinavian countries.</li></ul><div>With these requirements in hand we have a couple of options for implementation.</div><div><ol><li>Not using Backbone at all. Will save us the trouble of having to worry about Backbone, but since we are building this form within a Backbone powered application and it does contain several things that could benefit from Backbone this is probably not the best idea.</li><li>Using one template with all markup for this screen and one Backbone view. This is probably a very good first implementation, with the clear benefits of having a template that is easy to read and style, but unfortunately we will also have a view that does not adhere to the Single Responsibility Principle (SRP).</li><li>Using a view with a template (or html generated by javascript - shudders.) for every single item on the screen (probably bundling the label and the input field together). This option removes all readability of the markup as it is broken into a multitude of very small fragments, and you will probably end up with a view for the entire screen with a render method like this: <pre class="brush: javascript">render: function(){<br />  var firstNameInput = new control.InputView({<br />   model: this.model,<br />   attribute: 'heading',<br />   caption: 'FirstName',<br />   maxlength: 250<br />  });<br />  this.childViews.push(firstNameInput);<br />  firstNameInput.render();<br />  this.$('.firstNameContainer').append(firstNameInput.el);<br />};<br /></pre>Oooh&#8230; That was only for one field. </li><li>Somewhere in between all the crazy options given above. Maybe what we really want is a view corresponding to the screen, a view for the message area, a view for the area with the input fields, and potentially a view for the save button. It will adhere to SRP in my&nbsp;opinion&nbsp;and the markup with be in fragment sizes that are possible to mentally combine and get the overview.&nbsp; <br /><br /> It leaves us with the problem of the input area - what about the validation, binding to the model etc?&nbsp;In option 3 this was most likely handled by the InputView.  <br /><br />I would suggest keeping the markup in the template, possibly enriching it with just enough information to enable binding dynamically to the model (consider using or stealing the idea of &nbsp;something like&nbsp;<a href="https://github.com/derickbailey/backbone.modelbinding">https://github.com/derickbailey/backbone.modelbinding</a>). Apply the binding jQuery style at the last line in the render method (only one line) and use jQuery to find all elements requiring binding. <br /><br /></li></ol><div>Thus:<br /><br /><ul><li>Be careful with fragmenting the backup for a screen too much. It really reduces the overview.</li><li>Don&#8217;t use a view if you do not need one. A simple javascript module or function would do.</li><li>Leave the markup intact and decorate it for dynamically enriching it with behavior. In the ideal scenario your markup would work if javascript was disabled (albeit this does not make much sense in a Backbone application).</li><li>Your render method should be a matter of rendering a template and calling at most one method for each dynamic behavior required: modelbinding, autocomplete in some fields, or similar.</li></ul></div></div></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/01/22/linux-with-nodejs-and-mongo-on-windows_22/">Linux With Nodejs and Mongo on Windows Host - Part 2</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-22T11:53:00+01:00" pubdate data-updated="true">Jan 22<span>nd</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<br />I promised to get back when I had mongo-db up and running.<br /><br />In my blog post yesterday I pointed to his url :&nbsp;<a href="http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages">http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages</a><br /><br />And I did in fact install mongo using the instructions there, but I actually found the description to be confusing with the same step repeated. Thus, here is what I did. <br /><br />Opened /etc/apt/sources.list:   <pre><br />sudo gedit /etc/apt/sources.list  <br /></pre> Added the following line: <pre><br />deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen<br /></pre> Added the key from command line: <pre><br />sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10<br /></pre> Updated from the repository and installed latest stable version of mongo: <pre><br />sudo apt-get update <br />sudo apt-get install mongodb-10gen<br /></pre> Seems to be working quite well.   <br /><br /><br /> <br /><br /></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/01/21/linux-with-nodejs-and-mongo-on-windows/">Linux With Nodejs and Mongo on Windows Host</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-21T12:28:00+01:00" pubdate data-updated="true">Jan 21<span>st</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<br /><br />So finally the time has come where we have decided to give the node and mongo combination a closer look at my work. Not that we are going to migrate everything to such a platform tomorrow, but the combination of node and mongo is so promising that we decided to give it a try to see how far we can get.<br /><br /><span style="font-size: large;">Basic Setup</span><br />This is the setup we are going for sofar (will probably change as we get smarter - please feel free to help with that):<br /><br /><ul><li>Virtual Box on windows (we used to be a .NET based Software only - so everyone has Windows machines) -&nbsp; <a href="https://www.virtualbox.org/">https://www.virtualbox.org/</a></li><li>Linux 64 bit on the virtual box:</li><ul><li>Ubuntu 64 bit (my work setup):&nbsp; <a href="http://www.wikihow.com/Install-Ubuntu-on-VirtualBox">http://www.wikihow.com/Install-Ubuntu-on-VirtualBox</a></li><li>Mint 64 bit (my home setup): &nbsp; <a href="http://www.itworld.com/software/230123/install-linux-mint-12-virtualbox">http://www.itworld.com/software/230123/install-linux-mint-12-virtualbox</a>&nbsp;(not as detailed as the Ubuntu version - so if you get stuck refer to that one)</li></ul><li>Sharing of the code folder between Windows host and Linux virtual machine:</li><ul><li>Setup local account on windows machine.</li><li>Share code folder on windows machine - ensure that the local account you just created has both read and write.</li><li>Go to /home/&lt;linux_username&gt; and mkdir sourcecode (or whichever name you prefer)</li><li>Go to Linux and edit /etc/fstab (for instance sudo gedit /etc/fstab should do the trick</li><li>Add the following at the bottom of the file (there are not supposed to be any line breaks in the command, white spaces are important, and commas likewise) :</li><pre>&nbsp;//&lt;ip_host&gt;/&lt;share&gt;&nbsp;/home/&lt;linux_username&gt;/sourcecode&nbsp;cifs&nbsp;<br />rw,user,uid=&lt;your_linux_loginname&gt;,gid=&lt;linux_username&gt;,username=&lt;win_username&gt;,password=&lt;win_password&gt;,_netdev 0 0<br /></pre></ul></ul><ul><li>Neither Ubuntu nor Mint has a very new version of nodejs in their package repositories, thus I did as suggested in this&nbsp; <a href="http://stackoverflow.com/questions/8074327/need-advice-latest-version-of-node-js-vs-using-synaptic-package-manager">http://stackoverflow.com/questions/8074327/need-advice-latest-version-of-node-js-vs-using-synaptic-package-manager</a>:</li><pre>sudo add-apt-repository ppa:chris-lea/node.js<br />sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C7917B12<br />sudo apt-get update<br />sudo apt-get install nodejs</pre><li>Getting mongo installed - this looks promising (have not tried yet):&nbsp; <a href="http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages">http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages</a></li><li>What editor to use?: Have not decided completely yet, but currently I am considering:&nbsp;</li><ul><li><a href="http://www.sublimetext.com/2">http://www.sublimetext.com/2</a>&nbsp;I am testing right now, and so far it has really blown my mind - install the intellisence package to get the full power.</li><li><a href="http://www.jetbrains.com/webstorm/">http://www.jetbrains.com/webstorm/</a>&nbsp;I have been using for JavaScript for a while and I simply love it, so it says something about the promise of sulime 2 that I am testing it right now.</li></ul></ul>That is it for now&#8230; Will write more when we have the last details of our environment up and running, such as mongo install and how to structure our nodejs application in folders etc.<br /><br /></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/01/18/extending-backbone/">Extending Backbone</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-18T20:29:00+01:00" pubdate data-updated="true">Jan 18<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<br />For the past half year or so I have been using Backbone. Besides the obvious questions of how to fit the different pieces together, when to use what, and in general understanding the library, I have experimented with different ways of extended the existing Backbone behavior.<br /><br />Having tried a lot of different methods I ended up using 2 different approaches for 2 different scenarios.<br /><br /><span style="font-size: large;">Mixin</span><br /><br />You can use the different Backbone modules&#8217; extend function (they all have the same, which is not to be confused with the underscore extend function) to achieve code reuse. For instance if you wanted to create a model with an additional function you could do like this, by extending Backbone.Model:<br /><br /><pre class="brush: javascript">var someModel = Backbone.Model.extend({<br />   someFunction: function(){ }<br />});<br /><br /></pre>This is the normal way to use extend on a model, and Backbone will ensure the prototype chain is set up correctly. This is often used to create hierarchy of base models some potentially with many functions leading to&nbsp;a huge object that is used to extend all models from, like:<br /><br /><pre class="brush: javascript">var motherOfAllModels = Backbone.Model.extend({<br />   someFunction: function(){ },<br />   someFunction2: function(){ },<br />   someFunction3: function(){ },<br />   someFunction4: function(){ },<br />   someFunction5: function(){ },<br />   someFunction6: function(){ },<br />});<br /><br />var myModel = motherOfAllModels.extend({});<br /></pre>However, at least in my opinion this is not necessarily a good way of using such a powerful feature. A given model can be extended with a number of features from different objects:  <br /><br /><pre class="brush: javascript">var niceObject = function() {<br />  return {<br />     someFunction: function(){}<br />  };<br />}();<br /><br />var niceObject2 = function() {<br />  return {<br />     someFunction2: function(){}<br />  };<br />}();<br /><br />var myModel = Backbone.Model.extend(niceObject).extend(niceObject2);<br /></pre><pre class="brush: javascript"><br /></pre>This way it lets you build features in small objects that are easy to test seperately. Basically, creating a model becomes a matter of picking the different features you would like have enabled instead of dragging around a huge &#8220;base&#8221; model or hierarchy of base model.<br /><br />There is a couple of problems with this use of the extend method. If the object contains methods with same names the last one to be mixed in (extended with) will overwrite the earlier ones and the prototype chain will be kinda of weird.<br /><br /><br /><span style="font-size: large;">Wrapping</span><br /><br />I have experimented with a number of ways of decorating the behavior of a Backbone modules, and basically found two feasible paths.<br /><br /><pre class="brush: javascript">var niceObject = function() {<br />var dog = Backbone.Model.extend({<br />    bark: function(){<br />       return 'vuf';<br />    }<br />});<br /><br />var bulldog = dog.extend({<br />    bark: function(){<br />       return 'vaf ' + dog.prototype.bark.call(this);<br />    }<br />});<br /><br />var frenchBulldog = bulldog.extend({<br />    bark: function(){<br />       return 'vif ' + bulldog.prototype.bark.call(this);<br />    }<br />});<br /><br />var muffin = new frenchBulldog();<br /><br />expect(muffin.bark()).toBe('vif vaf vuf');<br /></pre><br />This way is probably used widely by Backbone developers, but it has a few challenges.<br /><ul><li>It requires a named var like bulldog to access the prototype.</li><li>It is pretty much a prototype chain.</li><li>I can&#8217;t make Muffin a french bulldog without also making her a bulldog&#8230; (as if that would make sense).</li><li>Overview of what is happening - usually I will not be able to see that a french bulldog is actually a dog without going elsewhere to look in my code.</li></ul><div>Thus, I invented (probably not as the first person though!) a different way of wrapping a Backbone.Model with the behavior of my wishes.</div><pre class="brush: javascript">var asDog = function(model){<br /> var oldBark = model.prototype.bark;<br /> return model.extend({<br />  bark: function(){<br />   return this.noise + ' vif ' + oldBark.call(this);<br />  }<br /> });<br />};<br /><br />var asBulldog = function(model){<br /> var oldBark = model.prototype.bark;<br /> return model.extend({<br />  bark: function(){<br />   return this.noise + ' vaf ' + oldBark.call(this);<br />  }<br /> });<br />};<br /><br />var frenchBulldog = asBulldog(asDog(Backbone.Model.extend({<br /> noise: 'vuf',<br /> bark: function(){<br />  return this.noise;<br /> }<br />})));<br /><br />var muffin = new frenchBulldog();<br /><br />expect(muffin.bark()).toBe('vuf vaf vuf vif vuf');<br /><br /></pre><div><br /></div><div>What is like about this way is:<br /><br /><ul><li>I can &#8220;chain&#8221; the wrapping.</li><li>I can make a french bulldog a bulldog without making it a dog.</li><li>When I find the definition of a french bulldog I can see all the ways of it.</li></ul></div>I have not found anyone else who have done a similar implementation, maybe I have looked the wrong places , maybe I just got it wrong and it is really nice with a mother of all base model, or we really benefit from having a long prototype chain.<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/11/13/oredev-bad-parts/">#oredev the Bad Parts</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-13T10:59:00+01:00" pubdate data-updated="true">Nov 13<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<br />Thankfully, this post if going to be a lot shorter than the <a href="http://nikolajkn.blogspot.com/2011/11/oredev-good-parts.html">good parts</a>, but I think with a bit of improvement Øredev can move from being a very good conference, to a brilliant conference.<br /><br /><br /><ol><li>The&nbsp;WiFi&nbsp;was a&nbsp;disgrace!&nbsp;Shouldn&#8217;t be that hard to get working.&nbsp;</li><li>Too many sessions were delayed due to faulty cables, projectors, or other technical problems. With a bit more testing and backup cables, projectors, and such readily available, it should be possible to minimize these kinds of problems.</li><li>The venue is quite good due to it&#8217;s location very close to the train station, but the structure of the building makes it hard to move from session to session, and at lunch the main area becomes as crowded as a metro in a reasonably sized city.</li></ol><br /><br />If this is fixed (at least the first 2 items) and the speaker quality stays high, Øredev 2012 is going to be brilliant.<br /><br /><br /></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Nikolaj K N</div>
+<div class='content'>
+Hi Emily,<br /><br />Really nice to hear from you, means my feedback ended up the right place.<br /><br />I hope you will be able to push the boundaries of the WiFi even further, and improve the experience for all.<br /><br />I am looking forward to see it and will be sure to test it again next year.<br /><br />Best Regards<br /><br />/Nikolaj</div>
+</div>
+<div class='comment'>
+<div class='author'>Emily Holweck</div>
+<div class='content'>
+Hi,<br /><br />as the organiser of the event, I want to answer your post :) I did read the nice post as well and thank you for both your posts!!!! <br /> I asked our technician Andreas, who has done a fantastic job, why we have so many difficulties with the network, here is his answer: <br /><br />&quot;I was checking the wifi in different locations every day several times and got good throughput (10mbs/11mbs). We build a completely new hotspot network in 1½ week, The building it self is made of stonewalls and there is allot of steel frameworks in the building so we tried to fine tune the radio during the conference.<br /> <br />The wifi on the paper should handle more than 5000 simultaneous connections, it was the hotspots itself that where the bottleneck and we placed about 20 of those and they should hold 256 simultaneous connections each. The backend delivers more than 3Gbit throughput and up to 500.000 packets per second.&quot; <br /><br />Well, it is not that easy! <br />I hope we can improve next year. And I hope you will visit us again!<br /><br />Kind regards,<br />Emily Holweck, Öredev AB</div>
+</div>
+<div class='comment'>
+<div class='author'>rafek</div>
+<div class='content'>
+That&#39;s funny because last year I wasn&#39;t able to actually connect to the WiFi with my Samsung smartphone.. but this year, the very same Samsung and I tweeted all the time :)</div>
+</div>
+<div class='comment'>
+<div class='author'>Nikolaj K N</div>
+<div class='content'>
+My recollection is that it was bad last year as well (albeit I recall it as being slightly better back then). Either way I don&#39;t think it was good enough. To compare at the GotoCON conference in Copenhagen this year I experienced almost no problems with the WiFi</div>
+</div>
+<div class='comment'>
+<div class='author'>rafek</div>
+<div class='content'>
+WiFi was muuuch better than last year..</div>
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/11/13/oredev-good-parts/">#oredev - the Good Parts</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-11-13T09:42:00+01:00" pubdate data-updated="true">Nov 13<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<br />The Øredev conference 2011 is now over and at this point I have even managed to catch up on missing sleep and cut down on the coffee usage!<br /><br />As usual the conference was a success (from my perspective) with brilliant speakers and interesting topics, and this is my presentation of the good parts.<br /><br /><b>Monday</b><br />This day I was fortunate enough to have TDD training with <a href="http://www.coreyhaines.com/">Corey Haines</a>. We started out with a simple code kata, and quickly more followed, which were solved in pairs or alone.<br />During these exercises the <a href="http://cleancoder.posterous.com/the-transformation-priority-premise">Transformation Priority Premise</a> &nbsp;was introduced, something I originally discovered when Uncle Bob invented it a while ago. Didn&#8217;t really get it back then, but now at least I get the concept and can apply it albeit clumsily.<br />In the late afternoon Corey spoke a bit about Mocking and general challenges encountered by the different attendants.&nbsp;Even though, I did get a lot of value from this part it did at times seem unstructured and slightly random.<br />In general a very good day, and maybe next time Corey will have a Mocking kata up his sleeve in the event that it is requested?<br /><br /><b>Tuesday</b><br />Another day of training, this day I attended the Git Bootcamp with&nbsp;<a href="http://www.ambientideas.com/blog/">Matthew J. McCullough</a>. I have been using Git for a few months now with a central SVN repository, and felt I was ready to move to the next level.<br />With the energetic guidance of Matthew the entire room was quickly up and running and within a few hours I discovered the first new gem of Git (watch the blog for a later post on this).<br /><br />Before lunch Matthew promised to show us something truly&nbsp;mind blowing&nbsp;with Git, but unfortunately I had seen the trick before and was slightly&nbsp;disappointed. This got me thinking how fast you become used to Source Control being a welcome tool in your everyday developer life with Git, as opposed to all the pain felt before starting to use Git.<br />Again a very good day, and I do believe I managed to move to the next level. If you are looking for a day of Git training, this&nbsp;definitely&nbsp;seems like the way to do it.<br /><br /><b>Wednesday</b><br />The conference was properly kicked off with an inspiring keynote from&nbsp;<a href="http://alexisohanian.com/">Alexis Ohanian</a>&nbsp;regarding getting your mother away from your website, or was it getting other users than your mother? Seems our business is slowly&nbsp;realizing that all that really matters is the users. Fortunately, there are plenty of companies that have yet to realize and act on this, leaving a ton of opportunities to grab their customers if you execute!<br /><br />I had really looked forward to seeing <a href="http://yehudakatz.com/">Yehuda Katz</a>&nbsp;and both his talk on <a href="http://www.sproutcore.com/">SproutCore</a> and <a href="http://rubyonrails.org/">Rails</a> Serializer were quite brilliant. Very intriguing technique he applied for the first talk having slides with inline&nbsp;JavaScript&nbsp;console - worked quite well, when the dependency on being online was removed.<br /><br />In the afternoon I hadn&#8217;t really figured out what to see, and ended up attending a session on TDD with JavaScript. I expected to see some random Swedish or Danish dude named Christian Johansen, but turned out it was THE <a href="http://cjohansen.no/">Christian Johansen</a>, author of&nbsp;Test-Driven JavaScript Development, creator of <a href="http://sinonjs.org/">Sinon.JS</a>, and&nbsp;Norwegian.&nbsp;This session was the most impressive live coding session I have ever seen with Christian creating a small JQuery plugin in 50 minutes - test driven and everything. Very impressive!<br /><br /><b>Thursday</b><br />This day I started out with watching Greg Young explaining how not to apply CQRS. Greg chose to forego slides and coding, and just slowly wandered back and forth on the stage while visualizing his points with war-stories from the real world. Mainly:<br />- Do not apply CQRS as a top level architecture, creating a monolithic CQRS system. You will fail.<br />- Apply CQRS in a bounded context - but only if the context gives you a competitive advantage. Otherwise you will fail.<br />- Do not create a CQRS framework, at least not before you have implemented CQRS in at least 5 different systems.<br /><br />I think few speakers have the charisma, memory (no notes), and voice (I am not even sure the mike worked) to pull this off - Greg Young does.<br /><br /><b>Friday</b><br />Unfortunately, I could no attend Friday&#8217;s sessions. How was it?<br /><br /><br /><br /><br /></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Alexander Beletsky</div>
+<div class='content'>
+That sounds like a great boost you got there).. Øredev is cool, hope some videos will be available soon.</div>
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/09/29/basket-frameworks-empowerment-and-holy/">Basket, Frameworks, Empowerment, and the Holy Goat</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-09-29T09:40:00+02:00" pubdate data-updated="true">Sep 29<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">First of a few disclaimers :</span><br /><br /><ol><li><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">The title of this post probably does not make a lot of sense (if any).</span></li><li><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">Any perceived person and/or organization in this blog post is not intended - it is based on my experience in several projects, for different companies, and different clients.&nbsp;</span></li><li><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">This is my first blog post ever!</span></li></ol><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">Chronologically, considering the title of the post, I should write something about basket first. Actually, this post is not about basket at all, but just had to show this great picture of developers from Ukraine and Denmark after playing a bit of basket in the sun.&nbsp;</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><table style="width: auto;"><tbody><tr><td><a href="https://picasaweb.google.com/lh/photo/xndH3P7UKDunKYRZ0mXuLQ?feat=embedwebsite"><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><img height="480" src="https://lh6.googleusercontent.com/-YCpmPSzVxUs/ToQMA_RiVYI/AAAAAAAABIQ/MhPlpiFyTQ0/s640/11%252520-%2525201.jpg" width="640" /></span></a></td></tr></tbody></table><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><div><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">After, this short detour lets get back on the track to what I actually want to write a bit about - what motivates a developer.</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><b><i>&lt;Ramble&gt;</i></b></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">It seems to be the perception from people looking at developers from the outside, be it managers, project managers, or people from the street that all developers care about is playing with new toys (languages, frameworks, new hardware, or gadgets).</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">While most developers love new toys (like women love new shoes), what motivates a developer is actually far more nuanced than just the urge to try new stuff. Albeit, some developers are motivated by money, most I have met (including myself) are motivated by an urge to craft software and learn. We want to craft stuff smarter, faster, with fewer bugs, and better features.&nbsp;</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">This is probably why developers in&nbsp;start-up&nbsp;companies seem to be more motivated - they have a clean slate and can craft and learn according to what is the smartest (perceived!) way of working at that point in time. After a few years what was smartest back in the beginning is probably not the smartest anymore, but more importantly the developers have learned a lot, and can now do even smarter (again perceived) stuff. But at this time the products and systems they work on have a lot of customers, thus the level of risk the business is willing to take decrease dramatically - meaning the developers get to craft and learn less. Thus, eventually the developers will become demotivated (seems to be close to a law of nature - at least from my personal experience).</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">There are a couple of challenges with demotivated developers.&nbsp;</span><br /><br /><ul><li><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">Retention becomes harder.</span></li><li><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">Hiring becomes harder.</span></li><li><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">In the very best scenarios the developers are also very professional people (they do get paid) and will do their job adequately - but they will never do a GREAT job. For that they need to be motivated.</span></li></ul><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><b>Avoiding this trap?</b></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">If it was easy less software products/ projects would fail. Nevertheless, I believe there is a path. Good developers have the urge to craft and learn just as strongly as all other developers, maybe even stronger. But, more importantly good developers also understand the business and the customers. Thus, a good developer would be able to determine quite well when to take which risks regarding which frameworks, languages, platforms, methodologies, etc. are used. A good developer also understands that not all risks should be taken at the same time: In general the good developer will be able to help guide the direction of the software.</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">Thus, to have motivated developers your need to empower the developer (does not mean no control - just more influence). This may sound risky, and indeed it is. If you empower a bad developer the results will not be nice - probably close to catastrophic. If you empower a good developer you are not guaranteed success, but you know that at the very least he will fight to succeed.</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">Soooo&#8230; empowerment is risky even with good developers (if you are choosing not to empower your developers because you believe they are bad I can only ask why the hell you are hiring bad developers (and keeping them)).&nbsp;</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">W</span><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">hat&#8217;s the alternative? Demotivated developers&#8230;. I honestly do not believe you can&nbsp;successfully&nbsp;run a business based on software with demotivated developers working on it - it will fail, sooner or later - if you don&#8217;t change.</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><b>How much?</b></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><b><br /></b></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">So how much should you empower your developers? This is not easy either - for some developers you can give almost free reins - while others need a quite firm hand controlling.&nbsp;</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;">If I find the solution for this last bit, I will be sure to let you know :-)</span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><b><i>&lt;/Ramble&gt;</i></b></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span><br /><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span></div><div><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span></div><div><span class="Apple-style-span" style="font-family: Georgia, 'Times New Roman', serif;"><br /></span></div><div><br /></div></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/05/27/porting-to-octopress/">Porting to Octopress</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/25/code-generation-in-net/">Code Generation in .NET</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/02/getting-started-with-go/">Getting Started With Go</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/22/working-effectively-with-aspnet-and/">Working Effectively With ASP.NET and HttpContext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/24/playing-with-dynamic-keyword/">Playing With the Dynamic Keyword</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/elgsdyret">@elgsdyret</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'elgsdyret',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Nikolaj Kaare Nørskov -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

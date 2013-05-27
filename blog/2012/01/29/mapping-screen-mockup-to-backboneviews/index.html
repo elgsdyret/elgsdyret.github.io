@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Mapping Screen Mockup to Backbone.View(s) - Developer's Perception</title>
+  <meta name="author" content="Nikolaj Kaare Nørskov">
+
+  
+  <meta name="description" content="One thing I have noticed after working on a Backbone powered application for 4 months is that developers have very different views on how to split a &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://elgsdyret.github.io/blog/2012/01/29/mapping-screen-mockup-to-backboneviews">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Perception" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Perception</a></h1>
+  
+    <h2>Odd thoughts from a developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:elgsdyret.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Mapping Screen Mockup to Backbone.View(s)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-29T10:38:00+01:00" pubdate data-updated="true">Jan 29<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div class='post'>
+<div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: left;">One thing I have noticed after working on a Backbone powered application for 4 months is that developers have very different views on how to split a screen mockup into Backbone views in the code.&nbsp;</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">I have seen re-use of code with each and every input field being wrapped by a view and named as a control (&#8230;smells like ASP.NET web forms controls - shudders&#8230;.) and potentially you could also have all the markup handled by one view.</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">Given a small example screen mockup for gathering simple information about a person, like this:</div><div class="separator" style="clear: both; text-align: center;"><br /></div><table align="center" cellpadding="0" cellspacing="0" class="tr-caption-container" style="margin-left: auto; margin-right: auto; text-align: center;"><tbody><tr><td style="text-align: center;"><a href="http://1.bp.blogspot.com/-xg1e1uDa7gk/TyUJMJYIvsI/AAAAAAAABnI/NmMq715UayM/s1600/Simple_Mockup.png" imageanchor="1" style="margin-left: auto; margin-right: auto;"><img border="0" src="http://1.bp.blogspot.com/-xg1e1uDa7gk/TyUJMJYIvsI/AAAAAAAABnI/NmMq715UayM/s1600/Simple_Mockup.png" /></a></td></tr><tr><td class="tr-caption" style="text-align: center;">Our very simple screen mockup</td></tr></tbody></table>Lets try to look at the different ways we could implement this with Backbone views, but first let us look at the requirements:<br /><br /><ul><li>There is a message area that greets the person when the full name has been given (should be triggered when the user leaves either field if both are filled), and similarly the message area will contain errors if something goes wrong when clicking the save button.</li><li>FirstName and SurName only allows characters (yes I am aware this excludes some people with dots in names or similarly). This should be checked when leaving the field.</li><li>Country is actually a dropdown that lists the Scandinavian countries.</li></ul><div>With these requirements in hand we have a couple of options for implementation.</div><div><ol><li>Not using Backbone at all. Will save us the trouble of having to worry about Backbone, but since we are building this form within a Backbone powered application and it does contain several things that could benefit from Backbone this is probably not the best idea.</li><li>Using one template with all markup for this screen and one Backbone view. This is probably a very good first implementation, with the clear benefits of having a template that is easy to read and style, but unfortunately we will also have a view that does not adhere to the Single Responsibility Principle (SRP).</li><li>Using a view with a template (or html generated by javascript - shudders.) for every single item on the screen (probably bundling the label and the input field together). This option removes all readability of the markup as it is broken into a multitude of very small fragments, and you will probably end up with a view for the entire screen with a render method like this: <pre class="brush: javascript">render: function(){<br />  var firstNameInput = new control.InputView({<br />   model: this.model,<br />   attribute: 'heading',<br />   caption: 'FirstName',<br />   maxlength: 250<br />  });<br />  this.childViews.push(firstNameInput);<br />  firstNameInput.render();<br />  this.$('.firstNameContainer').append(firstNameInput.el);<br />};<br /></pre>Oooh&#8230; That was only for one field. </li><li>Somewhere in between all the crazy options given above. Maybe what we really want is a view corresponding to the screen, a view for the message area, a view for the area with the input fields, and potentially a view for the save button. It will adhere to SRP in my&nbsp;opinion&nbsp;and the markup with be in fragment sizes that are possible to mentally combine and get the overview.&nbsp; <br /><br /> It leaves us with the problem of the input area - what about the validation, binding to the model etc?&nbsp;In option 3 this was most likely handled by the InputView.  <br /><br />I would suggest keeping the markup in the template, possibly enriching it with just enough information to enable binding dynamically to the model (consider using or stealing the idea of &nbsp;something like&nbsp;<a href="https://github.com/derickbailey/backbone.modelbinding">https://github.com/derickbailey/backbone.modelbinding</a>). Apply the binding jQuery style at the last line in the render method (only one line) and use jQuery to find all elements requiring binding. <br /><br /></li></ol><div>Thus:<br /><br /><ul><li>Be careful with fragmenting the backup for a screen too much. It really reduces the overview.</li><li>Don&#8217;t use a view if you do not need one. A simple javascript module or function would do.</li><li>Leave the markup intact and decorate it for dynamically enriching it with behavior. In the ideal scenario your markup would work if javascript was disabled (albeit this does not make much sense in a Backbone application).</li><li>Your render method should be a matter of rendering a template and calling at most one method for each dynamic behavior required: modelbinding, autocomplete in some fields, or similar.</li></ul></div></div></div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nikolaj Kaare Nørskov</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-29T10:38:00+01:00" pubdate data-updated="true">Jan 29<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/backbone/'>Backbone</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://elgsdyret.github.io/blog/2012/01/29/mapping-screen-mockup-to-backboneviews/" data-via="nikolaj_k_n" data-counturl="http://elgsdyret.github.io/blog/2012/01/29/mapping-screen-mockup-to-backboneviews/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/01/22/linux-with-nodejs-and-mongo-on-windows_22/" title="Previous Post: Linux with nodejs and mongo on Windows Host - Part 2">&laquo; Linux with nodejs and mongo on Windows Host - Part 2</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/04/09/nodejs-first-experiences/" title="Next Post: Node.js First Experiences">Node.js First Experiences &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/05/27/porting-to-octopress/">Porting to Octopress</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/25/code-generation-in-net/">Code Generation in .NET</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/02/getting-started-with-go/">Getting Started With Go</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/22/working-effectively-with-aspnet-and/">Working Effectively With ASP.NET and HttpContext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/24/playing-with-dynamic-keyword/">Playing With the Dynamic Keyword</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/elgsdyret">@elgsdyret</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'elgsdyret',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Nikolaj Kaare Nørskov -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

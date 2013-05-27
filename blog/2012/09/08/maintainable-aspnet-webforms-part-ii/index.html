@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Porting to Octopress - Developer's Perception</title>
+  <title>Maintainable ASP.NET Webforms - Part II - Developer's Perception</title>
   <meta name="author" content="Nikolaj Kaare Nørskov">
 
   
-  <meta name="description" content="Just testing out the octopress blogging engine. I am considering moving away from blogger, mostly to enable me to write in markdown (I am not a fan &hellip;">
+  <meta name="description" content="In the last post I described how I believe that implementing the MVP pattern is a feasible way of improving ASP.NET Web Forms code:http://nikolajkn. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress">
+  <link rel="canonical" href="http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-ii">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Developer's Perception" type="application/atom+xml">
@@ -68,7 +68,7 @@
   
   <header>
     
-      <h1 class="entry-title">Porting to Octopress</h1>
+      <h1 class="entry-title">Maintainable ASP.NET Webforms - Part II</h1>
     
     
       <p class="meta">
@@ -84,16 +84,23 @@
   
 
 
-<time datetime="2013-05-27T19:16:00+02:00" pubdate data-updated="true">May 27<span>th</span>, 2013</time>
+<time datetime="2012-09-08T13:36:00+02:00" pubdate data-updated="true">Sep 8<span>th</span>, 2012</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Just  testing out the octopress blogging engine. I am considering moving away from blogger, mostly to enable me to write in markdown (I am not a fan of editing in the browser) and to get the control of whats going one.</p>
-
-<p>Sofar it has been easy enough to get working, but I imagine it will require quite a bit of work to set it up completely as my main blogging outlet.</p>
+<div class="entry-content"><div class='post'>
+<br /><br />In the last post I described how I believe that implementing the MVP pattern is a feasible way of improving ASP.NET Web Forms code:<br /><br /><a href="http://nikolajkn.blogspot.dk/2012/09/maintainable-aspnet-webforms-part-i.html">http://nikolajkn.blogspot.dk/2012/09/maintainable-aspnet-webforms-part-i.html</a><br /><br />The most important lesson is still that you should not use ASP.NET Web Forms unless you absolutely have to.<br /><br /><h4>The Example</h4>I have added a tiny example to github:&nbsp;<a href="https://github.com/elgsdyret/mvp-example">https://github.com/elgsdyret/mvp-example</a><br /><br />Like any contrived example it might be too simple and too silly to really show the power of implementing the pages this way, but here is a short walk-through of the flow anyways:<br />The view loads the presenter with a reference to itself and asks it to PresentAllDogs: <pre class="brush: c#">protected void Page_Load(object sender, EventArgs e)<br />{<br /> presenter = new DogSearchPresenter(this);<br /> presenter.PresentAllDogs();<br />}<br /></pre> The presenter then retrieves all the dogs (probably from some kind of data layer) and asks the view to render the dogs:  <pre class="brush: c#">public void PresentAllDogs()<br />{<br /> view.RenderDogs(Dog.All());<br />}<br /></pre> The view just assigns a local field with the values retrived (in some scenarios it might be doing a databind or similar, all depending on how the template aspx is used):  <script type="syntaxhighlighter" class="brush: c#"><![CDATA[ public void RenderDogs(IList<Dog> dogs) {  Dogs = dogs; } ]]></script> When the template is rendered it automatically renders the Dogs from the view:  <script type="syntaxhighlighter" class="brush: c#"><table> <tr><th>Name</th><th>Race</th></tr> <%foreach(var dog in Dogs)    { %>  <tr>   <td><%=dog.Name%></td>   <td><%=dog.Race%></td>  </tr>     <% } %></table></script> This way of rendering is my preferred as it puts just the right amount of rendering logic in the template. It does not work well if you need to manipulate specific rows of the table and have the viewstate handle which you clicked.  <br/><br/>For this you could use the listview control which is a decent compromise between using raw template rendering and having the view set values on elements using the runat server tag (I definetely prefer the first template rendering.)  <br/><br/>Happy coding!    </div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Alexander Beletsky</div>
+<div class='content'>
+Good stuff.<br /><br />There is ASP.NET MVP framework. <br /><br />http://aspnetmvp.codeplex.com/<br /><br />But I also still prefer lightweight custom solutions.</div>
+</div>
+</div>
 </div>
 
 
@@ -116,15 +123,21 @@
   
 
 
-<time datetime="2013-05-27T19:16:00+02:00" pubdate data-updated="true">May 27<span>th</span>, 2013</time>
+<time datetime="2012-09-08T13:36:00+02:00" pubdate data-updated="true">Sep 8<span>th</span>, 2012</time>
       
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/asp-dot-net/'>ASP.NET</a>, <a class='category' href='/blog/categories/web-forms/'>Web Forms</a>
+  
+</span>
 
 
     </p>
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress/" data-via="nikolaj_k_n" data-counturl="http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/" data-via="nikolaj_k_n" data-counturl="http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/" >Tweet</a>
   
   
   
@@ -133,8 +146,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2013/05/25/code-generation-in-net/" title="Previous Post: Code Generation in .NET">&laquo; Code Generation in .NET</a>
+        <a class="basic-alignment left" href="/blog/2012/09/08/maintainable-aspnet-webforms-part-i/" title="Previous Post: Maintainable ASP.NET Webforms - Part I">&laquo; Maintainable ASP.NET Webforms - Part I</a>
       
+      
+        <a class="basic-alignment right" href="/blog/2012/09/11/cors-vs-aspnet-session/" title="Next Post: CORS vs ASP.NET Session">CORS vs ASP.NET Session &raquo;</a>
       
     </p>
   </footer>

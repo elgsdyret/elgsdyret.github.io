@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Node.js First Experiences - Developer's Perception</title>
+  <meta name="author" content="Nikolaj Kaare Nørskov">
+
+  
+  <meta name="description" content="The last 3 months or so I have been busy working on a new backend built in node with mongo as the database. It has been lots of fun, with some &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Perception" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Perception</a></h1>
+  
+    <h2>Odd thoughts from a developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:elgsdyret.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Node.js First Experiences</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-09T10:51:00+02:00" pubdate data-updated="true">Apr 9<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div class='post'>
+<br /><br />The last 3 months or so I have been busy working on a new backend built in node with mongo as the database. It has been lots of fun, with some frustration, and lots of heureka moments.<br /><br />This is my attempt at describing those experiences, some good and some bad.<br /><br />The two many reasons we opted to work with node was the following:<br /><br /><ul><li>Development speed, due to the simplicity of node and using the same language in both client and server.</li><li>Performance, most of the information we found indicated that we could easier get more performance from using node than the alternative of ASP.NET.</li></ul><br /><br /><span style="font-size: large;">Development Speed</span><br />It seems like the development speed has indeed been increased, but in reality we cannot really measure before we build the next module on top of node. Our first module has also been the proving grounds for the technology stack, as the maturity of the technology means there is not so much information to find on how to write the best node code. Thus, the progress has most likely been slower than what we can expect in the future (yet I still believe I have seen an improvement compared to old projects).<br /><br /><b>Same Language</b><br />So node being javascript, it is in fact the same language is we use in our browser client (built on top of backbone). But, due to the fact that node does not work in the same way as the browser with regards to the code it is not completely trivial to share code between server and client.<br /><br />A given file containing a function in node would have to use<br /><br /><pre class="brush: javascript">module.exports = myFunction; </pre><br />To expose it to being available for use elsewhere. In addition this file would have to be required for the code to actually be used elsewhere. One could argue this is much better than the browser where the same function would probably be attached to some global object (pretending to be a namespace).<br /><br />To give an example of how one could implement code usable for both browser and node, I have taken the liberty of showing a snippet from the brilliant underscore library doing exactly this:<br /><pre class="brush: javascript">if (typeof exports !== 'undefined') {<br />   if (typeof module !== 'undefined' &amp;&amp; module.exports) {<br />       exports = module.exports = _;<br />   }<br />   exports._ = _;<br />} else <br />   root['_'] = _;<br />}<br /></pre><b><br /></b><br /><b>Cross OS Platform</b><br />Having a cross OS platform gives us more freedom in which development machines to use and servers to run in production, which also gives us more freedom regarding hosting partners, whether in the cloud or not. Actually, all the developers are working on windows, as we have found the Webstorm IDE to be the best tool by far, and it does not work well on linux.<br /><br />Running development on windows and production on linux has not been without problems though. The node core is equally good on both OS, but some of the modules we have used have not been properly tested on windows. Additionally, the windows file system is case insensitive, while it is case sensitive on linux, which has led to one error deployment so far.<br /><br /><b>Pyramid of Doom</b><br />Much have been written about the problems the callback nature of most node api&#8217;s lead to. Our solution has been to mainly use function hoisting:<br />Nested: <br /><pre class="brush: javascript">getSomeData(err, function(err, callback){<br />   doSomeStuff(err, function() {<br />   });<br />});<br /></pre>Hoisted: <br /><pre class="brush: javascript">getSomeData(err, dataRetrieved);<br /><br />function dataRetrieved(err, callback) {<br />   doSomeStuff(err, someStuffDone);<br />}<br /><br />function someStuffDone() {<br />}<br /></pre>This is working ok for scenarios where we have a fixed depth of nesting of functions (the example with 2 above is not a bad pyramid of doom by the way - try throwing in a couple of more levels of nesting and you will see the problem). Unfortunately, this method does not work with a dynamic level of nesting (think an array of functions generated and to be called in sequence), and this is where a library such as Async can help.<br /><br />Solving the pyramid of doom this way has not been without challenges, as there have been arguments about using Async or similar library even with a fixed amount of nesting. My standing on this is that code written with Async in that scenario (fixed level of nesting) is much harder to read, understand, and reason about.<br /><br /><b>Express and middleware</b><br />Like most developers doing services in node exposed on the web, we have chosen the express web framework. There are a lot of features built into express, and to be honest we only use a fraction of them. Mainly the middleware stack (from the connect sub module) has been used for good, but certainly also for bad.<br /><br />Cross cutting concerns like logging, authorization, and gzipping are all examples where benefit can be reaped from the stack and it is easy to apply a certain behaviour to all requests and responses. Unfortunately, the ease of implementation has lead to data access and business logic being implemented as middleware. This went well for a while, but it is harder to reuse and test the middleware as they are dependent on the (request, reponse, next) - triple &nbsp;of arguments, as opposed to business relevant objects.<br /><br />Thus, we are moving towards not using middleware for data access and business logic, having one function, registered as middleware, for each end-point which then delegates to business and data oriented modules.<br /><br /><b>Require (Cyclic)</b><br />As we move along and introduce more files and more modules, I have noticed a tendency to let all dependencies be resolved with require. This leads to some scenarios where we have fairly low level functionality (such as configuration api) require high level functionality (the user module). This easily leads to cyclic require loops, causing bugs that can be hard to resolve. Like any software it is good practise also in node to let high level functionality depend on low level functionality - not the other way.<br /><br />The solution to reusing bits is, as with many frameworks, to divide and conquer. If a high level module contains a function that would be really usable in a low level module, extract it in a seperate module and break the cycle that way.<br /><br /><b>Return Callback</b><br />Just an observation on the nature of some of the node code I have been writing recently:<br /><pre class="brush: javascript">function doSomeStuff(err, callback) {<br />     if (err) {<br />        callback(err, 'bad stuff happened');<br />     }<br />     callback(null, 'wuhuuuu bad stuff did not happen');<br />}<br /></pre>Did you find the bug? This is the most simple example I could come up with, but when it gets a bit more complex I find myself forgetting the return statement in front of the first callback, leading to some funky debugging session:<br /><pre class="brush: javascript">function doSomeStuff(err, callback) {<br />     if (err) {<br />        return callback(err, 'bad stuff happened');<br />     }<br />     callback(null, 'wuhuuuu bad stuff did not happen');<br />}<br /></pre>Maybe it is just a quirk of how many brain process the code, but consider yourself warned! ;-D<br /><br /><b>Simplicity</b><br />This is the one point where I believe node really shows its&nbsp;strength, it is dead simple to implement a server. Recently, we had a potential candidate who had written the server part of his test in less than 100 lines of coffee-script, and I really think this says it all.<br /><br /><span style="font-size: large;">Performance</span><br />I have written a lot about my experiences with developing on node, and very little regarding the awesome earth-shattering speed of node.<br /><br />Some claim that the way node works (event-loop and such) is the coolest thing since the invention of the wheel, while others claim that it is borderline stupid. I am not going to join that discussion, but just tell that what I have seen so far and the experiments done show that node is indeed fast, and also faster than what we did before. That being said our team does not have good large scale measurements or experiments of our own to prove this.<br /><br /><br />Is node the best choice available for us? Maybe, it could be, but at least until now it has proven to be a very good choice.<br /><br /></div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nikolaj Kaare Nørskov</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-09T10:51:00+02:00" pubdate data-updated="true">Apr 9<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/async/'>Async</a>, <a class='category' href='/blog/categories/express/'>express</a>, <a class='category' href='/blog/categories/javascript/'>javascript</a>, <a class='category' href='/blog/categories/node-dot-js/'>node.js</a>, <a class='category' href='/blog/categories/pyramid-of-doom/'>pyramid of doom</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences/" data-via="nikolaj_k_n" data-counturl="http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/01/29/mapping-screen-mockup-to-backboneviews/" title="Previous Post: Mapping Screen Mockup to Backbone.View(s)">&laquo; Mapping Screen Mockup to Backbone.View(s)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/06/01/nodejs-when-honeymoon-is-over/" title="Next Post: Node.js When The Honeymoon is Over">Node.js When The Honeymoon is Over &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/05/27/porting-to-octopress/">Porting to Octopress</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/25/code-generation-in-net/">Code Generation in .NET</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/02/getting-started-with-go/">Getting Started With Go</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/22/working-effectively-with-aspnet-and/">Working Effectively With ASP.NET and HttpContext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/24/playing-with-dynamic-keyword/">Playing With the Dynamic Keyword</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/elgsdyret">@elgsdyret</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'elgsdyret',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Nikolaj Kaare Nørskov -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

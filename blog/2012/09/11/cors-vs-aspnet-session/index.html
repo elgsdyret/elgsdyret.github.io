@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CORS vs ASP.NET Session - Developer's Perception</title>
+  <meta name="author" content="Nikolaj Kaare Nørskov">
+
+  
+  <meta name="description" content="The last couple of days I have been trying to implement a pure javascript client that could connect to our SOAP API. To do that we need to enable &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://elgsdyret.github.io/blog/2012/09/11/cors-vs-aspnet-session">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Perception" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Perception</a></h1>
+  
+    <h2>Odd thoughts from a developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:elgsdyret.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">CORS vs ASP.NET Session</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-11T20:02:00+02:00" pubdate data-updated="true">Sep 11<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div class='post'>
+<br />The last couple of days I have been trying to implement a pure javascript client that could connect to our SOAP API. <br /><br />To do that we need to enable <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Cross-origin resource sharing</a> (called CORS for short). Basically, as a security measure browsers implement Same origin policy ensuring that only programs loaded from the same domain can query resources on that domain.<br /><br />Thus, a javascript loaded from http://www.example.com/myprogram.html could query http://www.example.com/api, but no http://www.test.com/api.<br /><br />As Rich Internet Applications written as javascript clients is seeing an increase in popularity (and ease of implementing due to lots of nice frameworks such as Backbone), more and more providers of services will want to expose those services directly to the clients.<br /><br />To enable CORS we need to set a series of headers and respond to the HTTP OPTIONS verb request (used by the browser to figure out if the server actually supports CORS). To be honest I have yet to figure out all the headers and exactly why each one is required, but with some trial and error I have gotten it to work.<br /><br /><br /><h4>Allowing CORS from ASP.NET SOAP WebService</h4>The first challenge for our API was to get our ASP.NET SOAP service to set the correct headers (which I just admitted to not knowing&#8230;) for only that service.<br /><br />It turned out this is actually not that hard and throwing in a HttpModule setting the headers for requests to a specific url (the service) with a lot of random (more or less) headers actually enabled me to invoke the service from javascript.<br /><br /><pre class="brush: c#">public void AddCors(HttpApplication httpApplication)<br />{<br />  var sb = new StringBuilder();<br />  var hdrs = httpApplication.Response.Headers;<br />  var origin = hdrs.Get("Origin");<br />  if (string.IsNullOrEmpty(origin))<br />  {<br />    origin = "*";<br />  }<br />  hdrs.Add("Access-Control-Allow-Origin", origin);<br />  hdrs.Add("Access-Control-Allow-Credentials", "true");<br />  sb.Append("Content-Type, Cake");<br />  if (httpApplication.Request.HttpMethod.ToUpper() != "OPTIONS")<br />  {<br />    hdrs.Add("Access-Control-Allow-Headers", sb.ToString());<br />    return;<br />  }<br />  hdrs.Add("Access-Control-Allow-Methods",<br />"GET,POST,PUT,DELETE,OPTIONS");   <br />  // TODO: how many of these do we need???<br />  sb.Append(",authorization,Content-Type,accept");<br />  sb.Append(",accept-charset,accept-encoding,accept-language");<br />  sb.Append(",connection,content-length,content-type");<br />  sb.Append(",host,origin,referer,user-agent, SOAPAction");<br />  hdrs.Add("Access-Control-Allow-Headers", sb.ToString());    <br />  hdrs.Add("Access-Control-Max-Age", "3000"); //seconds<br />  hdrs.Add("content-length", "0");<br />  httpApplication.Response.StatusCode = 204;<br />}<br /></pre><br /><br /><h4>Consuming SOAP envelopes from JavaScript</h4>I tried out a number of promising leads for consuming SOAP services. The common ground for all of them was that they used the XmlHttpRequest object internally and tried to generate a proxy based on the wsdl of the service. After a couple of tries I gave up on this approach and went closer to the metal.<br /><br />Using fiddler and an integration that worked (written as a server) I spied on the SOAP envelopes needed to send the requests, and saved them as templates (in the format for Mustache.js). This way I could easily put in the values needed without having to worry about serializing object and manipulating XML. The response was simply parsed using regex&#8217; and thus I was able to handle the envelopes.<br /><br />Actually, this way of handling although primitive is not half bad. If the service changes the service contract the template/regex has to be updated, but code generated on top of the wsdl would suffer from the same, and the implementation is extremely simple and basic this way.<br /><br />The last bit was sending the requests to the server which was done through jQuery and the XmlHttpRequest. This took me some fiddling (not using fiddler) and googling to find the exact parameters and such. Again I used fiddler to find the correct headers for the requests and added them using jQuery.<br /><br /><h4>Using ASP.NET Cookie SessionState from JavaScript</h4><div>Thus, I was able to log in to our web service and retrieve the key used for subsequent request as an access token (actually the ASP.NET session id).<br /><br />Unfortunately, the web service uses ASP.NET session to maintain whether you are logged in or not. Thus, a Set-Cookie header is returned from the Connect method and that Cookie must be returned in the header of the following requests to ensure access.<br /><br />Due to security measures it is not possible to add the Cookie header manually to the XmlHttpRequest object. As the session id is also returned in the SOAP response envelope it is not a problem to retrieve it and I managed it to send it in another header called CAKE (part of the explanation for the many weird headers in the CORS implementation above).<br /><br />Thus, I was stuck with changing the service implementation (not relying on ASP.NET session or somehow hijacking it using my CAKE header) or forcing the potential consumers of our API to use one of the potential hacks using iframes or JSONP (which I have not tested), but at least the last option defeats the purpose of making it easy to access (one could ago that SOAP does the same, but that is another battle).<br /><br />What is the point you might ask? I actually managed to implement CORS, but due to the implementation using ASP.NET Session it is completely useless.<br /><br />Anyone has any hacks worth trying?<br /><br />&nbsp;Next step&#8230;. Something more usable than SOAP&#8230;&#8230;. Not using ASP.NET Session<br /><br /><br /><br /><br /><br /><br /></div><br /></div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nikolaj Kaare Nørskov</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-11T20:02:00+02:00" pubdate data-updated="true">Sep 11<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/asp-dot-net/'>ASP.NET</a>, <a class='category' href='/blog/categories/cors/'>CORS</a>, <a class='category' href='/blog/categories/session/'>SESSION</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://elgsdyret.github.io/blog/2012/09/11/cors-vs-aspnet-session/" data-via="nikolaj_k_n" data-counturl="http://elgsdyret.github.io/blog/2012/09/11/cors-vs-aspnet-session/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/" title="Previous Post: Maintainable ASP.NET Webforms - Part II">&laquo; Maintainable ASP.NET Webforms - Part II</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/11/18/polyglot-javascript/" title="Next Post:  Polyglot JavaScript"> Polyglot JavaScript &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/05/27/porting-to-octopress/">Porting to Octopress</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/25/code-generation-in-net/">Code Generation in .NET</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/02/getting-started-with-go/">Getting Started With Go</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/22/working-effectively-with-aspnet-and/">Working Effectively With ASP.NET and HttpContext</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/24/playing-with-dynamic-keyword/">Playing With the Dynamic Keyword</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/elgsdyret">@elgsdyret</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'elgsdyret',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Nikolaj Kaare Nørskov -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
