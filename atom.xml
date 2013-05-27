@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My Octopress Blog]]></title>
+  <title><![CDATA[Developer's Perception]]></title>
   <link href="http://elgsdyret.github.io/atom.xml" rel="self"/>
   <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-05-27T19:07:02+02:00</updated>
+  <updated>2013-05-27T19:22:45+02:00</updated>
   <id>http://elgsdyret.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Porting to Octopress]]></title>
+    <link href="http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress/"/>
+    <updated>2013-05-27T19:16:00+02:00</updated>
+    <id>http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
   
 </feed>
