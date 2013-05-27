@@ -4,7 +4,7 @@
   <title><![CDATA[Category: .NET | Developer's Perception]]></title>
   <link href="http://elgsdyret.github.io/blog/categories/dot-net/atom.xml" rel="self"/>
   <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-05-27T19:44:42+02:00</updated>
+  <updated>2013-05-27T20:58:10+02:00</updated>
   <id>http://elgsdyret.github.io/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
@@ -18,9 +18,160 @@
     <link href="http://elgsdyret.github.io/blog/2013/05/25/code-generation-in-net/"/>
     <updated>2013-05-25T12:39:00+02:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/05/25/code-generation-in-net</id>
-    <content type="html"><![CDATA[<div class='post'>
-<p>Code generation has over time turned into one of my pet peeves when working in .NET (although most of it will apply to similar platforms like JAVA). Let me be very clear from the beginning of this post. I am advocating that you should use extreme caution before even considering using code generation to solve whatever real or perceived problems you might find it useful for. I have yet to see an implementation that has not caused extra problems. That does not necessarily mean that it cannot be valuable tool, but please take a step back and think before continuing down that path.</p> <blockquote>  <p>This is the longest blog post I have yet written. It contains no code, just ranting, and hopefully some insights.</p></blockquote> <h3>Possible Motivation</h3> <p>Code generation is typically introduced to:</p> <ul><li>remove duplication.</li><li>reduce tedious coding.</li><li>enforce security measures (authentication and authorization).</li><li>enforce consistent handling of resources such as database connections and transactions.</li><li>apply cross cutting concerns such as logging or caching.</li></ul> <p>And probably a number of other reasons. Basically, anything that seems hard to do in a nice way in the language and framework you are currently working with. Most of these things can be handled by using more light weight measures, using more simple and well known designs based on patterns. </p> <p>Regarding tedious coding it would be wise to step back and consider why there is so much tedious coding? If the number of lines of code compared to the functionality it provides is so high that you consider using code generation, I would put it to you that your design is not very good. Basically, you are trying to hammer a square peg into a round hole, and instead of seeing the error of that you just get a bigger hammer (called code generation). </p> <h3>How to Determine what to Generate</h3> <p>Usually, you would determine what to generate based on an external resource (like XML files), examining the existing code structure using the reflection API, or annotating the existing code somehow (probably using attributes) and then examining that using the reflection API.</p> <p>No matter how you choose to do this you are defining rules that are not clear from the context. An XML file is a very loose format and what is generated from that XML file is by no means clear to a developer looking at that XML, and it can also be very hard to determine from the code of the code generator. Similar problems arise when using the existing code structure or attributes, it is simply not very clear what rules are being applied and how the resulting code will look.</p> <p>Step back and consider the number of characters in those XML files. Now consider the number of characters of the code if you wrote it by hand in the same way the code generator does it. Now consider the number of characters for the code of the generator. Often you will find that you end up with more characters using the XML than just using the code. Then consider that XML files cannot be unit tested, the build process will be more complicated, and you will have to actually write the code generator. </p> <p>If you determine what to generate based on examining the existing code you will introduce the problem of simple code changes causing an unwanted side effect. I still recall changing the name of a parameter in a function in a model class as it was misspelled. Compilation and tests worked fine as they should. What I did not foresee was that suddenly our public API had a breaking change as it was generated from the core model. Our public SDK had suddenly also introduced this change as it was also generated from the code models. So basically all our integration partners had to change their code, or we could rollback the release. I know this is an extreme scenario and probably not something you would ponder, but there really is no limit for the ingenuity (insanity) of developers when trying to solve problems.</p> <blockquote>  <p><em>If you end up doing code generation despite all my attempts to get you to move away from it, do work dilligently on creating and maintaining documentation for you base generation format, whether it is XML based, annotations, or the structure of the code.</em> </p></blockquote> <h3>How to Actually Generate the code</h3> <p>Once the motivation is in place and you have somehow figured out how to determine what the output code should look like, it is time to actually generate some code.</p> <p>There are a number of different tools for doing this in the .NET stack, but all of them basically falls into to different categories:  + generate by code API (such as the CodeDOM)  + generate by template (such as T4 templates)</p> <p>Using code to generate code is a feasible approach, but unfortunately the APIs in .NET for this are extremely cumbersome and verbose leading to a lot of incomprehensible code. For instance the combination of CodeDOM and reflection (for reading base format) leads to some of the least readable code I have ever encountered in .NET. This basically means that it is very hard to envision the resulting code from the generator, which leads to random experimentation followed by examination of the resulting code to verify changes (if possible).</p> <p>Using a template engine is a better alternative. The templates will most likely be a raw text format with placeholders for the code that has variation. This means it is a lot easier to envision the resulting code. Usually, the placeholders should be fairly few, otherwise, the reusability is very low and the code generation should probably never have been implemented at all.</p> <blockquote>  <p><em>Use a template based engine and put as much as the generation logic in the template.</em> </p></blockquote> <p>There is an alternative where you generate the code based on a 3rd party solution, such as PostSharp. In this scenario it is the 3rd party that defines the 'how to determine what to generate' and maintain most of the documentation.</p> <blockquote>  <p><em>Do not start from scratch. Search the market for generation tools that can do the bulk of the lifting for you.</em> </p></blockquote> <h3>Build Process</h3> <p>Once the code is generated there is a number of ways it can interact with the rest of the codebase:</p> <ol><li>never generate a file just build it straight into a DLL</li><li>generate a temp file as part of build and delete it afterwards</li><li>generate a temp file and try to hide it from the developers (the folder it is in is not included in the project etc.)</li><li>generate a temp file and use it in build (the build is seperate step from generation).</li><li>only generate the code on demand and check it in with the rest of the code. </li></ol> <p>The distinction between these methods can seem very narrow. The important part is whether the generated code is an artifact of the build process and how easy it is to see for the developers.</p> <p>The first 3 options basically assumes that it is not a good thing if the developer can see and modify the generated code. As if bad stuff would come from that, which it might. </p> <p>The last 2 assumes that the generated code is not directly an artifact from the build process. Item 4 is not that different from 1-3, but at least it keeps the code generation step as a seperate step from the build process. This could be a pre process step in building with Visual Studio and the actual build just picks up the file from the project.</p> <p>Item 5 is basically a templating engine. You generate something once and it is perfectly acceptable to modify it afterwards. This is just like when you add a class file in Visual Studio it will have a bit of code prefilled such as namespace, classname, and useless using statements. Similarly, with very simple commands you can generate new controllers and models in RAILS. </p> <blockquote>  <p><em>Make sure the build process is not made more complicated (and slower) due to the code generation. Ensure that the code generation is an optional step that comes before the build. Consider only generating once and keeping the files in source control if feasible.</em></p></blockquote> <h3>Examples</h3> <p>I am just going to run through some of the examples of code generation I have encountered sofar. One is bad, but ultimately not that harmful, two have been extremely costly, and one is maybe ok.</p> <h4>Re-use of Internal Model in Other Services</h4> <p>The first example of a custom code generator I encountered was used to share models between a number of different services. Basically, the team had decided to go for a SOA design, but not really unstood how to implement it. It was a relatively simple business application consisting of a an ASP.NET webforms site and no less than 12 SOAP based web services. </p> <p>We eventually came to the conclussion that probably 3 services would have been just about right, as the services depended on each other to a large degree. The sheer work of maintaining a model that belonged in service A, but was used in service B, service C, and the website quickly became a pain with 12 services. Thus, a code generator had been build to generate these models, making this an example of bad design driving the creation of the code generator.</p> <p>Luckily, the simplicity of the generated classes, the ease with which they could be extended, and the simplicity of the code generator itself ensured that it was only slightly cumbersome to work with.</p> <h4>Custom ORM NHibernate Wrapper</h4> <p>I could write a series of blog posts on this example alone, but basically this backend system was designed by someone that considered code generation his speciality and consequently applied it to everything possible.</p> <p>Combine this with a desire to build a custom ORM and you get one of the most convoluted systems I have seen. Basically, more or less the entire backend system was generated from XML. The idea of the homemade ORM was eventually dropped, but its basic API was then used to wrapped NHibernate. So as a developer you are basically stuck with a homemade XML format for queries and entities, which was the used to generate mapping and queries for NHibernate. Due to the complexity of such a system the queries and the mapping are highly ineffective. </p> <p>The worst part was how hard it was to actually write any kind off meaningful code for the system. The generated entities and queries (called views) were hidden and impossible to extend, actually, the only intended way to implement business logic was static methods were everything was passed as parameters. Some of the hacks developers had implemented on top of this system to be able to deliver features only made it worse.</p> <p>To top off the problems with this code generation it was full of bugs and very hard to modify. Part of the code generator was even code generated.</p> <p>Possibly the worst design I have ever seen. For a relatively simple business domain and equally simple functionality.</p> <h4>Service Layer Method Generator</h4> <p>This is another example of a very complex code generation system. I cannot be completely certain of the motivation for this code generation system, but my guess is that it is yet another example of a bad design that caused a lot of manual work.</p> <p>The core of the system is a number of entities, build by hand and mapped with NHibernate. The entities have specific queries as static method in an Active Record style. This design in itself is not that bad. One could argue back and forth of the merits of Active Record compared to the Repository pattern, but at least it is a well known and tried pattern.</p> <p>Based on the methods, properties, and certain custom attributes of these entities a number of things were code generated (which was not documented ofcourse):</p> <ul><li>A service layer directly exposing all the public methods of the webservice. In this service layer certain cross cutting concerns was added, such as connection and transaction handling, exception handling, and security checks.</li><li>A number of classes that was build into a .NET based SDK.</li></ul> <p>The idea behind the .NET based SDK was that it should work in a RPC style, and it contained both proxy objects and data objects directly generated based on the data retrieved from the core entities. In itself exposing internal implementation details in this way is never a good idea. As a direct consequence of this I have introduced a bug by changing the naming of a function parameter, which reflected through the service layer and the SDK. This meant that consumers of the API suddenly experienced a breaking change.</p> <p>Nevertheless, the main problem stems from the design. The way the proxy object works in the SDK is that it does not contain any data. This means if for instance you access the name property of a customer object you will end up going over the wire to retrieve this data. Obviously, this leads to extremely chatty behaviour by the consumers of the SDK and eventhough it is possible to avoid it is not the perceived default. The main problem though is that 50 or so entities with an average of 10 properties leads to 50*10*2 (both get and set) = 1000 methods on the service layer to implement the proxy object (could have been done with a PATCH like operation for partially updates, but alas it is not). With the standard methods for entities (create, update, delete) and some queries the API ends up having approximately 1500 public methods.</p> <p>I have removed the code generation completely and changed every method to be a 'method as an object' implementation. Combined with the template pattern this means that there is very little redundant code. Unfortunately, it does not change the fact that we have 1500 public methods, which is a nightmare to maintain for us, and equally bad for our consumers to understand and navigate. Fans of the code generation in question would probably argue that it is only a problem to maintain, because the code generation has been removed, and they would be partially right. But, taking into account the number of bugs in the code generation and the number of well hidden side effects I am very happy we got rid of it.</p> <blockquote>  <p><em>When a design decision leaves you with 1500 different methods on a public API, you should really consider whether this design is a good idea</em></p></blockquote> <h4>AOP Support</h4> <p>This last example is actually one I designed myself. In a relatively simple ASP.NET MVC application we use attributes to implement AOP support using PostSharp. This actually works very well as PostSharp has a fairly straightforward API and there is no side effect by changing the code (all is handled by annotating with attributes).</p> <p>It is used for a number of things:</p> <ul><li>checking function parameters for null</li><li>checking function parameters for certain values</li><li>checking security rights on controller actions</li></ul> <p>I am not sure I would implement it this way again. The addition of the PostSharp tool does add a level of complexity and the fact that it must be installed on each and every developer machine also makes it a pricy dependency.</p> <p>Alternatively, each controller action could have been implemented as a 'method as an object' and used template pattern to achieve similar results. Or maybe just do it by hand, it is not like the size of the application made it that much work. Basically, it probably is an example of overengineering that I am responsible for. </p> <h3>Challenges</h3> <p>There are a number of general challenges with using code generation:</p> <ul><li>It makes the system inherently a lot more complex.</li><li>It reduces readability quite a bit.</li><li>It makes it hard to implement business logic. The required features will be hard to determine up front, and thus the code generator will not correctly accomodate them. This leads to hacks to work around the code generator.</li><li>The APIs in .NET that are often used for this really sucks. If you really want to create code that is very hard to read, just combine CodeDOM code generation with the reflection API.</li></ul> <p>There are a some challenges that will get harder without code generation. What if you have 1500 command classes that needs to be changed? Depending on the change it could be put in a base class (if one is available), but if this is not possible it will be a harder challenge. </p> <p>How do you change 1500 classes by hand? One option is hiring a lot of very cheap labour to do it for you, but more constructively it is also feasible to create a script that does the modification and is then thrown away, which was how they were generated in the first place.</p> <blockquote>  <p><em>I have yet to see a really good example of code generation. Even those provided by visual studio, the RAILS framework, or similar, are at best minor convenience functionality.</em></p></blockquote></div>
+    <content type="html"><![CDATA[<p>Code generation has over time turned into one of my pet peeves when working in .NET (although most of it will apply to similar platforms like JAVA). Let me be very clear from the beginning of this post. I am advocating that you should use extreme caution before even considering using code generation to solve whatever real or perceived problems you might find it useful for. I have yet to see an implementation that has not caused extra problems. That does not necessarily mean that it cannot be valuable tool, but please take a step back and think before continuing down that path.</p>
 
+<blockquote><p>This is the longest blog post I have yet written. It contains no code, just ranting, and hopefully some insights.</p></blockquote>
+
+<h3>Possible Motivation</h3>
+
+<p>Code generation is typically introduced to:</p>
+
+<ul>
+<li>remove duplication.</li>
+<li>reduce tedious coding.</li>
+<li>enforce security measures (authentication and authorization).</li>
+<li>enforce consistent handling of resources such as database connections and transactions.</li>
+<li>apply cross cutting concerns such as logging or caching.</li>
+</ul>
+
+
+<p>And probably a number of other reasons. Basically, anything that seems hard to do in a nice way in the language and framework you are currently working with. Most of these things can be handled by using more light weight measures, using more simple and well known designs based on patterns.</p>
+
+<p>Regarding tedious coding it would be wise to step back and consider why there is so much tedious coding? If the number of lines of code compared to the functionality it provides is so high that you consider using code generation, I would put it to you that your design is not very good. Basically, you are trying to hammer a square peg into a round hole, and instead of seeing the error of that you just get a bigger hammer (called code generation).</p>
+
+<h3>How to Determine what to Generate</h3>
+
+<p>Usually, you would determine what to generate based on an external resource (like XML files), examining the existing code structure using the reflection API, or annotating the existing code somehow (probably using attributes) and then examining that using the reflection API.</p>
+
+<p>No matter how you choose to do this you are defining rules that are not clear from the context. An XML file is a very loose format and what is generated from that XML file is by no means clear to a developer looking at that XML, and it can also be very hard to determine from the code of the code generator. Similar problems arise when using the existing code structure or attributes, it is simply not very clear what rules are being applied and how the resulting code will look.</p>
+
+<p>Step back and consider the number of characters in those XML files. Now consider the number of characters of the code if you wrote it by hand in the same way the code generator does it. Now consider the number of characters for the code of the generator. Often you will find that you end up with more characters using the XML than just using the code. Then consider that XML files cannot be unit tested, the build process will be more complicated, and you will have to actually write the code generator.</p>
+
+<p>If you determine what to generate based on examining the existing code you will introduce the problem of simple code changes causing an unwanted side effect. I still recall changing the name of a parameter in a function in a model class as it was misspelled. Compilation and tests worked fine as they should. What I did not foresee was that suddenly our public API had a breaking change as it was generated from the core model. Our public SDK had suddenly also introduced this change as it was also generated from the code models. So basically all our integration partners had to change their code, or we could rollback the release. I know this is an extreme scenario and probably not something you would ponder, but there really is no limit for the ingenuity (insanity) of developers when trying to solve problems.</p>
+
+<blockquote><p><em>If you end up doing code generation despite all my attempts to get you to move away from it, do work dilligently on creating and maintaining documentation for you base generation format, whether it is XML based, annotations, or the structure of the code.</em></p></blockquote>
+
+<h3>How to Actually Generate the code</h3>
+
+<p>Once the motivation is in place and you have somehow figured out how to determine what the output code should look like, it is time to actually generate some code.</p>
+
+<p>There are a number of different tools for doing this in the .NET stack, but all of them basically falls into to different categories:
+ + generate by code API (such as the CodeDOM)
+ + generate by template (such as T4 templates)</p>
+
+<p>Using code to generate code is a feasible approach, but unfortunately the APIs in .NET for this are extremely cumbersome and verbose leading to a lot of incomprehensible code. For instance the combination of CodeDOM and reflection (for reading base format) leads to some of the least readable code I have ever encountered in .NET. This basically means that it is very hard to envision the resulting code from the generator, which leads to random experimentation followed by examination of the resulting code to verify changes (if possible).</p>
+
+<p>Using a template engine is a better alternative. The templates will most likely be a raw text format with placeholders for the code that has variation. This means it is a lot easier to envision the resulting code. Usually, the placeholders should be fairly few, otherwise, the reusability is very low and the code generation should probably never have been implemented at all.</p>
+
+<blockquote><p><em>Use a template based engine and put as much as the generation logic in the template.</em></p></blockquote>
+
+<p>There is an alternative where you generate the code based on a 3rd party solution, such as PostSharp. In this scenario it is the 3rd party that defines the &lsquo;how to determine what to generate&rsquo; and maintain most of the documentation.</p>
+
+<blockquote><p><em>Do not start from scratch. Search the market for generation tools that can do the bulk of the lifting for you.</em></p></blockquote>
+
+<h3>Build Process</h3>
+
+<p>Once the code is generated there is a number of ways it can interact with the rest of the codebase:</p>
+
+<ol>
+<li>never generate a file just build it straight into a DLL</li>
+<li>generate a temp file as part of build and delete it afterwards</li>
+<li>generate a temp file and try to hide it from the developers (the folder it is in is not included in the project etc.)</li>
+<li>generate a temp file and use it in build (the build is seperate step from generation).</li>
+<li>only generate the code on demand and check it in with the rest of the code.</li>
+</ol>
+
+
+<p>The distinction between these methods can seem very narrow. The important part is whether the generated code is an artifact of the build process and how easy it is to see for the developers.</p>
+
+<p>The first 3 options basically assumes that it is not a good thing if the developer can see and modify the generated code. As if bad stuff would come from that, which it might.</p>
+
+<p>The last 2 assumes that the generated code is not directly an artifact from the build process. Item 4 is not that different from 1-3, but at least it keeps the code generation step as a seperate step from the build process. This could be a pre process step in building with Visual Studio and the actual build just picks up the file from the project.</p>
+
+<p>Item 5 is basically a templating engine. You generate something once and it is perfectly acceptable to modify it afterwards. This is just like when you add a class file in Visual Studio it will have a bit of code prefilled such as namespace, classname, and useless using statements. Similarly, with very simple commands you can generate new controllers and models in RAILS.</p>
+
+<blockquote><p><em>Make sure the build process is not made more complicated (and slower) due to the code generation. Ensure that the code generation is an optional step that comes before the build. Consider only generating once and keeping the files in source control if feasible.</em></p></blockquote>
+
+<h3>Examples</h3>
+
+<p>I am just going to run through some of the examples of code generation I have encountered sofar. One is bad, but ultimately not that harmful, two have been extremely costly, and one is maybe ok.</p>
+
+<h4>Re-use of Internal Model in Other Services</h4>
+
+<p>The first example of a custom code generator I encountered was used to share models between a number of different services. Basically, the team had decided to go for a SOA design, but not really unstood how to implement it. It was a relatively simple business application consisting of a an ASP.NET webforms site and no less than 12 SOAP based web services.</p>
+
+<p>We eventually came to the conclussion that probably 3 services would have been just about right, as the services depended on each other to a large degree. The sheer work of maintaining a model that belonged in service A, but was used in service B, service C, and the website quickly became a pain with 12 services. Thus, a code generator had been build to generate these models, making this an example of bad design driving the creation of the code generator.</p>
+
+<p>Luckily, the simplicity of the generated classes, the ease with which they could be extended, and the simplicity of the code generator itself ensured that it was only slightly cumbersome to work with.</p>
+
+<h4>Custom ORM NHibernate Wrapper</h4>
+
+<p>I could write a series of blog posts on this example alone, but basically this backend system was designed by someone that considered code generation his speciality and consequently applied it to everything possible.</p>
+
+<p>Combine this with a desire to build a custom ORM and you get one of the most convoluted systems I have seen. Basically, more or less the entire backend system was generated from XML. The idea of the homemade ORM was eventually dropped, but its basic API was then used to wrapped NHibernate. So as a developer you are basically stuck with a homemade XML format for queries and entities, which was the used to generate mapping and queries for NHibernate. Due to the complexity of such a system the queries and the mapping are highly ineffective.</p>
+
+<p>The worst part was how hard it was to actually write any kind off meaningful code for the system. The generated entities and queries (called views) were hidden and impossible to extend, actually, the only intended way to implement business logic was static methods were everything was passed as parameters. Some of the hacks developers had implemented on top of this system to be able to deliver features only made it worse.</p>
+
+<p>To top off the problems with this code generation it was full of bugs and very hard to modify. Part of the code generator was even code generated.</p>
+
+<p>Possibly the worst design I have ever seen. For a relatively simple business domain and equally simple functionality.</p>
+
+<h4>Service Layer Method Generator</h4>
+
+<p>This is another example of a very complex code generation system. I cannot be completely certain of the motivation for this code generation system, but my guess is that it is yet another example of a bad design that caused a lot of manual work.</p>
+
+<p>The core of the system is a number of entities, build by hand and mapped with NHibernate. The entities have specific queries as static method in an Active Record style. This design in itself is not that bad. One could argue back and forth of the merits of Active Record compared to the Repository pattern, but at least it is a well known and tried pattern.</p>
+
+<p>Based on the methods, properties, and certain custom attributes of these entities a number of things were code generated (which was not documented ofcourse):</p>
+
+<ul>
+<li>A service layer directly exposing all the public methods of the webservice. In this service layer certain cross cutting concerns was added, such as connection and transaction handling, exception handling, and security checks.</li>
+<li>A number of classes that was build into a .NET based SDK.</li>
+</ul>
+
+
+<p>The idea behind the .NET based SDK was that it should work in a RPC style, and it contained both proxy objects and data objects directly generated based on the data retrieved from the core entities. In itself exposing internal implementation details in this way is never a good idea. As a direct consequence of this I have introduced a bug by changing the naming of a function parameter, which reflected through the service layer and the SDK. This meant that consumers of the API suddenly experienced a breaking change.</p>
+
+<p>Nevertheless, the main problem stems from the design. The way the proxy object works in the SDK is that it does not contain any data. This means if for instance you access the name property of a customer object you will end up going over the wire to retrieve this data. Obviously, this leads to extremely chatty behaviour by the consumers of the SDK and eventhough it is possible to avoid it is not the perceived default. The main problem though is that 50 or so entities with an average of 10 properties leads to 50<em>10</em>2 (both get and set) = 1000 methods on the service layer to implement the proxy object (could have been done with a PATCH like operation for partially updates, but alas it is not). With the standard methods for entities (create, update, delete) and some queries the API ends up having approximately 1500 public methods.</p>
+
+<p>I have removed the code generation completely and changed every method to be a &lsquo;method as an object&rsquo; implementation. Combined with the template pattern this means that there is very little redundant code. Unfortunately, it does not change the fact that we have 1500 public methods, which is a nightmare to maintain for us, and equally bad for our consumers to understand and navigate. Fans of the code generation in question would probably argue that it is only a problem to maintain, because the code generation has been removed, and they would be partially right. But, taking into account the number of bugs in the code generation and the number of well hidden side effects I am very happy we got rid of it.</p>
+
+<blockquote><p><em>When a design decision leaves you with 1500 different methods on a public API, you should really consider whether this design is a good idea</em></p></blockquote>
+
+<h4>AOP Support</h4>
+
+<p>This last example is actually one I designed myself. In a relatively simple ASP.NET MVC application we use attributes to implement AOP support using PostSharp. This actually works very well as PostSharp has a fairly straightforward API and there is no side effect by changing the code (all is handled by annotating with attributes).</p>
+
+<p>It is used for a number of things:</p>
+
+<ul>
+<li>checking function parameters for null</li>
+<li>checking function parameters for certain values</li>
+<li>checking security rights on controller actions</li>
+</ul>
+
+
+<p>I am not sure I would implement it this way again. The addition of the PostSharp tool does add a level of complexity and the fact that it must be installed on each and every developer machine also makes it a pricy dependency.</p>
+
+<p>Alternatively, each controller action could have been implemented as a &lsquo;method as an object&rsquo; and used template pattern to achieve similar results. Or maybe just do it by hand, it is not like the size of the application made it that much work. Basically, it probably is an example of overengineering that I am responsible for.</p>
+
+<h3>Challenges</h3>
+
+<p>There are a number of general challenges with using code generation:</p>
+
+<ul>
+<li>It makes the system inherently a lot more complex.</li>
+<li>It reduces readability quite a bit.</li>
+<li>It makes it hard to implement business logic. The required features will be hard to determine up front, and thus the code generator will not correctly accomodate them. This leads to hacks to work around the code generator.</li>
+<li>The APIs in .NET that are often used for this really sucks. If you really want to create code that is very hard to read, just combine CodeDOM code generation with the reflection API.</li>
+</ul>
+
+
+<p>There are a some challenges that will get harder without code generation. What if you have 1500 command classes that needs to be changed? Depending on the change it could be put in a base class (if one is available), but if this is not possible it will be a harder challenge.</p>
+
+<p>How do you change 1500 classes by hand? One option is hiring a lot of very cheap labour to do it for you, but more constructively it is also feasible to create a script that does the modification and is then thrown away, which was how they were generated in the first place.</p>
+
+<blockquote><p><em>I have yet to see a really good example of code generation. Even those provided by visual studio, the RAILS framework, or similar, are at best minor convenience functionality.</em></p></blockquote>
 ]]></content>
   </entry>
   
@@ -29,9 +180,156 @@
     <link href="http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and/"/>
     <updated>2013-04-22T19:15:00+02:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and</id>
-    <content type="html"><![CDATA[<div class='post'>
-Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.<br /><br />This often appears in the form of code like this:<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff()  {    var userId = (string)HttpContext.Current.Session["userId"];    DoSomeMoreCoreStuff(userId); }]]&gt;</script> This code could be located anywhere in you codebase, and I have seen examples of such calls to session being done more or less inline in a string describing an SQL query. It does not necessarily have to be the Session property that is accessed though, the problem is the same if Application or other bits of the current http context is accessed this way.<br /><br />There is a number of problems with this approach.<br /><ul><li>Using a string like this is not strongly typed, which easily leads to errors. For instance the session variables might have had a different casing like "CurrentUserId".</li><li>A static reference to HttpContext.Current causes a number of problems. Firstly, it will be hard to use the code in question outside the ASP.NET stack, and secondly it will be equally hard to write meaningful tests for the code in questions.</li></ul><br /><h3>Options</h3>There are a number of ways to solve this problem leading to a much cleaner design enabling testing and reuse. All the options involves pushing the actual call to HttpContext.Current as far up in the call chain as possible, meaning in the code behind of the aspx page.<br /><br /><h4>Simple Types</h4>Given that the currentUserId in our example above is an string (or any other simple type or object that can be easily constructed) why not just use that? It can be injected through the constructor or the method in question.<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff(string userId)  {    DoSomeMoreCoreStuff(userId); }]]&gt;</script> <br /><br /><h4>Domain Specific Wrapper Class&nbsp;</h4>Often it is not as simple as a single entry that you want to retrieve from the session. Maybe there is a group of related entries that you want to use.<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff() {   var userId = (string)HttpContext.Current.Session["currentUserId"];   var userColor = (string)HttpContext.Current.Session["favoriteColor"];   var userNickname = (string)HttpContext.Current.Session["nick"];   DoSomeMoreCoreStuff(userId, userColor, userNickname); }]]&gt;</script> In that case an interface named according to the relation (for instance UserContext in our example) and injected can solve this problem. The key is to have an implementation of the interface that actually wraps Session and ensure that the string key for the entry is not copied all over the code. The wrapper implementation is instantiated at the top level of the web stack, most often in the code behind class and elsewhere we code against the interface in a inversion of control style.<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff(UserContext userContext) {   var userId = userContext.Id;   var userColor = userContext.FavoriteColor;   var userNickname = userContext.NickName;   DoSomeMoreCoreStuff(userId, userColor, userNickname); }]]&gt;</script> The implementation of the interface looks something like this: <br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public class HttpContextUserContext : UserContext {   HttpContext context;    public HttpContextUserContext(HttpContext context)   {     this.context = context;   }    public string Id   {     get     {       return (string)context.Session["currentUserId"];     }   }    public string FavoriteColor   {     get     {       return (string)context.Session["favoriteColor"];     }   }    public string NickName   {     get     {       return (string)context.Session["nick"];     }   } }]]&gt;</script> It might seem like a lot of code, but the flexibility is definitely worth the small overhead of adding this. <br /><h4></h4><h4>HttpContextBase</h4><div><br /></div>The main problem with the original implementation of the HttpContext class is that it is not based on an interface nor an abstract base class. This means that reusing code that depends on HttpContext can be hard, and testing equally hard. Microsoft realized this problen when they released the MVC framework and added a class called HttpContextBase. The funny thing is that HttpContext does not inherit from HttpContextBase as that would be a breaking change, but it has the exact same API.<br /><br />Thus, our problem from above with the static dependency could be solved as the following stepwise refactoring:<br /><br /><ul><li>Ensure that HttpContext is injected through the constructor or the method in question and ensure that HttpContext.Current is passed in as that value.</li><li>Replace HttpContext in the constructor or method with HttpContextBase and replace HttpContext.Current with new HttpContextWrapper(HttpContext.Current)</li></ul>And our example would then look something like this: <br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff(HttpContextBase context)  {    var userId = (string)context.Session["userId"];    DoSomeMoreCoreStuff(userId); }]]&gt;</script>This might seem a bit overkill, but we are now able to use our method with a different implementation of HttpContextBase for reuse and testing purposes.<br /><br />When doing a different implementation you should know that every base implementation in HttpContextBase just throws a NotImplementedException. Thus, you will need to override that different bits in your test and reuse implementations depending on what you really require. Alternatively, there are a couple of generic open source implementations available if you want to pull in that extra dependency.<br /><br />In general I would recommend using one of the first approaches, but if you are working with a fairly large system that adheres to the big ball of mud "design" antipattern this might be difficult. Maybe it is just to difficult to discern any meaningful relation between the different data retrieved from HttpContext, and with this approach you can at least start writing some tests to get control back of the code.<br /><br />As I mentioned earlier this is just one simple example as HttpContext have a lot of data and functionality built in.<br /><div><br /><br /></div></div>
+    <content type="html"><![CDATA[<p>Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.</p>
 
+<p>This often appears in the form of code like this:</p>
+
+<p>``` c#
+public void DoSomeCoreStuff()<br/>
+{</p>
+
+<pre><code>var userId = (string)HttpContext.Current.Session["userId"];    
+DoSomeMoreCoreStuff(userId); 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This code could be located anywhere in you codebase, and I have seen examples of such calls to session being done more or less inline in a string describing an SQL query. It does not necessarily have to be the Session property that is accessed though, the problem is the same if Application or other bits of the current http context is accessed this way.</p>
+
+<p>There is a number of problems with this approach.</p>
+
+<ul>
+<li>Using a string like this is not strongly typed, which easily leads to errors. For instance the session variables might have had a different casing like &ldquo;CurrentUserId&rdquo;.</li>
+<li>A static reference to HttpContext.Current causes a number of problems. Firstly, it will be hard to use the code in question outside the ASP.NET stack, and secondly it will be equally hard to write meaningful tests for the code in questions.</li>
+</ul>
+
+
+<h2>Options</h2>
+
+<p>There are a number of ways to solve this problem leading to a much cleaner design enabling testing and reuse. All the options involves pushing the actual call to HttpContext.Current as far up in the call chain as possible, meaning in the code behind of the aspx page.</p>
+
+<h3>Simple Types</h3>
+
+<p>Given that the currentUserId in our example above is an string (or any other simple type or object that can be easily constructed) why not just use that? It can be injected through the constructor or the method in question.</p>
+
+<p>``` c#
+public void DoSomeCoreStuff(string userId)<br/>
+{</p>
+
+<pre><code>DoSomeMoreCoreStuff(userId); 
+</code></pre>
+
+<p>}
+```</p>
+
+<h3>Domain Specific Wrapper Class</h3>
+
+<p>Often it is not as simple as a single entry that you want to retrieve from the session. Maybe there is a group of related entries that you want to use.</p>
+
+<p>``` c#
+public void DoSomeCoreStuff()
+{</p>
+
+<pre><code>var userId = (string)HttpContext.Current.Session["currentUserId"];   
+var userColor = (string)HttpContext.Current.Session["favoriteColor"];   
+var userNickname = (string)HttpContext.Current.Session["nick"];   
+DoSomeMoreCoreStuff(userId, userColor, userNickname); 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>In that case an interface named according to the relation (for instance UserContext in our example) and injected can solve this problem. The key is to have an implementation of the interface that actually wraps Session and ensure that the string key for the entry is not copied all over the code. The wrapper implementation is instantiated at the top level of the web stack, most often in the code behind class and elsewhere we code against the interface in a inversion of control style.</p>
+
+<p>``` c#
+public void DoSomeCoreStuff(UserContext userContext)
+{</p>
+
+<pre><code>var userId = userContext.Id;   
+var userColor = userContext.FavoriteColor;   
+var userNickname = userContext.NickName;   
+DoSomeMoreCoreStuff(userId, userColor, userNickname); 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>The implementation of the interface looks something like this:</p>
+
+<p>``` c#
+public class HttpContextUserContext : UserContext
+{</p>
+
+<pre><code>HttpContext context;    
+
+public HttpContextUserContext(HttpContext context)   
+{     
+    this.context = context;   
+}    
+
+public string Id   
+{     
+    get     
+    {       
+        return (string)context.Session["currentUserId"];     
+    }   
+}    
+
+public string FavoriteColor   
+{     
+    get     
+    {       
+        return (string)context.Session["favoriteColor"];     
+    }   
+}    
+
+public string NickName   
+{     
+    get     
+    {       
+        return (string)context.Session["nick"];     
+    }   
+} 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>It might seem like a lot of code, but the flexibility is definitely worth the small overhead of adding this.</p>
+
+<h3>HttpContextBase</h3>
+
+<p>The main problem with the original implementation of the HttpContext class is that it is not based on an interface nor an abstract base class. This means that reusing code that depends on HttpContext can be hard, and testing equally hard. Microsoft realized this problen when they released the MVC framework and added a class called HttpContextBase. The funny thing is that HttpContext does not inherit from HttpContextBase as that would be a breaking change, but it has the exact same API.</p>
+
+<p>Thus, our problem from above with the static dependency could be solved as the following stepwise refactoring:</p>
+
+<ul>
+<li>Ensure that HttpContext is injected through the constructor or the method in question and ensure that HttpContext.Current is passed in as that value.</li>
+<li>Replace HttpContext in the constructor or method with HttpContextBase and replace HttpContext.Current with new HttpContextWrapper(HttpContext.Current)</li>
+</ul>
+
+
+<p>And our example would then look something like this:</p>
+
+<p>``` c#
+public void DoSomeCoreStuff(HttpContextBase context)<br/>
+{</p>
+
+<pre><code>var userId = (string)context.Session["userId"];    
+DoSomeMoreCoreStuff(userId); 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This might seem a bit overkill, but we are now able to use our method with a different implementation of HttpContextBase for reuse and testing purposes.</p>
+
+<p>When doing a different implementation you should know that every base implementation in HttpContextBase just throws a NotImplementedException. Thus, you will need to override that different bits in your test and reuse implementations depending on what you really require. Alternatively, there are a couple of generic open source implementations available if you want to pull in that extra dependency.</p>
+
+<p>In general I would recommend using one of the first approaches, but if you are working with a fairly large system that adheres to the big ball of mud &ldquo;design&rdquo; antipattern this might be difficult. Maybe it is just to difficult to discern any meaningful relation between the different data retrieved from HttpContext, and with this approach you can at least start writing some tests to get control back of the code.</p>
+
+<p>As I mentioned earlier this is just one simple example as HttpContext have a lot of data and functionality built in.s</p>
 ]]></content>
   </entry>
   
@@ -40,9 +338,112 @@ Often in an ASP.NET WebForms application you will get up with unmanageable depen
     <link href="http://elgsdyret.github.io/blog/2013/03/24/playing-with-dynamic-keyword/"/>
     <updated>2013-03-24T09:28:00+01:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/03/24/playing-with-dynamic-keyword</id>
-    <content type="html"><![CDATA[<div class='post'>
-<br /><br />I have not yet had a chance to play around with the dynamic features that was introduced with .NET 4, probably because I have yet to find a good scenario for using it and probably because I am mostly stuck on doing work on the .NET 3.5.<br /><br />Fortunately, I am currently working on a new REST API build in Nancy and the dynamic features of .NET 4 seems perfect to implement HTTP PATCH.<br /><br />Our way of thinking is that it is hard to model with traditional classes as not all properties are necessarily included. One solution could be to make them all nullable and use that, but then it would not be possible for us to distinguish between a property simply not in the body of the request and a property the consumer deliberately set to null.<br /><br />My first test was like this:<br /><br /><pre class="brush: c#">public void DynamicValueNoneSet()<br />{<br />  dynamic a = new ExpandoObject();   <br />  string name = a.Name;   <br />}<br /></pre><br />This showed me that I would get a RunTimeBinderException if a given value was not available (yes I could also have read the documentation, but how fun is that?).  <br />My next attempt included this little implementation of DynamicObject - to avoid getting the exception when using:<br /><br /><script type="syntaxhighlighter" class="brush: c#">&lt;![CDATA[ public class NullDynamic : DynamicObject {   private readonly IDictionary<string, object> expando;    public NullDynamic()   {     expando = new ExpandoObject();   }    public override bool TryGetMember(GetMemberBinder binder, out object result)   {     expando.TryGetValue(binder.Name, out result);     return true;      }    public override bool TrySetMember(SetMemberBinder binder, object value)   {     expando[binder.Name] = value;     return true;   } }]]&gt;</script><br />Since the declared goal is to be able to distinguish between a value not being there and deliberately being set to null, this would not work either.<br />Actually what I found myself thinking was that I missed the "undefined" value from javascript, or some other way to express that something was not there, built into the language.<br /><br />Trying to avoid going to such drastic measure I came up with this: <br /><br /><script type="syntaxhighlighter" class="brush: c#">&lt;![CDATA[ public class Dynosaur: DynamicObject {   private readonly IDictionary<string, object> expando;    public Dynosaur()   {    expando = new ExpandoObject();   }    public override bool TryGetMember(GetMemberBinder binder, out object result)   {    return expando.TryGetValue(binder.Name, out result);      }    public override bool TrySetMember(SetMemberBinder binder, object value)   {    expando[binder.Name] = value;    return true;      }    public bool HasValue(string name)   {    return expando.Keys.Contains(name);   } } }]]&gt;</script><br />Maybe no the most elegant solution, but I does allow me to write code like: <br /><br /><pre class="brush: c#">public void PrintName(dynamic a)<br />{<br />  if (!a.HasValue("Name"))<br />  {<br />    a.Name = "dog";<br />  }<br />  Console.WriteLine("the name is: " + a.Name);<br />}<br /></pre><br />Given that "a" is actually an instance of my Dynosaur class. I would not say that I am entirely satisfied with this implementation, but I actually think that this is as far as the dynamic features of C# will take me.<br /><br />Any good ideas out there? I am thinking there must be other people that has played around with this and has come up some crazy dynamic stuff in C#.<br /><br /><br /></div>
+    <content type="html"><![CDATA[<p>I have not yet had a chance to play around with the dynamic features that was introduced with .NET 4, probably because I have yet to find a good scenario for using it and probably because I am mostly stuck on doing work on the .NET 3.5.</p>
 
+<p>Fortunately, I am currently working on a new REST API build in Nancy and the dynamic features of .NET 4 seems perfect to implement HTTP PATCH.</p>
+
+<p>Our way of thinking is that it is hard to model with traditional classes as not all properties are necessarily included. One solution could be to make them all nullable and use that, but then it would not be possible for us to distinguish between a property simply not in the body of the request and a property the consumer deliberately set to null.</p>
+
+<p>My first test was like this:</p>
+
+<p>``` c#
+public void DynamicValueNoneSet()
+{</p>
+
+<pre><code>dynamic a = new ExpandoObject();   
+string name = a.Name;   
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This showed me that I would get a RunTimeBinderException if a given value was not available (yes I could also have read the documentation, but how much fun is that?).</p>
+
+<p>My next attempt included this little implementation of DynamicObject &ndash; to avoid getting the exception when using it:</p>
+
+<p>``` c#
+public class NullDynamic : DynamicObject
+{</p>
+
+<pre><code>private readonly IDictionary&lt;string, object&gt; expando;    
+
+public NullDynamic()   
+{     
+    expando = new ExpandoObject();   
+}    
+
+public override bool TryGetMember(GetMemberBinder binder, out object result)   
+{     
+    expando.TryGetValue(binder.Name, out result);     
+    return true;      
+}    
+
+public override bool TrySetMember(SetMemberBinder binder, object value)   
+{     
+    expando[binder.Name] = value;     
+    return true;   
+} 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Since the declared goal is to be able to distinguish between a value not being there and deliberately being set to null, this would not work either.</p>
+
+<p>Actually what I found myself thinking was that I missed the &ldquo;undefined&rdquo; value from javascript, or some other way to express that something was not there, built into the language.</p>
+
+<p>Trying to avoid going to such drastic measure I came up with this:</p>
+
+<p>``` c#
+public class Dynosaur: DynamicObject
+{</p>
+
+<pre><code>private readonly IDictionary&lt;string, object&gt; expando;    
+
+public Dynosaur()   
+{    
+    expando = new ExpandoObject();   
+}    
+
+public override bool TryGetMember(GetMemberBinder binder, out object result)   
+{    
+    return expando.TryGetValue(binder.Name, out result);      
+}    
+
+public override bool TrySetMember(SetMemberBinder binder, object value)   
+{    
+    expando[binder.Name] = value;    
+    return true;      
+}    
+
+public bool HasValue(string name)   
+{    
+    return expando.Keys.Contains(name);   
+} 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Maybe not the most elegant solution, but I does allow me to write code like:</p>
+
+<p>``` c#
+public void PrintName(dynamic a)
+{</p>
+
+<pre><code>if (!a.HasValue("Name"))
+{
+    a.Name = "dog";
+}
+Console.WriteLine("the name is: " + a.Name);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Given that &ldquo;a&rdquo; is actually an instance of my Dynosaur class. I would not say that I am entirely satisfied with this implementation, but I actually think that this is as far as the dynamic features of C# will take me.</p>
+
+<p>Any good ideas out there? I am thinking there must be other people that has played around with this and has come up some crazy dynamic stuff in C#.</p>
 ]]></content>
   </entry>
   

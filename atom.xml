@@ -4,7 +4,7 @@
   <title><![CDATA[Developer's Perception]]></title>
   <link href="http://elgsdyret.github.io/atom.xml" rel="self"/>
   <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-05-27T19:44:42+02:00</updated>
+  <updated>2013-05-27T20:58:10+02:00</updated>
   <id>http://elgsdyret.github.io/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
@@ -29,8 +29,160 @@
     <link href="http://elgsdyret.github.io/blog/2013/05/25/code-generation-in-net/"/>
     <updated>2013-05-25T12:39:00+02:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/05/25/code-generation-in-net</id>
-    <content type="html"><![CDATA[<div class='post'>
-<p>Code generation has over time turned into one of my pet peeves when working in .NET (although most of it will apply to similar platforms like JAVA). Let me be very clear from the beginning of this post. I am advocating that you should use extreme caution before even considering using code generation to solve whatever real or perceived problems you might find it useful for. I have yet to see an implementation that has not caused extra problems. That does not necessarily mean that it cannot be valuable tool, but please take a step back and think before continuing down that path.</p> <blockquote>  <p>This is the longest blog post I have yet written. It contains no code, just ranting, and hopefully some insights.</p></blockquote> <h3>Possible Motivation</h3> <p>Code generation is typically introduced to:</p> <ul><li>remove duplication.</li><li>reduce tedious coding.</li><li>enforce security measures (authentication and authorization).</li><li>enforce consistent handling of resources such as database connections and transactions.</li><li>apply cross cutting concerns such as logging or caching.</li></ul> <p>And probably a number of other reasons. Basically, anything that seems hard to do in a nice way in the language and framework you are currently working with. Most of these things can be handled by using more light weight measures, using more simple and well known designs based on patterns. </p> <p>Regarding tedious coding it would be wise to step back and consider why there is so much tedious coding? If the number of lines of code compared to the functionality it provides is so high that you consider using code generation, I would put it to you that your design is not very good. Basically, you are trying to hammer a square peg into a round hole, and instead of seeing the error of that you just get a bigger hammer (called code generation). </p> <h3>How to Determine what to Generate</h3> <p>Usually, you would determine what to generate based on an external resource (like XML files), examining the existing code structure using the reflection API, or annotating the existing code somehow (probably using attributes) and then examining that using the reflection API.</p> <p>No matter how you choose to do this you are defining rules that are not clear from the context. An XML file is a very loose format and what is generated from that XML file is by no means clear to a developer looking at that XML, and it can also be very hard to determine from the code of the code generator. Similar problems arise when using the existing code structure or attributes, it is simply not very clear what rules are being applied and how the resulting code will look.</p> <p>Step back and consider the number of characters in those XML files. Now consider the number of characters of the code if you wrote it by hand in the same way the code generator does it. Now consider the number of characters for the code of the generator. Often you will find that you end up with more characters using the XML than just using the code. Then consider that XML files cannot be unit tested, the build process will be more complicated, and you will have to actually write the code generator. </p> <p>If you determine what to generate based on examining the existing code you will introduce the problem of simple code changes causing an unwanted side effect. I still recall changing the name of a parameter in a function in a model class as it was misspelled. Compilation and tests worked fine as they should. What I did not foresee was that suddenly our public API had a breaking change as it was generated from the core model. Our public SDK had suddenly also introduced this change as it was also generated from the code models. So basically all our integration partners had to change their code, or we could rollback the release. I know this is an extreme scenario and probably not something you would ponder, but there really is no limit for the ingenuity (insanity) of developers when trying to solve problems.</p> <blockquote>  <p><em>If you end up doing code generation despite all my attempts to get you to move away from it, do work dilligently on creating and maintaining documentation for you base generation format, whether it is XML based, annotations, or the structure of the code.</em> </p></blockquote> <h3>How to Actually Generate the code</h3> <p>Once the motivation is in place and you have somehow figured out how to determine what the output code should look like, it is time to actually generate some code.</p> <p>There are a number of different tools for doing this in the .NET stack, but all of them basically falls into to different categories:  + generate by code API (such as the CodeDOM)  + generate by template (such as T4 templates)</p> <p>Using code to generate code is a feasible approach, but unfortunately the APIs in .NET for this are extremely cumbersome and verbose leading to a lot of incomprehensible code. For instance the combination of CodeDOM and reflection (for reading base format) leads to some of the least readable code I have ever encountered in .NET. This basically means that it is very hard to envision the resulting code from the generator, which leads to random experimentation followed by examination of the resulting code to verify changes (if possible).</p> <p>Using a template engine is a better alternative. The templates will most likely be a raw text format with placeholders for the code that has variation. This means it is a lot easier to envision the resulting code. Usually, the placeholders should be fairly few, otherwise, the reusability is very low and the code generation should probably never have been implemented at all.</p> <blockquote>  <p><em>Use a template based engine and put as much as the generation logic in the template.</em> </p></blockquote> <p>There is an alternative where you generate the code based on a 3rd party solution, such as PostSharp. In this scenario it is the 3rd party that defines the &#8216;how to determine what to generate&#8217; and maintain most of the documentation.</p> <blockquote>  <p><em>Do not start from scratch. Search the market for generation tools that can do the bulk of the lifting for you.</em> </p></blockquote> <h3>Build Process</h3> <p>Once the code is generated there is a number of ways it can interact with the rest of the codebase:</p> <ol><li>never generate a file just build it straight into a DLL</li><li>generate a temp file as part of build and delete it afterwards</li><li>generate a temp file and try to hide it from the developers (the folder it is in is not included in the project etc.)</li><li>generate a temp file and use it in build (the build is seperate step from generation).</li><li>only generate the code on demand and check it in with the rest of the code. </li></ol> <p>The distinction between these methods can seem very narrow. The important part is whether the generated code is an artifact of the build process and how easy it is to see for the developers.</p> <p>The first 3 options basically assumes that it is not a good thing if the developer can see and modify the generated code. As if bad stuff would come from that, which it might. </p> <p>The last 2 assumes that the generated code is not directly an artifact from the build process. Item 4 is not that different from 1-3, but at least it keeps the code generation step as a seperate step from the build process. This could be a pre process step in building with Visual Studio and the actual build just picks up the file from the project.</p> <p>Item 5 is basically a templating engine. You generate something once and it is perfectly acceptable to modify it afterwards. This is just like when you add a class file in Visual Studio it will have a bit of code prefilled such as namespace, classname, and useless using statements. Similarly, with very simple commands you can generate new controllers and models in RAILS. </p> <blockquote>  <p><em>Make sure the build process is not made more complicated (and slower) due to the code generation. Ensure that the code generation is an optional step that comes before the build. Consider only generating once and keeping the files in source control if feasible.</em></p></blockquote> <h3>Examples</h3> <p>I am just going to run through some of the examples of code generation I have encountered sofar. One is bad, but ultimately not that harmful, two have been extremely costly, and one is maybe ok.</p> <h4>Re-use of Internal Model in Other Services</h4> <p>The first example of a custom code generator I encountered was used to share models between a number of different services. Basically, the team had decided to go for a SOA design, but not really unstood how to implement it. It was a relatively simple business application consisting of a an ASP.NET webforms site and no less than 12 SOAP based web services. </p> <p>We eventually came to the conclussion that probably 3 services would have been just about right, as the services depended on each other to a large degree. The sheer work of maintaining a model that belonged in service A, but was used in service B, service C, and the website quickly became a pain with 12 services. Thus, a code generator had been build to generate these models, making this an example of bad design driving the creation of the code generator.</p> <p>Luckily, the simplicity of the generated classes, the ease with which they could be extended, and the simplicity of the code generator itself ensured that it was only slightly cumbersome to work with.</p> <h4>Custom ORM NHibernate Wrapper</h4> <p>I could write a series of blog posts on this example alone, but basically this backend system was designed by someone that considered code generation his speciality and consequently applied it to everything possible.</p> <p>Combine this with a desire to build a custom ORM and you get one of the most convoluted systems I have seen. Basically, more or less the entire backend system was generated from XML. The idea of the homemade ORM was eventually dropped, but its basic API was then used to wrapped NHibernate. So as a developer you are basically stuck with a homemade XML format for queries and entities, which was the used to generate mapping and queries for NHibernate. Due to the complexity of such a system the queries and the mapping are highly ineffective. </p> <p>The worst part was how hard it was to actually write any kind off meaningful code for the system. The generated entities and queries (called views) were hidden and impossible to extend, actually, the only intended way to implement business logic was static methods were everything was passed as parameters. Some of the hacks developers had implemented on top of this system to be able to deliver features only made it worse.</p> <p>To top off the problems with this code generation it was full of bugs and very hard to modify. Part of the code generator was even code generated.</p> <p>Possibly the worst design I have ever seen. For a relatively simple business domain and equally simple functionality.</p> <h4>Service Layer Method Generator</h4> <p>This is another example of a very complex code generation system. I cannot be completely certain of the motivation for this code generation system, but my guess is that it is yet another example of a bad design that caused a lot of manual work.</p> <p>The core of the system is a number of entities, build by hand and mapped with NHibernate. The entities have specific queries as static method in an Active Record style. This design in itself is not that bad. One could argue back and forth of the merits of Active Record compared to the Repository pattern, but at least it is a well known and tried pattern.</p> <p>Based on the methods, properties, and certain custom attributes of these entities a number of things were code generated (which was not documented ofcourse):</p> <ul><li>A service layer directly exposing all the public methods of the webservice. In this service layer certain cross cutting concerns was added, such as connection and transaction handling, exception handling, and security checks.</li><li>A number of classes that was build into a .NET based SDK.</li></ul> <p>The idea behind the .NET based SDK was that it should work in a RPC style, and it contained both proxy objects and data objects directly generated based on the data retrieved from the core entities. In itself exposing internal implementation details in this way is never a good idea. As a direct consequence of this I have introduced a bug by changing the naming of a function parameter, which reflected through the service layer and the SDK. This meant that consumers of the API suddenly experienced a breaking change.</p> <p>Nevertheless, the main problem stems from the design. The way the proxy object works in the SDK is that it does not contain any data. This means if for instance you access the name property of a customer object you will end up going over the wire to retrieve this data. Obviously, this leads to extremely chatty behaviour by the consumers of the SDK and eventhough it is possible to avoid it is not the perceived default. The main problem though is that 50 or so entities with an average of 10 properties leads to 50*10*2 (both get and set) = 1000 methods on the service layer to implement the proxy object (could have been done with a PATCH like operation for partially updates, but alas it is not). With the standard methods for entities (create, update, delete) and some queries the API ends up having approximately 1500 public methods.</p> <p>I have removed the code generation completely and changed every method to be a &#8216;method as an object&#8217; implementation. Combined with the template pattern this means that there is very little redundant code. Unfortunately, it does not change the fact that we have 1500 public methods, which is a nightmare to maintain for us, and equally bad for our consumers to understand and navigate. Fans of the code generation in question would probably argue that it is only a problem to maintain, because the code generation has been removed, and they would be partially right. But, taking into account the number of bugs in the code generation and the number of well hidden side effects I am very happy we got rid of it.</p> <blockquote>  <p><em>When a design decision leaves you with 1500 different methods on a public API, you should really consider whether this design is a good idea</em></p></blockquote> <h4>AOP Support</h4> <p>This last example is actually one I designed myself. In a relatively simple ASP.NET MVC application we use attributes to implement AOP support using PostSharp. This actually works very well as PostSharp has a fairly straightforward API and there is no side effect by changing the code (all is handled by annotating with attributes).</p> <p>It is used for a number of things:</p> <ul><li>checking function parameters for null</li><li>checking function parameters for certain values</li><li>checking security rights on controller actions</li></ul> <p>I am not sure I would implement it this way again. The addition of the PostSharp tool does add a level of complexity and the fact that it must be installed on each and every developer machine also makes it a pricy dependency.</p> <p>Alternatively, each controller action could have been implemented as a &#8216;method as an object&#8217; and used template pattern to achieve similar results. Or maybe just do it by hand, it is not like the size of the application made it that much work. Basically, it probably is an example of overengineering that I am responsible for. </p> <h3>Challenges</h3> <p>There are a number of general challenges with using code generation:</p> <ul><li>It makes the system inherently a lot more complex.</li><li>It reduces readability quite a bit.</li><li>It makes it hard to implement business logic. The required features will be hard to determine up front, and thus the code generator will not correctly accomodate them. This leads to hacks to work around the code generator.</li><li>The APIs in .NET that are often used for this really sucks. If you really want to create code that is very hard to read, just combine CodeDOM code generation with the reflection API.</li></ul> <p>There are a some challenges that will get harder without code generation. What if you have 1500 command classes that needs to be changed? Depending on the change it could be put in a base class (if one is available), but if this is not possible it will be a harder challenge. </p> <p>How do you change 1500 classes by hand? One option is hiring a lot of very cheap labour to do it for you, but more constructively it is also feasible to create a script that does the modification and is then thrown away, which was how they were generated in the first place.</p> <blockquote>  <p><em>I have yet to see a really good example of code generation. Even those provided by visual studio, the RAILS framework, or similar, are at best minor convenience functionality.</em></p></blockquote></div>
+    <content type="html"><![CDATA[<p>Code generation has over time turned into one of my pet peeves when working in .NET (although most of it will apply to similar platforms like JAVA). Let me be very clear from the beginning of this post. I am advocating that you should use extreme caution before even considering using code generation to solve whatever real or perceived problems you might find it useful for. I have yet to see an implementation that has not caused extra problems. That does not necessarily mean that it cannot be valuable tool, but please take a step back and think before continuing down that path.</p>
+
+<blockquote><p>This is the longest blog post I have yet written. It contains no code, just ranting, and hopefully some insights.</p></blockquote>
+
+<h3>Possible Motivation</h3>
+
+<p>Code generation is typically introduced to:</p>
+
+<ul>
+<li>remove duplication.</li>
+<li>reduce tedious coding.</li>
+<li>enforce security measures (authentication and authorization).</li>
+<li>enforce consistent handling of resources such as database connections and transactions.</li>
+<li>apply cross cutting concerns such as logging or caching.</li>
+</ul>
+
+
+<p>And probably a number of other reasons. Basically, anything that seems hard to do in a nice way in the language and framework you are currently working with. Most of these things can be handled by using more light weight measures, using more simple and well known designs based on patterns.</p>
+
+<p>Regarding tedious coding it would be wise to step back and consider why there is so much tedious coding? If the number of lines of code compared to the functionality it provides is so high that you consider using code generation, I would put it to you that your design is not very good. Basically, you are trying to hammer a square peg into a round hole, and instead of seeing the error of that you just get a bigger hammer (called code generation).</p>
+
+<h3>How to Determine what to Generate</h3>
+
+<p>Usually, you would determine what to generate based on an external resource (like XML files), examining the existing code structure using the reflection API, or annotating the existing code somehow (probably using attributes) and then examining that using the reflection API.</p>
+
+<p>No matter how you choose to do this you are defining rules that are not clear from the context. An XML file is a very loose format and what is generated from that XML file is by no means clear to a developer looking at that XML, and it can also be very hard to determine from the code of the code generator. Similar problems arise when using the existing code structure or attributes, it is simply not very clear what rules are being applied and how the resulting code will look.</p>
+
+<p>Step back and consider the number of characters in those XML files. Now consider the number of characters of the code if you wrote it by hand in the same way the code generator does it. Now consider the number of characters for the code of the generator. Often you will find that you end up with more characters using the XML than just using the code. Then consider that XML files cannot be unit tested, the build process will be more complicated, and you will have to actually write the code generator.</p>
+
+<p>If you determine what to generate based on examining the existing code you will introduce the problem of simple code changes causing an unwanted side effect. I still recall changing the name of a parameter in a function in a model class as it was misspelled. Compilation and tests worked fine as they should. What I did not foresee was that suddenly our public API had a breaking change as it was generated from the core model. Our public SDK had suddenly also introduced this change as it was also generated from the code models. So basically all our integration partners had to change their code, or we could rollback the release. I know this is an extreme scenario and probably not something you would ponder, but there really is no limit for the ingenuity (insanity) of developers when trying to solve problems.</p>
+
+<blockquote><p><em>If you end up doing code generation despite all my attempts to get you to move away from it, do work dilligently on creating and maintaining documentation for you base generation format, whether it is XML based, annotations, or the structure of the code.</em></p></blockquote>
+
+<h3>How to Actually Generate the code</h3>
+
+<p>Once the motivation is in place and you have somehow figured out how to determine what the output code should look like, it is time to actually generate some code.</p>
+
+<p>There are a number of different tools for doing this in the .NET stack, but all of them basically falls into to different categories:
+ + generate by code API (such as the CodeDOM)
+ + generate by template (such as T4 templates)</p>
+
+<p>Using code to generate code is a feasible approach, but unfortunately the APIs in .NET for this are extremely cumbersome and verbose leading to a lot of incomprehensible code. For instance the combination of CodeDOM and reflection (for reading base format) leads to some of the least readable code I have ever encountered in .NET. This basically means that it is very hard to envision the resulting code from the generator, which leads to random experimentation followed by examination of the resulting code to verify changes (if possible).</p>
+
+<p>Using a template engine is a better alternative. The templates will most likely be a raw text format with placeholders for the code that has variation. This means it is a lot easier to envision the resulting code. Usually, the placeholders should be fairly few, otherwise, the reusability is very low and the code generation should probably never have been implemented at all.</p>
+
+<blockquote><p><em>Use a template based engine and put as much as the generation logic in the template.</em></p></blockquote>
+
+<p>There is an alternative where you generate the code based on a 3rd party solution, such as PostSharp. In this scenario it is the 3rd party that defines the &lsquo;how to determine what to generate&rsquo; and maintain most of the documentation.</p>
+
+<blockquote><p><em>Do not start from scratch. Search the market for generation tools that can do the bulk of the lifting for you.</em></p></blockquote>
+
+<h3>Build Process</h3>
+
+<p>Once the code is generated there is a number of ways it can interact with the rest of the codebase:</p>
+
+<ol>
+<li>never generate a file just build it straight into a DLL</li>
+<li>generate a temp file as part of build and delete it afterwards</li>
+<li>generate a temp file and try to hide it from the developers (the folder it is in is not included in the project etc.)</li>
+<li>generate a temp file and use it in build (the build is seperate step from generation).</li>
+<li>only generate the code on demand and check it in with the rest of the code.</li>
+</ol>
+
+
+<p>The distinction between these methods can seem very narrow. The important part is whether the generated code is an artifact of the build process and how easy it is to see for the developers.</p>
+
+<p>The first 3 options basically assumes that it is not a good thing if the developer can see and modify the generated code. As if bad stuff would come from that, which it might.</p>
+
+<p>The last 2 assumes that the generated code is not directly an artifact from the build process. Item 4 is not that different from 1-3, but at least it keeps the code generation step as a seperate step from the build process. This could be a pre process step in building with Visual Studio and the actual build just picks up the file from the project.</p>
+
+<p>Item 5 is basically a templating engine. You generate something once and it is perfectly acceptable to modify it afterwards. This is just like when you add a class file in Visual Studio it will have a bit of code prefilled such as namespace, classname, and useless using statements. Similarly, with very simple commands you can generate new controllers and models in RAILS.</p>
+
+<blockquote><p><em>Make sure the build process is not made more complicated (and slower) due to the code generation. Ensure that the code generation is an optional step that comes before the build. Consider only generating once and keeping the files in source control if feasible.</em></p></blockquote>
+
+<h3>Examples</h3>
+
+<p>I am just going to run through some of the examples of code generation I have encountered sofar. One is bad, but ultimately not that harmful, two have been extremely costly, and one is maybe ok.</p>
+
+<h4>Re-use of Internal Model in Other Services</h4>
+
+<p>The first example of a custom code generator I encountered was used to share models between a number of different services. Basically, the team had decided to go for a SOA design, but not really unstood how to implement it. It was a relatively simple business application consisting of a an ASP.NET webforms site and no less than 12 SOAP based web services.</p>
+
+<p>We eventually came to the conclussion that probably 3 services would have been just about right, as the services depended on each other to a large degree. The sheer work of maintaining a model that belonged in service A, but was used in service B, service C, and the website quickly became a pain with 12 services. Thus, a code generator had been build to generate these models, making this an example of bad design driving the creation of the code generator.</p>
+
+<p>Luckily, the simplicity of the generated classes, the ease with which they could be extended, and the simplicity of the code generator itself ensured that it was only slightly cumbersome to work with.</p>
+
+<h4>Custom ORM NHibernate Wrapper</h4>
+
+<p>I could write a series of blog posts on this example alone, but basically this backend system was designed by someone that considered code generation his speciality and consequently applied it to everything possible.</p>
+
+<p>Combine this with a desire to build a custom ORM and you get one of the most convoluted systems I have seen. Basically, more or less the entire backend system was generated from XML. The idea of the homemade ORM was eventually dropped, but its basic API was then used to wrapped NHibernate. So as a developer you are basically stuck with a homemade XML format for queries and entities, which was the used to generate mapping and queries for NHibernate. Due to the complexity of such a system the queries and the mapping are highly ineffective.</p>
+
+<p>The worst part was how hard it was to actually write any kind off meaningful code for the system. The generated entities and queries (called views) were hidden and impossible to extend, actually, the only intended way to implement business logic was static methods were everything was passed as parameters. Some of the hacks developers had implemented on top of this system to be able to deliver features only made it worse.</p>
+
+<p>To top off the problems with this code generation it was full of bugs and very hard to modify. Part of the code generator was even code generated.</p>
+
+<p>Possibly the worst design I have ever seen. For a relatively simple business domain and equally simple functionality.</p>
+
+<h4>Service Layer Method Generator</h4>
+
+<p>This is another example of a very complex code generation system. I cannot be completely certain of the motivation for this code generation system, but my guess is that it is yet another example of a bad design that caused a lot of manual work.</p>
+
+<p>The core of the system is a number of entities, build by hand and mapped with NHibernate. The entities have specific queries as static method in an Active Record style. This design in itself is not that bad. One could argue back and forth of the merits of Active Record compared to the Repository pattern, but at least it is a well known and tried pattern.</p>
+
+<p>Based on the methods, properties, and certain custom attributes of these entities a number of things were code generated (which was not documented ofcourse):</p>
+
+<ul>
+<li>A service layer directly exposing all the public methods of the webservice. In this service layer certain cross cutting concerns was added, such as connection and transaction handling, exception handling, and security checks.</li>
+<li>A number of classes that was build into a .NET based SDK.</li>
+</ul>
+
+
+<p>The idea behind the .NET based SDK was that it should work in a RPC style, and it contained both proxy objects and data objects directly generated based on the data retrieved from the core entities. In itself exposing internal implementation details in this way is never a good idea. As a direct consequence of this I have introduced a bug by changing the naming of a function parameter, which reflected through the service layer and the SDK. This meant that consumers of the API suddenly experienced a breaking change.</p>
+
+<p>Nevertheless, the main problem stems from the design. The way the proxy object works in the SDK is that it does not contain any data. This means if for instance you access the name property of a customer object you will end up going over the wire to retrieve this data. Obviously, this leads to extremely chatty behaviour by the consumers of the SDK and eventhough it is possible to avoid it is not the perceived default. The main problem though is that 50 or so entities with an average of 10 properties leads to 50<em>10</em>2 (both get and set) = 1000 methods on the service layer to implement the proxy object (could have been done with a PATCH like operation for partially updates, but alas it is not). With the standard methods for entities (create, update, delete) and some queries the API ends up having approximately 1500 public methods.</p>
+
+<p>I have removed the code generation completely and changed every method to be a &lsquo;method as an object&rsquo; implementation. Combined with the template pattern this means that there is very little redundant code. Unfortunately, it does not change the fact that we have 1500 public methods, which is a nightmare to maintain for us, and equally bad for our consumers to understand and navigate. Fans of the code generation in question would probably argue that it is only a problem to maintain, because the code generation has been removed, and they would be partially right. But, taking into account the number of bugs in the code generation and the number of well hidden side effects I am very happy we got rid of it.</p>
+
+<blockquote><p><em>When a design decision leaves you with 1500 different methods on a public API, you should really consider whether this design is a good idea</em></p></blockquote>
+
+<h4>AOP Support</h4>
+
+<p>This last example is actually one I designed myself. In a relatively simple ASP.NET MVC application we use attributes to implement AOP support using PostSharp. This actually works very well as PostSharp has a fairly straightforward API and there is no side effect by changing the code (all is handled by annotating with attributes).</p>
+
+<p>It is used for a number of things:</p>
+
+<ul>
+<li>checking function parameters for null</li>
+<li>checking function parameters for certain values</li>
+<li>checking security rights on controller actions</li>
+</ul>
+
+
+<p>I am not sure I would implement it this way again. The addition of the PostSharp tool does add a level of complexity and the fact that it must be installed on each and every developer machine also makes it a pricy dependency.</p>
+
+<p>Alternatively, each controller action could have been implemented as a &lsquo;method as an object&rsquo; and used template pattern to achieve similar results. Or maybe just do it by hand, it is not like the size of the application made it that much work. Basically, it probably is an example of overengineering that I am responsible for.</p>
+
+<h3>Challenges</h3>
+
+<p>There are a number of general challenges with using code generation:</p>
+
+<ul>
+<li>It makes the system inherently a lot more complex.</li>
+<li>It reduces readability quite a bit.</li>
+<li>It makes it hard to implement business logic. The required features will be hard to determine up front, and thus the code generator will not correctly accomodate them. This leads to hacks to work around the code generator.</li>
+<li>The APIs in .NET that are often used for this really sucks. If you really want to create code that is very hard to read, just combine CodeDOM code generation with the reflection API.</li>
+</ul>
+
+
+<p>There are a some challenges that will get harder without code generation. What if you have 1500 command classes that needs to be changed? Depending on the change it could be put in a base class (if one is available), but if this is not possible it will be a harder challenge.</p>
+
+<p>How do you change 1500 classes by hand? One option is hiring a lot of very cheap labour to do it for you, but more constructively it is also feasible to create a script that does the modification and is then thrown away, which was how they were generated in the first place.</p>
+
+<blockquote><p><em>I have yet to see a really good example of code generation. Even those provided by visual studio, the RAILS framework, or similar, are at best minor convenience functionality.</em></p></blockquote>
 ]]></content>
   </entry>
   
@@ -39,8 +191,222 @@
     <link href="http://elgsdyret.github.io/blog/2013/05/02/getting-started-with-go/"/>
     <updated>2013-05-02T16:08:00+02:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/05/02/getting-started-with-go</id>
-    <content type="html"><![CDATA[<div class='post'>
-<br />In late 2007 Google started an open source initiative to develop a new programming language named Go. The goal of the language was to make it as efficient as statically compiled languages, but as easy to use as dynamic languages<br /><br />Furthermore, the language aims to solve the challenges of concurrent programming in an intuitive way. This makes a lot of sense as computers are getting more and more CPUs with more and more cores. A lot of current programming initiatives are actually focused on enabling us to easier write concurrent programs.<br /><br />Node as an example does have some tools for concurrent programs, but its main focus by using the event loop is actually an approach of strictly single threaded programming, instead focusing on reducing the blocking IO. There has been a lot of discussions going around with people claiming this approach to be either ingenious or insane. My personal experience is that it is possible to write very efficient servers in Node working with the single threaded model.<br /><br />In contrast to Node, Microsoft released the async and await keywords in C# that makes implementing asynchronous code in C# a lot easier - simply by taking away most of the work of writing such code, but it does not change how the programming model works.<br /><br />As a language Go is mostly related to the C family of languages in my opinion. Both with regards to features and syntax it more or less feels like a cleaned up version of JAVA or C# with some cruft removed and some parts made explicit that is implicit in those language. Not surprisingly Go seems to go in the opposite direction of Node (like most languages do) and has a concurrent model at the forefront of the language focus. The intriguing thing is that Go manages to this in a fairly elegant way.<br /><br />What Go promises is speed close to that of C and C++, a slim and elegant language that is as easy to use as Node (it is as easy to get a simple http server running), and powerful features for doing concurrent programming.<br /><div><br /></div><div><h3>Initial thoughts</h3><div>With my usual curiosity I have followed the development of the language from the sideline for a while, but when I saw a very impressive demonstration of building a chat server in Go at the Oredev conference last year I decided I had to take a closer look and do some development on my own. This is my initial experiments with it and thoughts about the language.</div><div><br /></div><div>Like I mentioned above the language feels like a slim and more elegant version of the languages in the C family. This meant it was fairly easy for me to get started and following the great online tutorial (<a href="http://tour.golang.org/#1">http://tour.golang.org/#1</a>) I was quickly able to produce code.</div></div><div><br /></div><h4>Clean Code</h4><div><div>I cannot recall how many hours I have wasted looking at code where half of the lines are pure cruft. Functions that are never called, variables that are never used, and so forth. Therefore, I am really excited about the way the Go compiler handles this.</div><div><br /></div><div>To illustrate this we can do a very small example. I will not go over the details (read that tutorial!), but the key is that 2 integers &#8216;a&#8217; and &#8216;b&#8217; are declared and assigned.</div><div><br /></div><div><pre>package main<br /><br />import (<br />  "fmt"<br />)<br /><br />func main() {<br />  a := 1<br />  b := 2<br />  fmt.Println(a)<br />}<br /></pre><br /></div><div>This example will simply not compile! The integer &#8216;b&#8217; is never used for anything and thus should be removed. The following will compile:</div><div><br /></div><div><pre>package main<br /><br />import (<br />  "fmt"<br />)<br /><br />func main() {<br />  a := 1<br />  fmt.Println(a)<br />}<br /></pre><br /></div><div>I have seen some people argue that this is actually annoying when you are experimenting with the code as stuff might not get used in the beginning while developing and it then has to be commented out. I believe the pros clearly outweighs the cons:</div><div><br /><ul><li>The production code is cleaner.</li><li>It seems to me that if you are adding code that is not used yet and compiling you might be in a YAGNI situation? Do not write the code until you need it.</li><li>The workaround is dead simple - just comment it out. Then if it turns out you are not going to need it someone will eventually delete that comment.&nbsp;</li></ul></div></div><br /><h4>Interfaces</h4>Go does not have classes. It has structs and functions can be added to them. As such there is no inheritance, which means as a language Go favors composition over inheritance since the later is not even possible. I really like this design as composition is to be preferred over inheritance in most scenarios in my opinion (99%?) even in a language that support inheritance. This also means that the way interfaces are implemented are different from for instance C#.<br /><br />Interfaces are implemented implicitly, which in my mind almost feels like duke typing (except checked at compile time). Thus, if an object satisfies an interface (has the required functions) it will compile. This means that interfaces can easily be added for existing code even the main library.<br /><br />Imagine what I could have done with ASP.Net HttpContext if it worked this way in C# (check my last blog post). Invent a new interface matching the few bits of HttpContext that was being used and simply pass HttpContext along. A lot more elegant that what can be done in C#.<br /><br /><br /><h4>Http Server</h4>To be honest I have not yet worked very much with Go as an Http Server, but since it is one of the things I usually end up using extensively in a language I thought I would include an example anyways.<br /><pre><br />package main<br /><br />import (<br />    "fmt"<br />    "net/http"<br />)<br /><br />type User struct {<br />    Name string<br />    Password string<br />    FavoriteColor string<br />}<br /><br />func (u User) ServeHTTP(w http.ResponseWriter, r *http.Request) {<br />    fmt.Fprintf(w, "%s, %s, %s", u.Name, u.Password, u.FavoriteColor)<br />}<br /><br />func main() { <br />    http.Handle("/user", &User{"MyUserName", "OhSoSecret", "green"})<br />    http.ListenAndServe("localhost:4000", nil)<br />}<br /></pre>I do not think that is too bad. Almost simpler than doing the same in Node, but still to early for me to say how easy it will be to implement a realistic server. <br /><br /><br /><h4>Concurrency</h4>One of the most important features of Go is the way you write concurrent code. It consists of 2 main components being goroutines and channels. A goroutine is a lightweight thread and a channel is a way to communicate between threads. </br><br />A fairly common scenario will be goroutine(s) doing some calculation (or reading data) and another goroutine that then does some further manipulation like in this example.  <pre><br />package main<br /><br />import (<br />  "fmt"<br />)<br /><br />func getdata(resCh chan<- int) {<br />  i := 0<br />  for {<br />    resCh <- i  <br />    i++         <br />  }<br />}<br /><br />func printer(resCh <-chan int) {<br />  for {<br />    res := <- resCh  <br />    fmt.Println(res)         <br />  }<br />}<br /><br />func main() {<br />  resCh := make(chan int, 100)<br />    <br />  go getdata(resCh)<br />  go printer(resCh)<br /><br />  var input string<br />  fmt.Scanln(&input)<br />}<br /></pre>A dumb example I agree, as there are easier ways of printing sequential integers to the console. The point was to showcase the way functions can be started in goroutines and use channels to communicate. <br /><br />I find this a quite elegant way of doing concurrent programming, and if you want to see a slightly less contrived example take the tutorial of Go and solve the last exercise (you can find mine at my github account: <a href="https://github.com/elgsdyret/go_playground/blob/master/fetcher_2.go">https://github.com/elgsdyret/go_playground/blob/master/fetcher_2.go</a>).  </br></br></br><h4>Wrap Up</h4> With the limited experiments I have done so far I think Go has a lot going for it. Which is also why more and more companies are showing of stuff implemented in Go. For instance Mozilla just released a beta on Heka, a quite interesting project, which is written in Go (<a href="http://blog.mozilla.org/services/2013/04/30/introducing-heka/">http://blog.mozilla.org/services/2013/04/30/introducing-heka/</a>). </br></br>Next step is to play around with more areas of Go. How to write unit tests? How hard is it to write more advanced web servers?     </div>
+    <content type="html"><![CDATA[<p>In late 2007 Google started an open source initiative to develop a new programming language named Go. The goal of the language was to make it as efficient as statically compiled languages, but as easy to use as dynamic languages.</p>
+
+<p>Furthermore, the language aims to solve the challenges of concurrent programming in an intuitive way. This makes a lot of sense as computers are getting more and more CPUs with more and more cores. A lot of current programming initiatives are actually focused on enabling us to easier write concurrent programs.</p>
+
+<p>Node as an example does have some tools for concurrent programs, but its main focus by using the event loop is actually an approach of strictly single threaded programming, instead focusing on reducing the blocking IO. There has been a lot of discussions going around with people claiming this approach to be either ingenious or insane. My personal experience is that it is possible to write very efficient servers in Node working with the single threaded model.</p>
+
+<p>In contrast to Node, Microsoft released the async and await keywords in C# that makes implementing asynchronous code in C# a lot easier &ndash; simply by taking away most of the work of writing such code, but it does not change how the programming model works.</p>
+
+<p>As a language Go is mostly related to the C family of languages in my opinion. Both with regards to features and syntax it more or less feels like a cleaned up version of JAVA or C# with some cruft removed and some parts made explicit that is implicit in those language. Not surprisingly Go seems to go in the opposite direction of Node (like most languages do) and has a concurrent model at the forefront of the language focus. The intriguing thing is that Go manages to this in a fairly elegant way.</p>
+
+<p>What Go promises is speed close to that of C and C++, a slim and elegant language that is as easy to use as Node (it is as easy to get a simple http server running), and powerful features for doing concurrent programming.</p>
+
+<h2>Initial thoughts</h2>
+
+<p>With my usual curiosity I have followed the development of the language from the sideline for a while, but when I saw a very impressive demonstration of building a chat server in Go at the Oredev conference last year I decided I had to take a closer look and do some development on my own. This is my initial experiments with it and thoughts about the language.</p>
+
+<p>Like I mentioned above the language feels like a slim and more elegant version of the languages in the C family. This meant it was fairly easy for me to get started and following the great online tutorial (<a href="http://tour.golang.org/#1">http://tour.golang.org/#1</a>) I was quickly able to produce code.</p>
+
+<h3>Clean Code</h3>
+
+<p>I cannot recall how many hours I have wasted looking at code where half of the lines are pure cruft. Functions that are never called, variables that are never used, and so forth. Therefore, I am really excited about the way the Go compiler handles this.</p>
+
+<p>To illustrate this we can do a very small example. I will not go over the details (read that tutorial!), but the key is that 2 integers &lsquo;a&rsquo; and &lsquo;b&rsquo; are declared and assigned.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="nx">b</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This example will simply not compile! The integer &lsquo;b&rsquo; is never used for anything and thus should be removed. The following will compile:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I have seen some people argue that this is actually annoying when you are experimenting with the code as stuff might not get used in the beginning while developing and it then has to be commented out. I believe the pros clearly outweighs the cons:</p>
+
+<ul>
+<li>The production code is cleaner.</li>
+<li>It seems to me that if you are adding code that is not used yet and compiling you might be in a YAGNI situation? Do not write the code until you need it.</li>
+<li>The workaround is dead simple &ndash; just comment it out. Then if it turns out you are not going to need it someone will eventually delete that comment.</li>
+</ul>
+
+
+<h3>Interfaces</h3>
+
+<p>Go does not have classes. It has structs and functions can be added to them. As such there is no inheritance, which means as a language Go favors composition over inheritance since the later is not even possible. I really like this design as composition is to be preferred over inheritance in most scenarios in my opinion (99%?) even in a language that support inheritance. This also means that the way interfaces are implemented are different from for instance C#.</p>
+
+<p>Interfaces are implemented implicitly, which in my mind almost feels like duke typing (except checked at compile time). Thus, if an object satisfies an interface (has the required functions) it will compile. This means that interfaces can easily be added for existing code even the main library.</p>
+
+<p>Imagine what I could have done with ASP.Net HttpContext if it worked this way in C# (check my last blog post). Invent a new interface matching the few bits of HttpContext that was being used and simply pass HttpContext along. A lot more elegant that what can be done in C#.</p>
+
+<h3>Http Server</h3>
+
+<p>To be honest I have not yet worked very much with Go as an Http Server, but since it is one of the things I usually end up using extensively in a language I thought I would include an example anyways.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;net/http&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">User</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">Password</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">FavoriteColor</span> <span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">u</span> <span class="nx">User</span><span class="p">)</span> <span class="nx">ServeHTTP</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="s">&quot;%s, %s, %s&quot;</span><span class="p">,</span> <span class="nx">u</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">u</span><span class="p">.</span><span class="nx">Password</span><span class="p">,</span> <span class="nx">u</span><span class="p">.</span><span class="nx">FavoriteColor</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">http</span><span class="p">.</span><span class="nx">Handle</span><span class="p">(</span><span class="s">&quot;/user&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">User</span><span class="p">{</span><span class="s">&quot;MyUserName&quot;</span><span class="p">,</span> <span class="s">&quot;OhSoSecret&quot;</span><span class="p">,</span> <span class="s">&quot;green&quot;</span><span class="p">})</span>
+</span><span class='line'>  <span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">&quot;localhost:4000&quot;</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I do not think that is too bad. Almost simpler than doing the same in Node, but still to early for me to say how easy it will be to implement a realistic server.</p>
+
+<h3>Concurrency</h3>
+
+<p>One of the most important features of Go is the way you write concurrent code. It consists of 2 main components being goroutines and channels. A goroutine is a lightweight thread and a channel is a way to communicate between threads.</p>
+
+<p>A fairly common scenario will be goroutine(s) doing some calculation (or reading data) and another goroutine that then does some further manipulation like in this example.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">getdata</span><span class="p">(</span><span class="nx">resCh</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">resCh</span> <span class="o">&lt;-</span> <span class="nx">i</span>
+</span><span class='line'>      <span class="nx">i</span><span class="o">++</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">printer</span><span class="p">(</span><span class="nx">resCh</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">res</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">resCh</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">res</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">resCh</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">getdata</span><span class="p">(</span><span class="nx">resCh</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">printer</span><span class="p">(</span><span class="nx">resCh</span><span class="p">)</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">input</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Scanln</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">input</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A dumb example I agree, as there are easier ways of printing sequential integers to the console. The point was to showcase the way functions can be started in goroutines and use channels to communicate.</p>
+
+<p>I find this a quite elegant way of doing concurrent programming, and if you want to see a slightly less contrived example take the tutorial of Go and solve the last exercise (you can find mine at my github account: <a href="https://github.com/elgsdyret/go_playground/blob/master/fetcher_2.go">https://github.com/elgsdyret/go_playground/blob/master/fetcher_2.go</a>).</p>
+
+<h3>Wrap Up</h3>
+
+<p>With the limited experiments I have done so far I think Go has a lot going for it. Which is also why more and more companies are showing of stuff implemented in Go. For instance Mozilla just released a beta on Heka, a quite interesting project, which is written in Go (<a href="http://blog.mozilla.org/services/2013/04/30/introducing-heka/">http://blog.mozilla.org/services/2013/04/30/introducing-heka/</a>).</p>
+
+<p>Next step is to play around with more areas of Go. How to write unit tests? How hard is it to write more advanced web servers?</p>
 ]]></content>
   </entry>
   
@@ -49,8 +415,199 @@
     <link href="http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and/"/>
     <updated>2013-04-22T19:15:00+02:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and</id>
-    <content type="html"><![CDATA[<div class='post'>
-Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.<br /><br />This often appears in the form of code like this:<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff()  {    var userId = (string)HttpContext.Current.Session["userId"];    DoSomeMoreCoreStuff(userId); }]]&gt;</script> This code could be located anywhere in you codebase, and I have seen examples of such calls to session being done more or less inline in a string describing an SQL query. It does not necessarily have to be the Session property that is accessed though, the problem is the same if Application or other bits of the current http context is accessed this way.<br /><br />There is a number of problems with this approach.<br /><ul><li>Using a string like this is not strongly typed, which easily leads to errors. For instance the session variables might have had a different casing like &#8220;CurrentUserId&#8221;.</li><li>A static reference to HttpContext.Current causes a number of problems. Firstly, it will be hard to use the code in question outside the ASP.NET stack, and secondly it will be equally hard to write meaningful tests for the code in questions.</li></ul><br /><h3>Options</h3>There are a number of ways to solve this problem leading to a much cleaner design enabling testing and reuse. All the options involves pushing the actual call to HttpContext.Current as far up in the call chain as possible, meaning in the code behind of the aspx page.<br /><br /><h4>Simple Types</h4>Given that the currentUserId in our example above is an string (or any other simple type or object that can be easily constructed) why not just use that? It can be injected through the constructor or the method in question.<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff(string userId)  {    DoSomeMoreCoreStuff(userId); }]]&gt;</script> <br /><br /><h4>Domain Specific Wrapper Class&nbsp;</h4>Often it is not as simple as a single entry that you want to retrieve from the session. Maybe there is a group of related entries that you want to use.<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff() {   var userId = (string)HttpContext.Current.Session["currentUserId"];   var userColor = (string)HttpContext.Current.Session["favoriteColor"];   var userNickname = (string)HttpContext.Current.Session["nick"];   DoSomeMoreCoreStuff(userId, userColor, userNickname); }]]&gt;</script> In that case an interface named according to the relation (for instance UserContext in our example) and injected can solve this problem. The key is to have an implementation of the interface that actually wraps Session and ensure that the string key for the entry is not copied all over the code. The wrapper implementation is instantiated at the top level of the web stack, most often in the code behind class and elsewhere we code against the interface in a inversion of control style.<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff(UserContext userContext) {   var userId = userContext.Id;   var userColor = userContext.FavoriteColor;   var userNickname = userContext.NickName;   DoSomeMoreCoreStuff(userId, userColor, userNickname); }]]&gt;</script> The implementation of the interface looks something like this: <br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public class HttpContextUserContext : UserContext {   HttpContext context;    public HttpContextUserContext(HttpContext context)   {     this.context = context;   }    public string Id   {     get     {       return (string)context.Session["currentUserId"];     }   }    public string FavoriteColor   {     get     {       return (string)context.Session["favoriteColor"];     }   }    public string NickName   {     get     {       return (string)context.Session["nick"];     }   } }]]&gt;</script> It might seem like a lot of code, but the flexibility is definitely worth the small overhead of adding this. <br /><h4></h4><h4>HttpContextBase</h4><div><br /></div>The main problem with the original implementation of the HttpContext class is that it is not based on an interface nor an abstract base class. This means that reusing code that depends on HttpContext can be hard, and testing equally hard. Microsoft realized this problen when they released the MVC framework and added a class called HttpContextBase. The funny thing is that HttpContext does not inherit from HttpContextBase as that would be a breaking change, but it has the exact same API.<br /><br />Thus, our problem from above with the static dependency could be solved as the following stepwise refactoring:<br /><br /><ul><li>Ensure that HttpContext is injected through the constructor or the method in question and ensure that HttpContext.Current is passed in as that value.</li><li>Replace HttpContext in the constructor or method with HttpContextBase and replace HttpContext.Current with new HttpContextWrapper(HttpContext.Current)</li></ul>And our example would then look something like this: <br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff(HttpContextBase context)  {    var userId = (string)context.Session["userId"];    DoSomeMoreCoreStuff(userId); }]]&gt;</script>This might seem a bit overkill, but we are now able to use our method with a different implementation of HttpContextBase for reuse and testing purposes.<br /><br />When doing a different implementation you should know that every base implementation in HttpContextBase just throws a NotImplementedException. Thus, you will need to override that different bits in your test and reuse implementations depending on what you really require. Alternatively, there are a couple of generic open source implementations available if you want to pull in that extra dependency.<br /><br />In general I would recommend using one of the first approaches, but if you are working with a fairly large system that adheres to the big ball of mud &#8220;design&#8221; antipattern this might be difficult. Maybe it is just to difficult to discern any meaningful relation between the different data retrieved from HttpContext, and with this approach you can at least start writing some tests to get control back of the code.<br /><br />As I mentioned earlier this is just one simple example as HttpContext have a lot of data and functionality built in.<br /><div><br /><br /></div></div>
+    <content type="html"><![CDATA[<p>Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.</p>
+
+<p>This often appears in the form of code like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">DoSomeCoreStuff</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">userId</span> <span class="p">=</span> <span class="p">(</span><span class="kt">string</span><span class="p">)</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Session</span><span class="p">[</span><span class="s">&quot;userId&quot;</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">DoSomeMoreCoreStuff</span><span class="p">(</span><span class="n">userId</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This code could be located anywhere in you codebase, and I have seen examples of such calls to session being done more or less inline in a string describing an SQL query. It does not necessarily have to be the Session property that is accessed though, the problem is the same if Application or other bits of the current http context is accessed this way.</p>
+
+<p>There is a number of problems with this approach.</p>
+
+<ul>
+<li>Using a string like this is not strongly typed, which easily leads to errors. For instance the session variables might have had a different casing like &ldquo;CurrentUserId&rdquo;.</li>
+<li>A static reference to HttpContext.Current causes a number of problems. Firstly, it will be hard to use the code in question outside the ASP.NET stack, and secondly it will be equally hard to write meaningful tests for the code in questions.</li>
+</ul>
+
+
+<h2>Options</h2>
+
+<p>There are a number of ways to solve this problem leading to a much cleaner design enabling testing and reuse. All the options involves pushing the actual call to HttpContext.Current as far up in the call chain as possible, meaning in the code behind of the aspx page.</p>
+
+<h3>Simple Types</h3>
+
+<p>Given that the currentUserId in our example above is an string (or any other simple type or object that can be easily constructed) why not just use that? It can be injected through the constructor or the method in question.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">DoSomeCoreStuff</span><span class="p">(</span><span class="kt">string</span> <span class="n">userId</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">DoSomeMoreCoreStuff</span><span class="p">(</span><span class="n">userId</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Domain Specific Wrapper Class</h3>
+
+<p>Often it is not as simple as a single entry that you want to retrieve from the session. Maybe there is a group of related entries that you want to use.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">DoSomeCoreStuff</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">userId</span> <span class="p">=</span> <span class="p">(</span><span class="kt">string</span><span class="p">)</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Session</span><span class="p">[</span><span class="s">&quot;currentUserId&quot;</span><span class="p">];</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">userColor</span> <span class="p">=</span> <span class="p">(</span><span class="kt">string</span><span class="p">)</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Session</span><span class="p">[</span><span class="s">&quot;favoriteColor&quot;</span><span class="p">];</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">userNickname</span> <span class="p">=</span> <span class="p">(</span><span class="kt">string</span><span class="p">)</span><span class="n">HttpContext</span><span class="p">.</span><span class="n">Current</span><span class="p">.</span><span class="n">Session</span><span class="p">[</span><span class="s">&quot;nick&quot;</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">DoSomeMoreCoreStuff</span><span class="p">(</span><span class="n">userId</span><span class="p">,</span> <span class="n">userColor</span><span class="p">,</span> <span class="n">userNickname</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In that case an interface named according to the relation (for instance UserContext in our example) and injected can solve this problem. The key is to have an implementation of the interface that actually wraps Session and ensure that the string key for the entry is not copied all over the code. The wrapper implementation is instantiated at the top level of the web stack, most often in the code behind class and elsewhere we code against the interface in a inversion of control style.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">DoSomeCoreStuff</span><span class="p">(</span><span class="n">UserContext</span> <span class="n">userContext</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">userId</span> <span class="p">=</span> <span class="n">userContext</span><span class="p">.</span><span class="n">Id</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">userColor</span> <span class="p">=</span> <span class="n">userContext</span><span class="p">.</span><span class="n">FavoriteColor</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">userNickname</span> <span class="p">=</span> <span class="n">userContext</span><span class="p">.</span><span class="n">NickName</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">DoSomeMoreCoreStuff</span><span class="p">(</span><span class="n">userId</span><span class="p">,</span> <span class="n">userColor</span><span class="p">,</span> <span class="n">userNickname</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The implementation of the interface looks something like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">HttpContextUserContext</span> <span class="p">:</span> <span class="n">UserContext</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">HttpContext</span> <span class="n">context</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="nf">HttpContextUserContext</span><span class="p">(</span><span class="n">HttpContext</span> <span class="n">context</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="n">context</span> <span class="p">=</span> <span class="n">context</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">Id</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">get</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>          <span class="k">return</span> <span class="p">(</span><span class="kt">string</span><span class="p">)</span><span class="n">context</span><span class="p">.</span><span class="n">Session</span><span class="p">[</span><span class="s">&quot;currentUserId&quot;</span><span class="p">];</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">FavoriteColor</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">get</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>          <span class="k">return</span> <span class="p">(</span><span class="kt">string</span><span class="p">)</span><span class="n">context</span><span class="p">.</span><span class="n">Session</span><span class="p">[</span><span class="s">&quot;favoriteColor&quot;</span><span class="p">];</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">NickName</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">get</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>          <span class="k">return</span> <span class="p">(</span><span class="kt">string</span><span class="p">)</span><span class="n">context</span><span class="p">.</span><span class="n">Session</span><span class="p">[</span><span class="s">&quot;nick&quot;</span><span class="p">];</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It might seem like a lot of code, but the flexibility is definitely worth the small overhead of adding this.</p>
+
+<h3>HttpContextBase</h3>
+
+<p>The main problem with the original implementation of the HttpContext class is that it is not based on an interface nor an abstract base class. This means that reusing code that depends on HttpContext can be hard, and testing equally hard. Microsoft realized this problen when they released the MVC framework and added a class called HttpContextBase. The funny thing is that HttpContext does not inherit from HttpContextBase as that would be a breaking change, but it has the exact same API.</p>
+
+<p>Thus, our problem from above with the static dependency could be solved as the following stepwise refactoring:</p>
+
+<ul>
+<li>Ensure that HttpContext is injected through the constructor or the method in question and ensure that HttpContext.Current is passed in as that value.</li>
+<li>Replace HttpContext in the constructor or method with HttpContextBase and replace HttpContext.Current with new HttpContextWrapper(HttpContext.Current)</li>
+</ul>
+
+
+<p>And our example would then look something like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">DoSomeCoreStuff</span><span class="p">(</span><span class="n">HttpContextBase</span> <span class="n">context</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">var</span> <span class="n">userId</span> <span class="p">=</span> <span class="p">(</span><span class="kt">string</span><span class="p">)</span><span class="n">context</span><span class="p">.</span><span class="n">Session</span><span class="p">[</span><span class="s">&quot;userId&quot;</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">DoSomeMoreCoreStuff</span><span class="p">(</span><span class="n">userId</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This might seem a bit overkill, but we are now able to use our method with a different implementation of HttpContextBase for reuse and testing purposes.</p>
+
+<p>When doing a different implementation you should know that every base implementation in HttpContextBase just throws a NotImplementedException. Thus, you will need to override that different bits in your test and reuse implementations depending on what you really require. Alternatively, there are a couple of generic open source implementations available if you want to pull in that extra dependency.</p>
+
+<p>In general I would recommend using one of the first approaches, but if you are working with a fairly large system that adheres to the big ball of mud &ldquo;design&rdquo; antipattern this might be difficult. Maybe it is just to difficult to discern any meaningful relation between the different data retrieved from HttpContext, and with this approach you can at least start writing some tests to get control back of the code.</p>
+
+<p>As I mentioned earlier this is just one simple example as HttpContext have a lot of data and functionality built in.s</p>
 ]]></content>
   </entry>
   
@@ -59,8 +616,159 @@ Often in an ASP.NET WebForms application you will get up with unmanageable depen
     <link href="http://elgsdyret.github.io/blog/2013/03/24/playing-with-dynamic-keyword/"/>
     <updated>2013-03-24T09:28:00+01:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/03/24/playing-with-dynamic-keyword</id>
-    <content type="html"><![CDATA[<div class='post'>
-<br /><br />I have not yet had a chance to play around with the dynamic features that was introduced with .NET 4, probably because I have yet to find a good scenario for using it and probably because I am mostly stuck on doing work on the .NET 3.5.<br /><br />Fortunately, I am currently working on a new REST API build in Nancy and the dynamic features of .NET 4 seems perfect to implement HTTP PATCH.<br /><br />Our way of thinking is that it is hard to model with traditional classes as not all properties are necessarily included. One solution could be to make them all nullable and use that, but then it would not be possible for us to distinguish between a property simply not in the body of the request and a property the consumer deliberately set to null.<br /><br />My first test was like this:<br /><br /><pre class="brush: c#">public void DynamicValueNoneSet()<br />{<br />  dynamic a = new ExpandoObject();   <br />  string name = a.Name;   <br />}<br /></pre><br />This showed me that I would get a RunTimeBinderException if a given value was not available (yes I could also have read the documentation, but how fun is that?).  <br />My next attempt included this little implementation of DynamicObject - to avoid getting the exception when using:<br /><br /><script type="syntaxhighlighter" class="brush: c#">&lt;![CDATA[ public class NullDynamic : DynamicObject {   private readonly IDictionary<string, object> expando;    public NullDynamic()   {     expando = new ExpandoObject();   }    public override bool TryGetMember(GetMemberBinder binder, out object result)   {     expando.TryGetValue(binder.Name, out result);     return true;      }    public override bool TrySetMember(SetMemberBinder binder, object value)   {     expando[binder.Name] = value;     return true;   } }]]&gt;</script><br />Since the declared goal is to be able to distinguish between a value not being there and deliberately being set to null, this would not work either.<br />Actually what I found myself thinking was that I missed the &#8220;undefined&#8221; value from javascript, or some other way to express that something was not there, built into the language.<br /><br />Trying to avoid going to such drastic measure I came up with this: <br /><br /><script type="syntaxhighlighter" class="brush: c#">&lt;![CDATA[ public class Dynosaur: DynamicObject {   private readonly IDictionary<string, object> expando;    public Dynosaur()   {    expando = new ExpandoObject();   }    public override bool TryGetMember(GetMemberBinder binder, out object result)   {    return expando.TryGetValue(binder.Name, out result);      }    public override bool TrySetMember(SetMemberBinder binder, object value)   {    expando[binder.Name] = value;    return true;      }    public bool HasValue(string name)   {    return expando.Keys.Contains(name);   } } }]]&gt;</script><br />Maybe no the most elegant solution, but I does allow me to write code like: <br /><br /><pre class="brush: c#">public void PrintName(dynamic a)<br />{<br />  if (!a.HasValue("Name"))<br />  {<br />    a.Name = "dog";<br />  }<br />  Console.WriteLine("the name is: " + a.Name);<br />}<br /></pre><br />Given that &#8220;a&#8221; is actually an instance of my Dynosaur class. I would not say that I am entirely satisfied with this implementation, but I actually think that this is as far as the dynamic features of C# will take me.<br /><br />Any good ideas out there? I am thinking there must be other people that has played around with this and has come up some crazy dynamic stuff in C#.<br /><br /><br /></div>
+    <content type="html"><![CDATA[<p>I have not yet had a chance to play around with the dynamic features that was introduced with .NET 4, probably because I have yet to find a good scenario for using it and probably because I am mostly stuck on doing work on the .NET 3.5.</p>
+
+<p>Fortunately, I am currently working on a new REST API build in Nancy and the dynamic features of .NET 4 seems perfect to implement HTTP PATCH.</p>
+
+<p>Our way of thinking is that it is hard to model with traditional classes as not all properties are necessarily included. One solution could be to make them all nullable and use that, but then it would not be possible for us to distinguish between a property simply not in the body of the request and a property the consumer deliberately set to null.</p>
+
+<p>My first test was like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">DynamicValueNoneSet</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">dynamic</span> <span class="n">a</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ExpandoObject</span><span class="p">();</span>
+</span><span class='line'>  <span class="kt">string</span> <span class="n">name</span> <span class="p">=</span> <span class="n">a</span><span class="p">.</span><span class="n">Name</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This showed me that I would get a RunTimeBinderException if a given value was not available (yes I could also have read the documentation, but how much fun is that?).</p>
+
+<p>My next attempt included this little implementation of DynamicObject &ndash; to avoid getting the exception when using it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">NullDynamic</span> <span class="p">:</span> <span class="n">DynamicObject</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">private</span> <span class="k">readonly</span> <span class="n">IDictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;</span> <span class="n">expando</span><span class="p">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">public</span> <span class="nf">NullDynamic</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ExpandoObject</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">TryGetMember</span><span class="p">(</span><span class="n">GetMemberBinder</span> <span class="n">binder</span><span class="p">,</span> <span class="k">out</span> <span class="kt">object</span> <span class="n">result</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="n">binder</span><span class="p">.</span><span class="n">Name</span><span class="p">,</span> <span class="k">out</span> <span class="n">result</span><span class="p">);</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">TrySetMember</span><span class="p">(</span><span class="n">SetMemberBinder</span> <span class="n">binder</span><span class="p">,</span> <span class="kt">object</span> <span class="k">value</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span><span class="p">[</span><span class="n">binder</span><span class="p">.</span><span class="n">Name</span><span class="p">]</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Since the declared goal is to be able to distinguish between a value not being there and deliberately being set to null, this would not work either.</p>
+
+<p>Actually what I found myself thinking was that I missed the &ldquo;undefined&rdquo; value from javascript, or some other way to express that something was not there, built into the language.</p>
+
+<p>Trying to avoid going to such drastic measure I came up with this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">Dynosaur</span><span class="p">:</span> <span class="n">DynamicObject</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">private</span> <span class="k">readonly</span> <span class="n">IDictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;</span> <span class="n">expando</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="nf">Dynosaur</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ExpandoObject</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">TryGetMember</span><span class="p">(</span><span class="n">GetMemberBinder</span> <span class="n">binder</span><span class="p">,</span> <span class="k">out</span> <span class="kt">object</span> <span class="n">result</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">expando</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="n">binder</span><span class="p">.</span><span class="n">Name</span><span class="p">,</span> <span class="k">out</span> <span class="n">result</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">TrySetMember</span><span class="p">(</span><span class="n">SetMemberBinder</span> <span class="n">binder</span><span class="p">,</span> <span class="kt">object</span> <span class="k">value</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span><span class="p">[</span><span class="n">binder</span><span class="p">.</span><span class="n">Name</span><span class="p">]</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">bool</span> <span class="nf">HasValue</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">expando</span><span class="p">.</span><span class="n">Keys</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Maybe not the most elegant solution, but I does allow me to write code like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">PrintName</span><span class="p">(</span><span class="kt">dynamic</span> <span class="n">a</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(!</span><span class="n">a</span><span class="p">.</span><span class="n">HasValue</span><span class="p">(</span><span class="s">&quot;Name&quot;</span><span class="p">))</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">a</span><span class="p">.</span><span class="n">Name</span> <span class="p">=</span> <span class="s">&quot;dog&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&quot;the name is: &quot;</span> <span class="p">+</span> <span class="n">a</span><span class="p">.</span><span class="n">Name</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Given that &ldquo;a&rdquo; is actually an instance of my Dynosaur class. I would not say that I am entirely satisfied with this implementation, but I actually think that this is as far as the dynamic features of C# will take me.</p>
+
+<p>Any good ideas out there? I am thinking there must be other people that has played around with this and has come up some crazy dynamic stuff in C#.</p>
 ]]></content>
   </entry>
   
@@ -69,8 +777,22 @@ Often in an ASP.NET WebForms application you will get up with unmanageable depen
     <link href="http://elgsdyret.github.io/blog/2013/03/16/devops-days-london-2013/"/>
     <updated>2013-03-16T21:38:00+01:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/03/16/devops-days-london-2013</id>
-    <content type="html"><![CDATA[<div class='post'>
-<br /><br />The devops &#8220;thingy&#8221; is only a few years old. I use the word &#8220;thingy&#8221; (if it can be considered a word) as it is seemingly hard to describe precisely what exactly devops is.<br /><br />I am new to devops, but went to devops days in London anyways. This is my attempt to clear my head of some of the thoughts, ideas, and impressions that have been rambling around my head for these two days, and probably will for quite some time.<br /><br />I had a blast of a time in London listening to the different speakers and participating in discussions, but I must admit that I am even more confused now than I was before coming. Nevertheless, I did get some impressions:<br /><br />1.) Getting back to my opening sentence, the notion that has struck me as being one of the most important is that devops might not be meant to be described precisely, but is a continuous movement towards a better way of delivering value for the end customer (ups&#8230; I just did my own attempt at a description).<br /><br />I have heard several other suggestions during these days and it seems that each individual has his own definition of devops. I had the pleasure of talking with Patrick Debois over a beer about this and he hinted that this was actually on purpose. Maybe the journey is more important than the goal and a large part of the value comes from defining what devops means to you? What is your definition?<br /><br />2.) You can get some value with tools and processes, but if you do not get the people aboard you will not get to the end goal (which seems to be as hard to define as the definition).<br /><br />3.) Changing culture seems to be most powerful pattern for doing devops and maybe the only really relevant one.<br /><br />4.) There are a zillion of tools out there that I had never heard about and I am going to try out. Seems like everybody is using (have used at some point) logstash, graphite and so forth.<br /><br />5.) The people that do devops are awesome and passionate about it, which makes me want to learn more and participate in more devops days (Copenhagen next year anyone?)<br /><br />Cheers!<br /><br /></div>
+    <content type="html"><![CDATA[<p>The devops &ldquo;thingy&rdquo; is only a few years old. I use the word &ldquo;thingy&rdquo; (if it can be considered a word) as it is seemingly hard to describe precisely what exactly devops is.</p>
+
+<p>I am new to devops, but went to devops days in London anyways. This is my attempt to clear my head of some of the thoughts, ideas, and impressions that have been rambling around my head for these two days, and probably will for quite some time.</p>
+
+<p>I had a blast of a time in London listening to the different speakers and participating in discussions, but I must admit that I am even more confused now than I was before coming. Nevertheless, I did get some impressions:</p>
+
+<ol>
+<li>Getting back to my opening sentence, the notion that has struck me as being one of the most important is that devops might not be meant to be described precisely, but is a continuous movement towards a better way of delivering value for the end customer (ups&hellip; I just did my own attempt at a description). I have heard several other suggestions during these days and it seems that each individual has his own definition of devops. I had the pleasure of talking with Patrick Debois over a beer about this and he hinted that this was actually on purpose. Maybe the journey is more important than the goal and a large part of the value comes from defining what devops means to you? What is your definition?</li>
+<li>You can get some value with tools and processes, but if you do not get the people aboard you will not get to the end goal (which seems to be as hard to define as the definition).</li>
+<li>Changing culture seems to be most powerful pattern for doing devops and maybe the only really relevant one.</li>
+<li>There are a zillion of tools out there that I had never heard about and I am going to try out. Seems like everybody is using (have used at some point) logstash, graphite and so forth.</li>
+<li>The people that do devops are awesome and passionate about it, which makes me want to learn more and participate in more devops days (Copenhagen next year anyone?)</li>
+</ol>
+
+
+<p>Cheers!</p>
 ]]></content>
   </entry>
   
@@ -79,8 +801,93 @@ Often in an ASP.NET WebForms application you will get up with unmanageable depen
     <link href="http://elgsdyret.github.io/blog/2012/11/18/polyglot-javascript/"/>
     <updated>2012-11-18T13:14:00+01:00</updated>
     <id>http://elgsdyret.github.io/blog/2012/11/18/polyglot-javascript</id>
-    <content type="html"><![CDATA[<div class='post'>
-<br /><div>Over time&nbsp;JavaScript&nbsp;has gained a lot of traction as it is the default option for running code in the browser, and it has become a valid server option with the rise of node. This progress has largely been fueled by an arms race between the major browser vendor&nbsp;continuously&nbsp;trying to wield the fastest environment for running&nbsp;JavaScript.</div><div><br /></div><div>Thus, as&nbsp;JavaScript&nbsp;can be run everywhere and with the notion that this language like any other has its rough spots (partly due to the history of it&#8217;s creation, a notion supported by the famous book by Douglas Crockford &#8220;JavaScript the Good Parts&#8221;) it is no wonder that alternatives that compiles to&nbsp;JavaScript&nbsp;have been popping up for a while.</div><div><br /></div><div>Microsoft recently released TypeScript to join the efforts of Google with their Dart language to define the future of code running in the browser. Simultaneously, initiatives like CoffeeScript (by J Ashkenas) has gained some traction and the community is working (fighting) to get the next version of JavaScript ready. Another option that I cannot leave out is ClojureScript a version of the brilliant Clojure language that compiles to JavaScript.</div><div><br /></div><div>The options are abundant each with their own goals. Some like TypeScript and Dart aim to bring some form of static typing to the table (I do not specifically want this in JavaScript, but I still welcome these initiatives), while a language such as CoffeeScript aim to improve the syntax and hide some of the bad parts of JavaScript.</div><div><br /></div><div>J. Ashkenas (of BackBone, Underscore and CoffeeScript fame) maintains a quite comprehensive list (<a href="https://github.com/jashkenas/coffee-script/wiki/List-of-languages-that-compile-to-JS">https://github.com/jashkenas/coffee-script/wiki/List-of-languages-that-compile-to-JS</a>), and for a good read on the different aspect of languages compiling to JavaScript consider:&nbsp;<a href="http://buildnewgames.com/compiling-to-javascript/">http://buildnewgames.com/compiling-to-javascript/</a>.</div><div><br /></div><div>Indeed it is a very good time to be a web (Node) programmer. Some notable JavaScript engineers (Such as N. Zakas) claim that time would be better spent improving JavaScript and teaching it than building alternatives, but I believe that every new language will bring inspiration to developers and to the future of JavaScript.</div><div><br /></div><div>All of the languages compiling to JavaScript has a shared number of cons:</div><div><ol><li>Build process: Because they actually compile to JavaScript. Any serious JavaScript project will have a build process anyways, combining files, minifying, obfuscating, possibly running&nbsp;test suites&nbsp;automatically, and thus I do not see a big problem with this.</li><li>Debugging: Since what you are sending to the browser is JavaScript your debugging will also be in JavaScript. This means that unless you can get source map to work (<a href="http://addyosmani.com/blog/the-breakpoint-episode-3-source-maps-shortcut-secrets-and-jsrun/">http://addyosmani.com/blog/the-breakpoint-episode-3-source-maps-shortcut-secrets-and-jsrun/</a>)&nbsp;, to use one of these languages you need to be fluent in JavaScript.&nbsp;Definitely&nbsp; a challenge for some, but for experienced JavaScript developers this might not be a big problem (on a&nbsp;side note&nbsp;I believe that CoffeeScript for instance generates quite nice JavaScript).</li></ol></div><h3><br />CoffeeScript</h3><div>I have spend some energy on CoffeeScript as an alternative (or in addition to!) to JavaScript on my projects. I believe CoffeeScript brings readability and as a consequence of this also maintainability to a project. I cannot stress enough how important readability is for any piece of code and as such doing CoffeeScript to improve that becomes a very intriguing option.</div><div><br />One of the features about CoffeeScript that i most often hear complaints against is meaningful indentation, and it was also something I personally was not sure I would like. Nevertheless, the more I think about it, I am for using the indentation, as this is the way I consume code more than it is the braces. Why should the compiler use a different mechanism than me for interpreting code? Is it not easier to maintain code where your understand the code the same way the compiler does?<br /><br />Here is just a few examples of features I believe adds&nbsp;readability&nbsp;to code:<br /><br /></div><div>Function syntax:<br /><pre class="brush: javascript">var a = function() { return x*x; };</pre>becomes: <br /><pre class="brush: coffeescript">a = -&gt; x*x</pre><br />This especially becomes valuable if you like me use a lot of underscore.js functionality:<br /><pre class="brush: javascript">_([1, 2, 3]).each(function(num){ alert(num); });</pre>becomes: <br /><pre class="brush: coffeescript">_([1, 2, 3]).each((num) -&gt; alert(num));</pre><br />Default values.<br /><pre class="brush: javascript">function(a, b) { <br />   if (!b) { <br />     b = 'b'; <br />   } <br />   console.log(a, b); <br />}<br /></pre><br />In CoffeeScript you could do: <br /><pre class="brush: coffeescript">(a, b = 'b') -&gt; console.log(a, b)</pre><br />Basically, CoffeeScript is full of features that reduces the cluttering of your code removing unnecessary noise and thereby improving readability.<br /><br />I could whip up a ton more examples, but instead if will just point you to&nbsp;<a href="http://coffeescript.org/">http://coffeescript.org/</a>&nbsp;where you can read more if your interested. No need for me to copying all the examples :-D<br /><br />Recently, I converted a JavaScript project to CoffeeScript and I litterally ended up removing one third of all the characters just in the conversion. Afterwards, I spends some time using some of the nice features such as default values for parameters and splats, and consequently was able to reduce the amount of code even more.<br /><br />It is indeed a good time to be a polyglot JavaScript developer and I cheer&nbsp;every single time&nbsp;a new language can compile to JavaScript - bring it on!<br /><br /><br /></div><div><br /></div></div>
+    <content type="html"><![CDATA[<p>Over time JavaScript has gained a lot of traction as it is the default option for running code in the browser, and it has become a valid server option with the rise of node. This progress has largely been fueled by an arms race between the major browser vendor continuously trying to wield the fastest environment for running JavaScript.</p>
+
+<p>Thus, as JavaScript can be run everywhere and with the notion that this language like any other has its rough spots (partly due to the history of it&rsquo;s creation, a notion supported by the famous book by Douglas Crockford &ldquo;JavaScript the Good Parts&rdquo;) it is no wonder that alternatives that compiles to JavaScript have been popping up for a while.</p>
+
+<p>Microsoft recently released TypeScript to join the efforts of Google with their Dart language to define the future of code running in the browser. Simultaneously, initiatives like CoffeeScript (by J Ashkenas) has gained some traction and the community is working (fighting) to get the next version of JavaScript ready. Another option that I cannot leave out is ClojureScript a version of the brilliant Clojure language that compiles to JavaScript.</p>
+
+<p>The options are abundant each with their own goals. Some like TypeScript and Dart aim to bring some form of static typing to the table (I do not specifically want this in JavaScript, but I still welcome these initiatives), while a language such as CoffeeScript aim to improve the syntax and hide some of the bad parts of JavaScript.</p>
+
+<p>J Ashkenas (of BackBone, Underscore and CoffeeScript fame) maintains a quite comprehensive list (<a href="https://github.com/jashkenas/coffee-script/wiki/List-of-languages-that-compile-to-JS">https://github.com/jashkenas/coffee-script/wiki/List-of-languages-that-compile-to-JS</a>), and for a good read on the different aspect of languages compiling to JavaScript consider: <a href="http://buildnewgames.com/compiling-to-javascript/">http://buildnewgames.com/compiling-to-javascript/</a></p>
+
+<p>Indeed it is a very good time to be a web (Node) programmer. Some notable JavaScript engineers (Such as N. Zakas) claim that time would be better spent improving JavaScript and teaching it than building alternatives, but I believe that every new language will bring inspiration to developers and to the future of JavaScript.</p>
+
+<p>All of the languages compiling to JavaScript has a shared number of cons:</p>
+
+<ul>
+<li>Build process: Because they actually compile to JavaScript. Any serious JavaScript project will have a build process anyways, combining files, minifying, obfuscating, possibly running test suites automatically, and thus I do not see a big problem with this.</li>
+<li>Debugging: Since what you are sending to the browser is JavaScript your debugging will also be in JavaScript. This means that unless you can get source map to work <a href="http://addyosmani.com/blog/the-breakpoint-episode-3-source-maps-shortcut-secrets-and-jsrun/">http://addyosmani.com/blog/the-breakpoint-episode-3-source-maps-shortcut-secrets-and-jsrun</a>, to use one of these languages you need to be fluent in JavaScript. Definitely, a challenge for some, but for experienced JavaScript developers this might not be a big problem (on a side note I believe that CoffeeScript for instance generates quite nice JavaScript).</li>
+</ul>
+
+
+<h3>CoffeeScript</h3>
+
+<p>I have spend some energy on CoffeeScript as an alternative (or in addition to!) to JavaScript on my projects. I believe CoffeeScript brings readability and as a consequence of this also maintainability to a project. I cannot stress enough how important readability is for any piece of code and as such doing CoffeeScript to improve that becomes a very intriguing option.</p>
+
+<p>One of the features about CoffeeScript that i most often hear complaints against is meaningful indentation, and it was also something I personally was not sure I would like. Nevertheless, the more I think about it, I am for using the indentation, as this is the way I consume code more than it is the braces. Why should the compiler use a different mechanism than me for interpreting code? Is it not easier to maintain code where your understand the code the same way the compiler does?</p>
+
+<p>Here is just a few examples of features I believe adds readability to code:</p>
+
+<p>Function syntax:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="o">*</span><span class="nx">x</span><span class="p">;</span> <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">a = </span><span class="nf">-&gt;</span> <span class="nx">x</span><span class="o">*</span><span class="nx">x</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This especially becomes valuable if you like me use a lot of underscore.js functionality:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">_</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">){</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">num</span><span class="p">);</span> <span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nx">_</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]).</span><span class="nx">each</span><span class="p">(</span><span class="nf">(num) -&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">num</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Default values:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">b</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In CoffeeScript you could do:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nf">(a, b = &#39;b&#39;) -&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Basically, CoffeeScript is full of features that reduces the cluttering of your code removing unnecessary noise and thereby improving readability.</p>
+
+<p>I could whip up a ton more examples, but instead if will just point you to <a href="http://coffeescript.org/">http://coffeescript.org/</a> where you can read more if your interested. No need for me to copying all the examples :-D</p>
+
+<p>Recently, I converted a JavaScript project to CoffeeScript and I litterally ended up removing one third of all the characters just in the conversion. Afterwards, I spends some time using some of the nice features such as default values for parameters and splats, and consequently was able to reduce the amount of code even more.</p>
+
+<p>It is indeed a good time to be a polyglot JavaScript developer and I cheer every single time a new language can compile to JavaScript &ndash; bring it on!</p>
 ]]></content>
   </entry>
   

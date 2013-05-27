@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Go | Developer's Perception]]></title>
   <link href="http://elgsdyret.github.io/blog/categories/go/atom.xml" rel="self"/>
   <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-05-27T19:44:42+02:00</updated>
+  <updated>2013-05-27T20:58:10+02:00</updated>
   <id>http://elgsdyret.github.io/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
@@ -18,9 +18,188 @@
     <link href="http://elgsdyret.github.io/blog/2013/05/02/getting-started-with-go/"/>
     <updated>2013-05-02T16:08:00+02:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/05/02/getting-started-with-go</id>
-    <content type="html"><![CDATA[<div class='post'>
-<br />In late 2007 Google started an open source initiative to develop a new programming language named Go. The goal of the language was to make it as efficient as statically compiled languages, but as easy to use as dynamic languages<br /><br />Furthermore, the language aims to solve the challenges of concurrent programming in an intuitive way. This makes a lot of sense as computers are getting more and more CPUs with more and more cores. A lot of current programming initiatives are actually focused on enabling us to easier write concurrent programs.<br /><br />Node as an example does have some tools for concurrent programs, but its main focus by using the event loop is actually an approach of strictly single threaded programming, instead focusing on reducing the blocking IO. There has been a lot of discussions going around with people claiming this approach to be either ingenious or insane. My personal experience is that it is possible to write very efficient servers in Node working with the single threaded model.<br /><br />In contrast to Node, Microsoft released the async and await keywords in C# that makes implementing asynchronous code in C# a lot easier - simply by taking away most of the work of writing such code, but it does not change how the programming model works.<br /><br />As a language Go is mostly related to the C family of languages in my opinion. Both with regards to features and syntax it more or less feels like a cleaned up version of JAVA or C# with some cruft removed and some parts made explicit that is implicit in those language. Not surprisingly Go seems to go in the opposite direction of Node (like most languages do) and has a concurrent model at the forefront of the language focus. The intriguing thing is that Go manages to this in a fairly elegant way.<br /><br />What Go promises is speed close to that of C and C++, a slim and elegant language that is as easy to use as Node (it is as easy to get a simple http server running), and powerful features for doing concurrent programming.<br /><div><br /></div><div><h3>Initial thoughts</h3><div>With my usual curiosity I have followed the development of the language from the sideline for a while, but when I saw a very impressive demonstration of building a chat server in Go at the Oredev conference last year I decided I had to take a closer look and do some development on my own. This is my initial experiments with it and thoughts about the language.</div><div><br /></div><div>Like I mentioned above the language feels like a slim and more elegant version of the languages in the C family. This meant it was fairly easy for me to get started and following the great online tutorial (<a href="http://tour.golang.org/#1">http://tour.golang.org/#1</a>) I was quickly able to produce code.</div></div><div><br /></div><h4>Clean Code</h4><div><div>I cannot recall how many hours I have wasted looking at code where half of the lines are pure cruft. Functions that are never called, variables that are never used, and so forth. Therefore, I am really excited about the way the Go compiler handles this.</div><div><br /></div><div>To illustrate this we can do a very small example. I will not go over the details (read that tutorial!), but the key is that 2 integers 'a' and 'b' are declared and assigned.</div><div><br /></div><div><pre>package main<br /><br />import (<br />  "fmt"<br />)<br /><br />func main() {<br />  a := 1<br />  b := 2<br />  fmt.Println(a)<br />}<br /></pre><br /></div><div>This example will simply not compile! The integer 'b' is never used for anything and thus should be removed. The following will compile:</div><div><br /></div><div><pre>package main<br /><br />import (<br />  "fmt"<br />)<br /><br />func main() {<br />  a := 1<br />  fmt.Println(a)<br />}<br /></pre><br /></div><div>I have seen some people argue that this is actually annoying when you are experimenting with the code as stuff might not get used in the beginning while developing and it then has to be commented out. I believe the pros clearly outweighs the cons:</div><div><br /><ul><li>The production code is cleaner.</li><li>It seems to me that if you are adding code that is not used yet and compiling you might be in a YAGNI situation? Do not write the code until you need it.</li><li>The workaround is dead simple - just comment it out. Then if it turns out you are not going to need it someone will eventually delete that comment.&nbsp;</li></ul></div></div><br /><h4>Interfaces</h4>Go does not have classes. It has structs and functions can be added to them. As such there is no inheritance, which means as a language Go favors composition over inheritance since the later is not even possible. I really like this design as composition is to be preferred over inheritance in most scenarios in my opinion (99%?) even in a language that support inheritance. This also means that the way interfaces are implemented are different from for instance C#.<br /><br />Interfaces are implemented implicitly, which in my mind almost feels like duke typing (except checked at compile time). Thus, if an object satisfies an interface (has the required functions) it will compile. This means that interfaces can easily be added for existing code even the main library.<br /><br />Imagine what I could have done with ASP.Net HttpContext if it worked this way in C# (check my last blog post). Invent a new interface matching the few bits of HttpContext that was being used and simply pass HttpContext along. A lot more elegant that what can be done in C#.<br /><br /><br /><h4>Http Server</h4>To be honest I have not yet worked very much with Go as an Http Server, but since it is one of the things I usually end up using extensively in a language I thought I would include an example anyways.<br /><pre><br />package main<br /><br />import (<br />    "fmt"<br />    "net/http"<br />)<br /><br />type User struct {<br />    Name string<br />    Password string<br />    FavoriteColor string<br />}<br /><br />func (u User) ServeHTTP(w http.ResponseWriter, r *http.Request) {<br />    fmt.Fprintf(w, "%s, %s, %s", u.Name, u.Password, u.FavoriteColor)<br />}<br /><br />func main() { <br />    http.Handle("/user", &User{"MyUserName", "OhSoSecret", "green"})<br />    http.ListenAndServe("localhost:4000", nil)<br />}<br /></pre>I do not think that is too bad. Almost simpler than doing the same in Node, but still to early for me to say how easy it will be to implement a realistic server. <br /><br /><br /><h4>Concurrency</h4>One of the most important features of Go is the way you write concurrent code. It consists of 2 main components being goroutines and channels. A goroutine is a lightweight thread and a channel is a way to communicate between threads. </br><br />A fairly common scenario will be goroutine(s) doing some calculation (or reading data) and another goroutine that then does some further manipulation like in this example.  <pre><br />package main<br /><br />import (<br />  "fmt"<br />)<br /><br />func getdata(resCh chan<- int) {<br />  i := 0<br />  for {<br />    resCh <- i  <br />    i++         <br />  }<br />}<br /><br />func printer(resCh <-chan int) {<br />  for {<br />    res := <- resCh  <br />    fmt.Println(res)         <br />  }<br />}<br /><br />func main() {<br />  resCh := make(chan int, 100)<br />    <br />  go getdata(resCh)<br />  go printer(resCh)<br /><br />  var input string<br />  fmt.Scanln(&input)<br />}<br /></pre>A dumb example I agree, as there are easier ways of printing sequential integers to the console. The point was to showcase the way functions can be started in goroutines and use channels to communicate. <br /><br />I find this a quite elegant way of doing concurrent programming, and if you want to see a slightly less contrived example take the tutorial of Go and solve the last exercise (you can find mine at my github account: <a href="https://github.com/elgsdyret/go_playground/blob/master/fetcher_2.go">https://github.com/elgsdyret/go_playground/blob/master/fetcher_2.go</a>).  </br></br></br><h4>Wrap Up</h4> With the limited experiments I have done so far I think Go has a lot going for it. Which is also why more and more companies are showing of stuff implemented in Go. For instance Mozilla just released a beta on Heka, a quite interesting project, which is written in Go (<a href="http://blog.mozilla.org/services/2013/04/30/introducing-heka/">http://blog.mozilla.org/services/2013/04/30/introducing-heka/</a>). </br></br>Next step is to play around with more areas of Go. How to write unit tests? How hard is it to write more advanced web servers?     </div>
+    <content type="html"><![CDATA[<p>In late 2007 Google started an open source initiative to develop a new programming language named Go. The goal of the language was to make it as efficient as statically compiled languages, but as easy to use as dynamic languages.</p>
 
+<p>Furthermore, the language aims to solve the challenges of concurrent programming in an intuitive way. This makes a lot of sense as computers are getting more and more CPUs with more and more cores. A lot of current programming initiatives are actually focused on enabling us to easier write concurrent programs.</p>
+
+<p>Node as an example does have some tools for concurrent programs, but its main focus by using the event loop is actually an approach of strictly single threaded programming, instead focusing on reducing the blocking IO. There has been a lot of discussions going around with people claiming this approach to be either ingenious or insane. My personal experience is that it is possible to write very efficient servers in Node working with the single threaded model.</p>
+
+<p>In contrast to Node, Microsoft released the async and await keywords in C# that makes implementing asynchronous code in C# a lot easier &ndash; simply by taking away most of the work of writing such code, but it does not change how the programming model works.</p>
+
+<p>As a language Go is mostly related to the C family of languages in my opinion. Both with regards to features and syntax it more or less feels like a cleaned up version of JAVA or C# with some cruft removed and some parts made explicit that is implicit in those language. Not surprisingly Go seems to go in the opposite direction of Node (like most languages do) and has a concurrent model at the forefront of the language focus. The intriguing thing is that Go manages to this in a fairly elegant way.</p>
+
+<p>What Go promises is speed close to that of C and C++, a slim and elegant language that is as easy to use as Node (it is as easy to get a simple http server running), and powerful features for doing concurrent programming.</p>
+
+<h2>Initial thoughts</h2>
+
+<p>With my usual curiosity I have followed the development of the language from the sideline for a while, but when I saw a very impressive demonstration of building a chat server in Go at the Oredev conference last year I decided I had to take a closer look and do some development on my own. This is my initial experiments with it and thoughts about the language.</p>
+
+<p>Like I mentioned above the language feels like a slim and more elegant version of the languages in the C family. This meant it was fairly easy for me to get started and following the great online tutorial (<a href="http://tour.golang.org/#1">http://tour.golang.org/#1</a>) I was quickly able to produce code.</p>
+
+<h3>Clean Code</h3>
+
+<p>I cannot recall how many hours I have wasted looking at code where half of the lines are pure cruft. Functions that are never called, variables that are never used, and so forth. Therefore, I am really excited about the way the Go compiler handles this.</p>
+
+<p>To illustrate this we can do a very small example. I will not go over the details (read that tutorial!), but the key is that 2 integers &lsquo;a&rsquo; and &lsquo;b&rsquo; are declared and assigned.</p>
+
+<p>``` go
+package main</p>
+
+<p>import (</p>
+
+<pre><code>"fmt"
+</code></pre>
+
+<p>)</p>
+
+<p>func main() {</p>
+
+<pre><code>a := 1
+b := 2
+fmt.Println(a)
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This example will simply not compile! The integer &lsquo;b&rsquo; is never used for anything and thus should be removed. The following will compile:</p>
+
+<p>``` go
+package main</p>
+
+<p>import (</p>
+
+<pre><code>"fmt"
+</code></pre>
+
+<p>)</p>
+
+<p>func main() {</p>
+
+<pre><code>a := 1
+fmt.Println(a)
+</code></pre>
+
+<p>}
+```</p>
+
+<p>I have seen some people argue that this is actually annoying when you are experimenting with the code as stuff might not get used in the beginning while developing and it then has to be commented out. I believe the pros clearly outweighs the cons:</p>
+
+<ul>
+<li>The production code is cleaner.</li>
+<li>It seems to me that if you are adding code that is not used yet and compiling you might be in a YAGNI situation? Do not write the code until you need it.</li>
+<li>The workaround is dead simple &ndash; just comment it out. Then if it turns out you are not going to need it someone will eventually delete that comment.</li>
+</ul>
+
+
+<h3>Interfaces</h3>
+
+<p>Go does not have classes. It has structs and functions can be added to them. As such there is no inheritance, which means as a language Go favors composition over inheritance since the later is not even possible. I really like this design as composition is to be preferred over inheritance in most scenarios in my opinion (99%?) even in a language that support inheritance. This also means that the way interfaces are implemented are different from for instance C#.</p>
+
+<p>Interfaces are implemented implicitly, which in my mind almost feels like duke typing (except checked at compile time). Thus, if an object satisfies an interface (has the required functions) it will compile. This means that interfaces can easily be added for existing code even the main library.</p>
+
+<p>Imagine what I could have done with ASP.Net HttpContext if it worked this way in C# (check my last blog post). Invent a new interface matching the few bits of HttpContext that was being used and simply pass HttpContext along. A lot more elegant that what can be done in C#.</p>
+
+<h3>Http Server</h3>
+
+<p>To be honest I have not yet worked very much with Go as an Http Server, but since it is one of the things I usually end up using extensively in a language I thought I would include an example anyways.</p>
+
+<p>``` go
+package main</p>
+
+<p>import (</p>
+
+<pre><code>"fmt"
+"net/http"
+</code></pre>
+
+<p>)</p>
+
+<p>type User struct {</p>
+
+<pre><code>Name string
+Password string
+FavoriteColor string
+</code></pre>
+
+<p>}</p>
+
+<p>func (u User) ServeHTTP(w http.ResponseWriter, r *http.Request) {</p>
+
+<pre><code>fmt.Fprintf(w, "%s, %s, %s", u.Name, u.Password, u.FavoriteColor)
+</code></pre>
+
+<p>}</p>
+
+<p>func main() {</p>
+
+<pre><code>http.Handle("/user", &amp;User{"MyUserName", "OhSoSecret", "green"})
+http.ListenAndServe("localhost:4000", nil)
+</code></pre>
+
+<p>}
+```</p>
+
+<p>I do not think that is too bad. Almost simpler than doing the same in Node, but still to early for me to say how easy it will be to implement a realistic server.</p>
+
+<h3>Concurrency</h3>
+
+<p>One of the most important features of Go is the way you write concurrent code. It consists of 2 main components being goroutines and channels. A goroutine is a lightweight thread and a channel is a way to communicate between threads.</p>
+
+<p>A fairly common scenario will be goroutine(s) doing some calculation (or reading data) and another goroutine that then does some further manipulation like in this example.</p>
+
+<p>``` go
+package main</p>
+
+<p>import (</p>
+
+<pre><code>"fmt"
+</code></pre>
+
+<p>)</p>
+
+<p>func getdata(resCh chan&lt;&ndash; int) {</p>
+
+<pre><code>i := 0
+for {
+    resCh &lt;- i
+    i++
+}
+</code></pre>
+
+<p>}</p>
+
+<p>func printer(resCh &lt;-chan int) {</p>
+
+<pre><code>for {
+    res := &lt;- resCh
+    fmt.Println(res)
+}
+</code></pre>
+
+<p>}</p>
+
+<p>func main() {</p>
+
+<pre><code>resCh := make(chan int, 100)
+go getdata(resCh)
+go printer(resCh)
+var input string
+fmt.Scanln(&amp;input)
+</code></pre>
+
+<p>}
+```</p>
+
+<p>A dumb example I agree, as there are easier ways of printing sequential integers to the console. The point was to showcase the way functions can be started in goroutines and use channels to communicate.</p>
+
+<p>I find this a quite elegant way of doing concurrent programming, and if you want to see a slightly less contrived example take the tutorial of Go and solve the last exercise (you can find mine at my github account: <a href="https://github.com/elgsdyret/go_playground/blob/master/fetcher_2.go">https://github.com/elgsdyret/go_playground/blob/master/fetcher_2.go</a>).</p>
+
+<h3>Wrap Up</h3>
+
+<p>With the limited experiments I have done so far I think Go has a lot going for it. Which is also why more and more companies are showing of stuff implemented in Go. For instance Mozilla just released a beta on Heka, a quite interesting project, which is written in Go (<a href="http://blog.mozilla.org/services/2013/04/30/introducing-heka/">http://blog.mozilla.org/services/2013/04/30/introducing-heka/</a>).</p>
+
+<p>Next step is to play around with more areas of Go. How to write unit tests? How hard is it to write more advanced web servers?</p>
 ]]></content>
   </entry>
   

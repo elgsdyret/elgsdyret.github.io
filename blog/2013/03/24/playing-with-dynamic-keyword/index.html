@@ -91,8 +91,159 @@
   </header>
 
 
-<div class="entry-content"><div class='post'>
-<br /><br />I have not yet had a chance to play around with the dynamic features that was introduced with .NET 4, probably because I have yet to find a good scenario for using it and probably because I am mostly stuck on doing work on the .NET 3.5.<br /><br />Fortunately, I am currently working on a new REST API build in Nancy and the dynamic features of .NET 4 seems perfect to implement HTTP PATCH.<br /><br />Our way of thinking is that it is hard to model with traditional classes as not all properties are necessarily included. One solution could be to make them all nullable and use that, but then it would not be possible for us to distinguish between a property simply not in the body of the request and a property the consumer deliberately set to null.<br /><br />My first test was like this:<br /><br /><pre class="brush: c#">public void DynamicValueNoneSet()<br />{<br />  dynamic a = new ExpandoObject();   <br />  string name = a.Name;   <br />}<br /></pre><br />This showed me that I would get a RunTimeBinderException if a given value was not available (yes I could also have read the documentation, but how fun is that?).  <br />My next attempt included this little implementation of DynamicObject - to avoid getting the exception when using:<br /><br /><script type="syntaxhighlighter" class="brush: c#"><![CDATA[ public class NullDynamic : DynamicObject {   private readonly IDictionary<string, object> expando;    public NullDynamic()   {     expando = new ExpandoObject();   }    public override bool TryGetMember(GetMemberBinder binder, out object result)   {     expando.TryGetValue(binder.Name, out result);     return true;      }    public override bool TrySetMember(SetMemberBinder binder, object value)   {     expando[binder.Name] = value;     return true;   } }]]></script><br />Since the declared goal is to be able to distinguish between a value not being there and deliberately being set to null, this would not work either.<br />Actually what I found myself thinking was that I missed the &#8220;undefined&#8221; value from javascript, or some other way to express that something was not there, built into the language.<br /><br />Trying to avoid going to such drastic measure I came up with this: <br /><br /><script type="syntaxhighlighter" class="brush: c#"><![CDATA[ public class Dynosaur: DynamicObject {   private readonly IDictionary<string, object> expando;    public Dynosaur()   {    expando = new ExpandoObject();   }    public override bool TryGetMember(GetMemberBinder binder, out object result)   {    return expando.TryGetValue(binder.Name, out result);      }    public override bool TrySetMember(SetMemberBinder binder, object value)   {    expando[binder.Name] = value;    return true;      }    public bool HasValue(string name)   {    return expando.Keys.Contains(name);   } } }]]></script><br />Maybe no the most elegant solution, but I does allow me to write code like: <br /><br /><pre class="brush: c#">public void PrintName(dynamic a)<br />{<br />  if (!a.HasValue("Name"))<br />  {<br />    a.Name = "dog";<br />  }<br />  Console.WriteLine("the name is: " + a.Name);<br />}<br /></pre><br />Given that &#8220;a&#8221; is actually an instance of my Dynosaur class. I would not say that I am entirely satisfied with this implementation, but I actually think that this is as far as the dynamic features of C# will take me.<br /><br />Any good ideas out there? I am thinking there must be other people that has played around with this and has come up some crazy dynamic stuff in C#.<br /><br /><br /></div>
+<div class="entry-content"><p>I have not yet had a chance to play around with the dynamic features that was introduced with .NET 4, probably because I have yet to find a good scenario for using it and probably because I am mostly stuck on doing work on the .NET 3.5.</p>
+
+<p>Fortunately, I am currently working on a new REST API build in Nancy and the dynamic features of .NET 4 seems perfect to implement HTTP PATCH.</p>
+
+<p>Our way of thinking is that it is hard to model with traditional classes as not all properties are necessarily included. One solution could be to make them all nullable and use that, but then it would not be possible for us to distinguish between a property simply not in the body of the request and a property the consumer deliberately set to null.</p>
+
+<p>My first test was like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">DynamicValueNoneSet</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">dynamic</span> <span class="n">a</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ExpandoObject</span><span class="p">();</span>
+</span><span class='line'>  <span class="kt">string</span> <span class="n">name</span> <span class="p">=</span> <span class="n">a</span><span class="p">.</span><span class="n">Name</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This showed me that I would get a RunTimeBinderException if a given value was not available (yes I could also have read the documentation, but how much fun is that?).</p>
+
+<p>My next attempt included this little implementation of DynamicObject &ndash; to avoid getting the exception when using it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">NullDynamic</span> <span class="p">:</span> <span class="n">DynamicObject</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">private</span> <span class="k">readonly</span> <span class="n">IDictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;</span> <span class="n">expando</span><span class="p">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">public</span> <span class="nf">NullDynamic</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ExpandoObject</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">TryGetMember</span><span class="p">(</span><span class="n">GetMemberBinder</span> <span class="n">binder</span><span class="p">,</span> <span class="k">out</span> <span class="kt">object</span> <span class="n">result</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="n">binder</span><span class="p">.</span><span class="n">Name</span><span class="p">,</span> <span class="k">out</span> <span class="n">result</span><span class="p">);</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">TrySetMember</span><span class="p">(</span><span class="n">SetMemberBinder</span> <span class="n">binder</span><span class="p">,</span> <span class="kt">object</span> <span class="k">value</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span><span class="p">[</span><span class="n">binder</span><span class="p">.</span><span class="n">Name</span><span class="p">]</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Since the declared goal is to be able to distinguish between a value not being there and deliberately being set to null, this would not work either.</p>
+
+<p>Actually what I found myself thinking was that I missed the &ldquo;undefined&rdquo; value from javascript, or some other way to express that something was not there, built into the language.</p>
+
+<p>Trying to avoid going to such drastic measure I came up with this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">Dynosaur</span><span class="p">:</span> <span class="n">DynamicObject</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">private</span> <span class="k">readonly</span> <span class="n">IDictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;</span> <span class="n">expando</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="nf">Dynosaur</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ExpandoObject</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">TryGetMember</span><span class="p">(</span><span class="n">GetMemberBinder</span> <span class="n">binder</span><span class="p">,</span> <span class="k">out</span> <span class="kt">object</span> <span class="n">result</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">expando</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="n">binder</span><span class="p">.</span><span class="n">Name</span><span class="p">,</span> <span class="k">out</span> <span class="n">result</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">TrySetMember</span><span class="p">(</span><span class="n">SetMemberBinder</span> <span class="n">binder</span><span class="p">,</span> <span class="kt">object</span> <span class="k">value</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">expando</span><span class="p">[</span><span class="n">binder</span><span class="p">.</span><span class="n">Name</span><span class="p">]</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">bool</span> <span class="nf">HasValue</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">expando</span><span class="p">.</span><span class="n">Keys</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Maybe not the most elegant solution, but I does allow me to write code like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">PrintName</span><span class="p">(</span><span class="kt">dynamic</span> <span class="n">a</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(!</span><span class="n">a</span><span class="p">.</span><span class="n">HasValue</span><span class="p">(</span><span class="s">&quot;Name&quot;</span><span class="p">))</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">a</span><span class="p">.</span><span class="n">Name</span> <span class="p">=</span> <span class="s">&quot;dog&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&quot;the name is: &quot;</span> <span class="p">+</span> <span class="n">a</span><span class="p">.</span><span class="n">Name</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Given that &ldquo;a&rdquo; is actually an instance of my Dynosaur class. I would not say that I am entirely satisfied with this implementation, but I actually think that this is as far as the dynamic features of C# will take me.</p>
+
+<p>Any good ideas out there? I am thinking there must be other people that has played around with this and has come up some crazy dynamic stuff in C#.</p>
 </div>
 
 

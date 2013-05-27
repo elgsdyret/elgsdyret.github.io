@@ -9,7 +9,7 @@
   <meta name="author" content="Nikolaj Kaare Nørskov">
 
   
-  <meta name="description" content="Over time&nbsp;JavaScript&nbsp;has gained a lot of traction as it is the default option for running code in the browser, and it has become a valid &hellip;">
+  <meta name="description" content="Over time JavaScript has gained a lot of traction as it is the default option for running code in the browser, and it has become a valid server &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -91,8 +91,93 @@
   </header>
 
 
-<div class="entry-content"><div class='post'>
-<br /><div>Over time&nbsp;JavaScript&nbsp;has gained a lot of traction as it is the default option for running code in the browser, and it has become a valid server option with the rise of node. This progress has largely been fueled by an arms race between the major browser vendor&nbsp;continuously&nbsp;trying to wield the fastest environment for running&nbsp;JavaScript.</div><div><br /></div><div>Thus, as&nbsp;JavaScript&nbsp;can be run everywhere and with the notion that this language like any other has its rough spots (partly due to the history of it&#8217;s creation, a notion supported by the famous book by Douglas Crockford &#8220;JavaScript the Good Parts&#8221;) it is no wonder that alternatives that compiles to&nbsp;JavaScript&nbsp;have been popping up for a while.</div><div><br /></div><div>Microsoft recently released TypeScript to join the efforts of Google with their Dart language to define the future of code running in the browser. Simultaneously, initiatives like CoffeeScript (by J Ashkenas) has gained some traction and the community is working (fighting) to get the next version of JavaScript ready. Another option that I cannot leave out is ClojureScript a version of the brilliant Clojure language that compiles to JavaScript.</div><div><br /></div><div>The options are abundant each with their own goals. Some like TypeScript and Dart aim to bring some form of static typing to the table (I do not specifically want this in JavaScript, but I still welcome these initiatives), while a language such as CoffeeScript aim to improve the syntax and hide some of the bad parts of JavaScript.</div><div><br /></div><div>J. Ashkenas (of BackBone, Underscore and CoffeeScript fame) maintains a quite comprehensive list (<a href="https://github.com/jashkenas/coffee-script/wiki/List-of-languages-that-compile-to-JS">https://github.com/jashkenas/coffee-script/wiki/List-of-languages-that-compile-to-JS</a>), and for a good read on the different aspect of languages compiling to JavaScript consider:&nbsp;<a href="http://buildnewgames.com/compiling-to-javascript/">http://buildnewgames.com/compiling-to-javascript/</a>.</div><div><br /></div><div>Indeed it is a very good time to be a web (Node) programmer. Some notable JavaScript engineers (Such as N. Zakas) claim that time would be better spent improving JavaScript and teaching it than building alternatives, but I believe that every new language will bring inspiration to developers and to the future of JavaScript.</div><div><br /></div><div>All of the languages compiling to JavaScript has a shared number of cons:</div><div><ol><li>Build process: Because they actually compile to JavaScript. Any serious JavaScript project will have a build process anyways, combining files, minifying, obfuscating, possibly running&nbsp;test suites&nbsp;automatically, and thus I do not see a big problem with this.</li><li>Debugging: Since what you are sending to the browser is JavaScript your debugging will also be in JavaScript. This means that unless you can get source map to work (<a href="http://addyosmani.com/blog/the-breakpoint-episode-3-source-maps-shortcut-secrets-and-jsrun/">http://addyosmani.com/blog/the-breakpoint-episode-3-source-maps-shortcut-secrets-and-jsrun/</a>)&nbsp;, to use one of these languages you need to be fluent in JavaScript.&nbsp;Definitely&nbsp; a challenge for some, but for experienced JavaScript developers this might not be a big problem (on a&nbsp;side note&nbsp;I believe that CoffeeScript for instance generates quite nice JavaScript).</li></ol></div><h3><br />CoffeeScript</h3><div>I have spend some energy on CoffeeScript as an alternative (or in addition to!) to JavaScript on my projects. I believe CoffeeScript brings readability and as a consequence of this also maintainability to a project. I cannot stress enough how important readability is for any piece of code and as such doing CoffeeScript to improve that becomes a very intriguing option.</div><div><br />One of the features about CoffeeScript that i most often hear complaints against is meaningful indentation, and it was also something I personally was not sure I would like. Nevertheless, the more I think about it, I am for using the indentation, as this is the way I consume code more than it is the braces. Why should the compiler use a different mechanism than me for interpreting code? Is it not easier to maintain code where your understand the code the same way the compiler does?<br /><br />Here is just a few examples of features I believe adds&nbsp;readability&nbsp;to code:<br /><br /></div><div>Function syntax:<br /><pre class="brush: javascript">var a = function() { return x*x; };</pre>becomes: <br /><pre class="brush: coffeescript">a = -&gt; x*x</pre><br />This especially becomes valuable if you like me use a lot of underscore.js functionality:<br /><pre class="brush: javascript">_([1, 2, 3]).each(function(num){ alert(num); });</pre>becomes: <br /><pre class="brush: coffeescript">_([1, 2, 3]).each((num) -&gt; alert(num));</pre><br />Default values.<br /><pre class="brush: javascript">function(a, b) { <br />   if (!b) { <br />     b = 'b'; <br />   } <br />   console.log(a, b); <br />}<br /></pre><br />In CoffeeScript you could do: <br /><pre class="brush: coffeescript">(a, b = 'b') -&gt; console.log(a, b)</pre><br />Basically, CoffeeScript is full of features that reduces the cluttering of your code removing unnecessary noise and thereby improving readability.<br /><br />I could whip up a ton more examples, but instead if will just point you to&nbsp;<a href="http://coffeescript.org/">http://coffeescript.org/</a>&nbsp;where you can read more if your interested. No need for me to copying all the examples :-D<br /><br />Recently, I converted a JavaScript project to CoffeeScript and I litterally ended up removing one third of all the characters just in the conversion. Afterwards, I spends some time using some of the nice features such as default values for parameters and splats, and consequently was able to reduce the amount of code even more.<br /><br />It is indeed a good time to be a polyglot JavaScript developer and I cheer&nbsp;every single time&nbsp;a new language can compile to JavaScript - bring it on!<br /><br /><br /></div><div><br /></div></div>
+<div class="entry-content"><p>Over time JavaScript has gained a lot of traction as it is the default option for running code in the browser, and it has become a valid server option with the rise of node. This progress has largely been fueled by an arms race between the major browser vendor continuously trying to wield the fastest environment for running JavaScript.</p>
+
+<p>Thus, as JavaScript can be run everywhere and with the notion that this language like any other has its rough spots (partly due to the history of it&rsquo;s creation, a notion supported by the famous book by Douglas Crockford &ldquo;JavaScript the Good Parts&rdquo;) it is no wonder that alternatives that compiles to JavaScript have been popping up for a while.</p>
+
+<p>Microsoft recently released TypeScript to join the efforts of Google with their Dart language to define the future of code running in the browser. Simultaneously, initiatives like CoffeeScript (by J Ashkenas) has gained some traction and the community is working (fighting) to get the next version of JavaScript ready. Another option that I cannot leave out is ClojureScript a version of the brilliant Clojure language that compiles to JavaScript.</p>
+
+<p>The options are abundant each with their own goals. Some like TypeScript and Dart aim to bring some form of static typing to the table (I do not specifically want this in JavaScript, but I still welcome these initiatives), while a language such as CoffeeScript aim to improve the syntax and hide some of the bad parts of JavaScript.</p>
+
+<p>J Ashkenas (of BackBone, Underscore and CoffeeScript fame) maintains a quite comprehensive list (<a href="https://github.com/jashkenas/coffee-script/wiki/List-of-languages-that-compile-to-JS">https://github.com/jashkenas/coffee-script/wiki/List-of-languages-that-compile-to-JS</a>), and for a good read on the different aspect of languages compiling to JavaScript consider: <a href="http://buildnewgames.com/compiling-to-javascript/">http://buildnewgames.com/compiling-to-javascript/</a></p>
+
+<p>Indeed it is a very good time to be a web (Node) programmer. Some notable JavaScript engineers (Such as N. Zakas) claim that time would be better spent improving JavaScript and teaching it than building alternatives, but I believe that every new language will bring inspiration to developers and to the future of JavaScript.</p>
+
+<p>All of the languages compiling to JavaScript has a shared number of cons:</p>
+
+<ul>
+<li>Build process: Because they actually compile to JavaScript. Any serious JavaScript project will have a build process anyways, combining files, minifying, obfuscating, possibly running test suites automatically, and thus I do not see a big problem with this.</li>
+<li>Debugging: Since what you are sending to the browser is JavaScript your debugging will also be in JavaScript. This means that unless you can get source map to work <a href="http://addyosmani.com/blog/the-breakpoint-episode-3-source-maps-shortcut-secrets-and-jsrun/">http://addyosmani.com/blog/the-breakpoint-episode-3-source-maps-shortcut-secrets-and-jsrun</a>, to use one of these languages you need to be fluent in JavaScript. Definitely, a challenge for some, but for experienced JavaScript developers this might not be a big problem (on a side note I believe that CoffeeScript for instance generates quite nice JavaScript).</li>
+</ul>
+
+
+<h3>CoffeeScript</h3>
+
+<p>I have spend some energy on CoffeeScript as an alternative (or in addition to!) to JavaScript on my projects. I believe CoffeeScript brings readability and as a consequence of this also maintainability to a project. I cannot stress enough how important readability is for any piece of code and as such doing CoffeeScript to improve that becomes a very intriguing option.</p>
+
+<p>One of the features about CoffeeScript that i most often hear complaints against is meaningful indentation, and it was also something I personally was not sure I would like. Nevertheless, the more I think about it, I am for using the indentation, as this is the way I consume code more than it is the braces. Why should the compiler use a different mechanism than me for interpreting code? Is it not easier to maintain code where your understand the code the same way the compiler does?</p>
+
+<p>Here is just a few examples of features I believe adds readability to code:</p>
+
+<p>Function syntax:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="o">*</span><span class="nx">x</span><span class="p">;</span> <span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">a = </span><span class="nf">-&gt;</span> <span class="nx">x</span><span class="o">*</span><span class="nx">x</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This especially becomes valuable if you like me use a lot of underscore.js functionality:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">_</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">){</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">num</span><span class="p">);</span> <span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nx">_</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]).</span><span class="nx">each</span><span class="p">(</span><span class="nf">(num) -&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">num</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Default values:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">b</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In CoffeeScript you could do:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nf">(a, b = &#39;b&#39;) -&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Basically, CoffeeScript is full of features that reduces the cluttering of your code removing unnecessary noise and thereby improving readability.</p>
+
+<p>I could whip up a ton more examples, but instead if will just point you to <a href="http://coffeescript.org/">http://coffeescript.org/</a> where you can read more if your interested. No need for me to copying all the examples :-D</p>
+
+<p>Recently, I converted a JavaScript project to CoffeeScript and I litterally ended up removing one third of all the characters just in the conversion. Afterwards, I spends some time using some of the nice features such as default values for parameters and splats, and consequently was able to reduce the amount of code even more.</p>
+
+<p>It is indeed a good time to be a polyglot JavaScript developer and I cheer every single time a new language can compile to JavaScript &ndash; bring it on!</p>
 </div>
 
 

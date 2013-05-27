@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Web Forms | Developer's Perception]]></title>
   <link href="http://elgsdyret.github.io/blog/categories/web-forms/atom.xml" rel="self"/>
   <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-05-27T19:44:42+02:00</updated>
+  <updated>2013-05-27T20:58:10+02:00</updated>
   <id>http://elgsdyret.github.io/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
@@ -18,9 +18,156 @@
     <link href="http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and/"/>
     <updated>2013-04-22T19:15:00+02:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and</id>
-    <content type="html"><![CDATA[<div class='post'>
-Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.<br /><br />This often appears in the form of code like this:<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff()  {    var userId = (string)HttpContext.Current.Session["userId"];    DoSomeMoreCoreStuff(userId); }]]&gt;</script> This code could be located anywhere in you codebase, and I have seen examples of such calls to session being done more or less inline in a string describing an SQL query. It does not necessarily have to be the Session property that is accessed though, the problem is the same if Application or other bits of the current http context is accessed this way.<br /><br />There is a number of problems with this approach.<br /><ul><li>Using a string like this is not strongly typed, which easily leads to errors. For instance the session variables might have had a different casing like "CurrentUserId".</li><li>A static reference to HttpContext.Current causes a number of problems. Firstly, it will be hard to use the code in question outside the ASP.NET stack, and secondly it will be equally hard to write meaningful tests for the code in questions.</li></ul><br /><h3>Options</h3>There are a number of ways to solve this problem leading to a much cleaner design enabling testing and reuse. All the options involves pushing the actual call to HttpContext.Current as far up in the call chain as possible, meaning in the code behind of the aspx page.<br /><br /><h4>Simple Types</h4>Given that the currentUserId in our example above is an string (or any other simple type or object that can be easily constructed) why not just use that? It can be injected through the constructor or the method in question.<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff(string userId)  {    DoSomeMoreCoreStuff(userId); }]]&gt;</script> <br /><br /><h4>Domain Specific Wrapper Class&nbsp;</h4>Often it is not as simple as a single entry that you want to retrieve from the session. Maybe there is a group of related entries that you want to use.<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff() {   var userId = (string)HttpContext.Current.Session["currentUserId"];   var userColor = (string)HttpContext.Current.Session["favoriteColor"];   var userNickname = (string)HttpContext.Current.Session["nick"];   DoSomeMoreCoreStuff(userId, userColor, userNickname); }]]&gt;</script> In that case an interface named according to the relation (for instance UserContext in our example) and injected can solve this problem. The key is to have an implementation of the interface that actually wraps Session and ensure that the string key for the entry is not copied all over the code. The wrapper implementation is instantiated at the top level of the web stack, most often in the code behind class and elsewhere we code against the interface in a inversion of control style.<br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff(UserContext userContext) {   var userId = userContext.Id;   var userColor = userContext.FavoriteColor;   var userNickname = userContext.NickName;   DoSomeMoreCoreStuff(userId, userColor, userNickname); }]]&gt;</script> The implementation of the interface looks something like this: <br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public class HttpContextUserContext : UserContext {   HttpContext context;    public HttpContextUserContext(HttpContext context)   {     this.context = context;   }    public string Id   {     get     {       return (string)context.Session["currentUserId"];     }   }    public string FavoriteColor   {     get     {       return (string)context.Session["favoriteColor"];     }   }    public string NickName   {     get     {       return (string)context.Session["nick"];     }   } }]]&gt;</script> It might seem like a lot of code, but the flexibility is definitely worth the small overhead of adding this. <br /><h4></h4><h4>HttpContextBase</h4><div><br /></div>The main problem with the original implementation of the HttpContext class is that it is not based on an interface nor an abstract base class. This means that reusing code that depends on HttpContext can be hard, and testing equally hard. Microsoft realized this problen when they released the MVC framework and added a class called HttpContextBase. The funny thing is that HttpContext does not inherit from HttpContextBase as that would be a breaking change, but it has the exact same API.<br /><br />Thus, our problem from above with the static dependency could be solved as the following stepwise refactoring:<br /><br /><ul><li>Ensure that HttpContext is injected through the constructor or the method in question and ensure that HttpContext.Current is passed in as that value.</li><li>Replace HttpContext in the constructor or method with HttpContextBase and replace HttpContext.Current with new HttpContextWrapper(HttpContext.Current)</li></ul>And our example would then look something like this: <br /><script class="brush: c#" type="syntaxhighlighter">&lt;![CDATA[public void DoSomeCoreStuff(HttpContextBase context)  {    var userId = (string)context.Session["userId"];    DoSomeMoreCoreStuff(userId); }]]&gt;</script>This might seem a bit overkill, but we are now able to use our method with a different implementation of HttpContextBase for reuse and testing purposes.<br /><br />When doing a different implementation you should know that every base implementation in HttpContextBase just throws a NotImplementedException. Thus, you will need to override that different bits in your test and reuse implementations depending on what you really require. Alternatively, there are a couple of generic open source implementations available if you want to pull in that extra dependency.<br /><br />In general I would recommend using one of the first approaches, but if you are working with a fairly large system that adheres to the big ball of mud "design" antipattern this might be difficult. Maybe it is just to difficult to discern any meaningful relation between the different data retrieved from HttpContext, and with this approach you can at least start writing some tests to get control back of the code.<br /><br />As I mentioned earlier this is just one simple example as HttpContext have a lot of data and functionality built in.<br /><div><br /><br /></div></div>
+    <content type="html"><![CDATA[<p>Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.</p>
 
+<p>This often appears in the form of code like this:</p>
+
+<p>``` c#
+public void DoSomeCoreStuff()<br/>
+{</p>
+
+<pre><code>var userId = (string)HttpContext.Current.Session["userId"];    
+DoSomeMoreCoreStuff(userId); 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This code could be located anywhere in you codebase, and I have seen examples of such calls to session being done more or less inline in a string describing an SQL query. It does not necessarily have to be the Session property that is accessed though, the problem is the same if Application or other bits of the current http context is accessed this way.</p>
+
+<p>There is a number of problems with this approach.</p>
+
+<ul>
+<li>Using a string like this is not strongly typed, which easily leads to errors. For instance the session variables might have had a different casing like &ldquo;CurrentUserId&rdquo;.</li>
+<li>A static reference to HttpContext.Current causes a number of problems. Firstly, it will be hard to use the code in question outside the ASP.NET stack, and secondly it will be equally hard to write meaningful tests for the code in questions.</li>
+</ul>
+
+
+<h2>Options</h2>
+
+<p>There are a number of ways to solve this problem leading to a much cleaner design enabling testing and reuse. All the options involves pushing the actual call to HttpContext.Current as far up in the call chain as possible, meaning in the code behind of the aspx page.</p>
+
+<h3>Simple Types</h3>
+
+<p>Given that the currentUserId in our example above is an string (or any other simple type or object that can be easily constructed) why not just use that? It can be injected through the constructor or the method in question.</p>
+
+<p>``` c#
+public void DoSomeCoreStuff(string userId)<br/>
+{</p>
+
+<pre><code>DoSomeMoreCoreStuff(userId); 
+</code></pre>
+
+<p>}
+```</p>
+
+<h3>Domain Specific Wrapper Class</h3>
+
+<p>Often it is not as simple as a single entry that you want to retrieve from the session. Maybe there is a group of related entries that you want to use.</p>
+
+<p>``` c#
+public void DoSomeCoreStuff()
+{</p>
+
+<pre><code>var userId = (string)HttpContext.Current.Session["currentUserId"];   
+var userColor = (string)HttpContext.Current.Session["favoriteColor"];   
+var userNickname = (string)HttpContext.Current.Session["nick"];   
+DoSomeMoreCoreStuff(userId, userColor, userNickname); 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>In that case an interface named according to the relation (for instance UserContext in our example) and injected can solve this problem. The key is to have an implementation of the interface that actually wraps Session and ensure that the string key for the entry is not copied all over the code. The wrapper implementation is instantiated at the top level of the web stack, most often in the code behind class and elsewhere we code against the interface in a inversion of control style.</p>
+
+<p>``` c#
+public void DoSomeCoreStuff(UserContext userContext)
+{</p>
+
+<pre><code>var userId = userContext.Id;   
+var userColor = userContext.FavoriteColor;   
+var userNickname = userContext.NickName;   
+DoSomeMoreCoreStuff(userId, userColor, userNickname); 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>The implementation of the interface looks something like this:</p>
+
+<p>``` c#
+public class HttpContextUserContext : UserContext
+{</p>
+
+<pre><code>HttpContext context;    
+
+public HttpContextUserContext(HttpContext context)   
+{     
+    this.context = context;   
+}    
+
+public string Id   
+{     
+    get     
+    {       
+        return (string)context.Session["currentUserId"];     
+    }   
+}    
+
+public string FavoriteColor   
+{     
+    get     
+    {       
+        return (string)context.Session["favoriteColor"];     
+    }   
+}    
+
+public string NickName   
+{     
+    get     
+    {       
+        return (string)context.Session["nick"];     
+    }   
+} 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>It might seem like a lot of code, but the flexibility is definitely worth the small overhead of adding this.</p>
+
+<h3>HttpContextBase</h3>
+
+<p>The main problem with the original implementation of the HttpContext class is that it is not based on an interface nor an abstract base class. This means that reusing code that depends on HttpContext can be hard, and testing equally hard. Microsoft realized this problen when they released the MVC framework and added a class called HttpContextBase. The funny thing is that HttpContext does not inherit from HttpContextBase as that would be a breaking change, but it has the exact same API.</p>
+
+<p>Thus, our problem from above with the static dependency could be solved as the following stepwise refactoring:</p>
+
+<ul>
+<li>Ensure that HttpContext is injected through the constructor or the method in question and ensure that HttpContext.Current is passed in as that value.</li>
+<li>Replace HttpContext in the constructor or method with HttpContextBase and replace HttpContext.Current with new HttpContextWrapper(HttpContext.Current)</li>
+</ul>
+
+
+<p>And our example would then look something like this:</p>
+
+<p>``` c#
+public void DoSomeCoreStuff(HttpContextBase context)<br/>
+{</p>
+
+<pre><code>var userId = (string)context.Session["userId"];    
+DoSomeMoreCoreStuff(userId); 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This might seem a bit overkill, but we are now able to use our method with a different implementation of HttpContextBase for reuse and testing purposes.</p>
+
+<p>When doing a different implementation you should know that every base implementation in HttpContextBase just throws a NotImplementedException. Thus, you will need to override that different bits in your test and reuse implementations depending on what you really require. Alternatively, there are a couple of generic open source implementations available if you want to pull in that extra dependency.</p>
+
+<p>In general I would recommend using one of the first approaches, but if you are working with a fairly large system that adheres to the big ball of mud &ldquo;design&rdquo; antipattern this might be difficult. Maybe it is just to difficult to discern any meaningful relation between the different data retrieved from HttpContext, and with this approach you can at least start writing some tests to get control back of the code.</p>
+
+<p>As I mentioned earlier this is just one simple example as HttpContext have a lot of data and functionality built in.s</p>
 ]]></content>
   </entry>
   
