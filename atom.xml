@@ -4,7 +4,7 @@
   <title><![CDATA[Developer's Perception]]></title>
   <link href="http://elgsdyret.github.io/atom.xml" rel="self"/>
   <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-05-27T19:23:36+02:00</updated>
+  <updated>2013-05-27T19:30:56+02:00</updated>
   <id>http://elgsdyret.github.io/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
@@ -18,7 +18,9 @@
     <link href="http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress/"/>
     <updated>2013-05-27T19:16:00+02:00</updated>
     <id>http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress</id>
-    <content type="html"><![CDATA[
+    <content type="html"><![CDATA[<p>Just  testing out the octopress blogging engine. I am considering moving away from blogger, mostly to enable me to write in markdown (I am not a fan of editing in the browser) and to get the control of whats going one.</p>
+
+<p>Sofar it has been easy enough to get working, but I imagine it will require quite a bit of work to set it up completely as my main blogging outlet.</p>
 ]]></content>
   </entry>
   
