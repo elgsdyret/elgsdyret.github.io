@@ -9,7 +9,7 @@
   <meta name="author" content="Nikolaj Kaare Nørskov">
 
   
-  <meta name="description" content="I promised to get back when I had mongo-db up and running.In my blog post yesterday I pointed to his url :&nbsp;http://www.mongodb.org/display/DOCS/ &hellip;">
+  <meta name="description" content="I promised to get back when I had mongo-db up and running. In my blog post yesterday I pointed to his url : (http://www.mongodb.org/display/DOCS/ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -91,8 +91,41 @@
   </header>
 
 
-<div class="entry-content"><div class='post'>
-<br />I promised to get back when I had mongo-db up and running.<br /><br />In my blog post yesterday I pointed to his url :&nbsp;<a href="http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages">http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages</a><br /><br />And I did in fact install mongo using the instructions there, but I actually found the description to be confusing with the same step repeated. Thus, here is what I did. <br /><br />Opened /etc/apt/sources.list:   <pre><br />sudo gedit /etc/apt/sources.list  <br /></pre> Added the following line: <pre><br />deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen<br /></pre> Added the key from command line: <pre><br />sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10<br /></pre> Updated from the repository and installed latest stable version of mongo: <pre><br />sudo apt-get update <br />sudo apt-get install mongodb-10gen<br /></pre> Seems to be working quite well.   <br /><br /><br /> <br /><br /></div>
+<div class="entry-content"><p>I promised to get back when I had mongo-db up and running.</p>
+
+<p>In my blog post yesterday I pointed to his url : (<a href="http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages">http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages</a>)</p>
+
+<p>And I did in fact install mongo using the instructions there, but I actually found the description to be confusing with the same step repeated.</p>
+
+<p>Thus, here is what I did.</p>
+
+<p>Opened /etc/apt/sources.list:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo gedit /etc/apt/sources.list</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Added the following line:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Added the key from command line:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Updated from the repository and installed latest stable version of mongo:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get update 
+</span><span class='line'>sudo apt-get install mongodb-10gen</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Seems to be working quite well.</p>
 </div>
 
 

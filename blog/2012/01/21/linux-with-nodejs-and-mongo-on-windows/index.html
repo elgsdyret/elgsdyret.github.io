@@ -91,8 +91,68 @@
   </header>
 
 
-<div class="entry-content"><div class='post'>
-<br /><br />So finally the time has come where we have decided to give the node and mongo combination a closer look at my work. Not that we are going to migrate everything to such a platform tomorrow, but the combination of node and mongo is so promising that we decided to give it a try to see how far we can get.<br /><br /><span style="font-size: large;">Basic Setup</span><br />This is the setup we are going for sofar (will probably change as we get smarter - please feel free to help with that):<br /><br /><ul><li>Virtual Box on windows (we used to be a .NET based Software only - so everyone has Windows machines) -&nbsp; <a href="https://www.virtualbox.org/">https://www.virtualbox.org/</a></li><li>Linux 64 bit on the virtual box:</li><ul><li>Ubuntu 64 bit (my work setup):&nbsp; <a href="http://www.wikihow.com/Install-Ubuntu-on-VirtualBox">http://www.wikihow.com/Install-Ubuntu-on-VirtualBox</a></li><li>Mint 64 bit (my home setup): &nbsp; <a href="http://www.itworld.com/software/230123/install-linux-mint-12-virtualbox">http://www.itworld.com/software/230123/install-linux-mint-12-virtualbox</a>&nbsp;(not as detailed as the Ubuntu version - so if you get stuck refer to that one)</li></ul><li>Sharing of the code folder between Windows host and Linux virtual machine:</li><ul><li>Setup local account on windows machine.</li><li>Share code folder on windows machine - ensure that the local account you just created has both read and write.</li><li>Go to /home/&lt;linux_username&gt; and mkdir sourcecode (or whichever name you prefer)</li><li>Go to Linux and edit /etc/fstab (for instance sudo gedit /etc/fstab should do the trick</li><li>Add the following at the bottom of the file (there are not supposed to be any line breaks in the command, white spaces are important, and commas likewise) :</li><pre>&nbsp;//&lt;ip_host&gt;/&lt;share&gt;&nbsp;/home/&lt;linux_username&gt;/sourcecode&nbsp;cifs&nbsp;<br />rw,user,uid=&lt;your_linux_loginname&gt;,gid=&lt;linux_username&gt;,username=&lt;win_username&gt;,password=&lt;win_password&gt;,_netdev 0 0<br /></pre></ul></ul><ul><li>Neither Ubuntu nor Mint has a very new version of nodejs in their package repositories, thus I did as suggested in this&nbsp; <a href="http://stackoverflow.com/questions/8074327/need-advice-latest-version-of-node-js-vs-using-synaptic-package-manager">http://stackoverflow.com/questions/8074327/need-advice-latest-version-of-node-js-vs-using-synaptic-package-manager</a>:</li><pre>sudo add-apt-repository ppa:chris-lea/node.js<br />sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C7917B12<br />sudo apt-get update<br />sudo apt-get install nodejs</pre><li>Getting mongo installed - this looks promising (have not tried yet):&nbsp; <a href="http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages">http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages</a></li><li>What editor to use?: Have not decided completely yet, but currently I am considering:&nbsp;</li><ul><li><a href="http://www.sublimetext.com/2">http://www.sublimetext.com/2</a>&nbsp;I am testing right now, and so far it has really blown my mind - install the intellisence package to get the full power.</li><li><a href="http://www.jetbrains.com/webstorm/">http://www.jetbrains.com/webstorm/</a>&nbsp;I have been using for JavaScript for a while and I simply love it, so it says something about the promise of sulime 2 that I am testing it right now.</li></ul></ul>That is it for now&#8230; Will write more when we have the last details of our environment up and running, such as mongo install and how to structure our nodejs application in folders etc.<br /><br /></div>
+<div class="entry-content"><p>So finally the time has come where we have decided to give the node and mongo combination a closer look at my work. Not that we are going to migrate everything to such a platform tomorrow, but the combination of node and mongo is so promising that we decided to give it a try to see how far we can get.</p>
+
+<h3>Basic Setup</h3>
+
+<p>This is the setup we are going for sofar (will probably change as we get smarter &ndash; please feel free to help with that):</p>
+
+<ul>
+<li>Virtual Box on windows (we used to be a .NET based Software only &ndash; so everyone has Windows machines) &ndash; (<a href="https://www.virtualbox.org/">https://www.virtualbox.org/</a>)</li>
+<li>Linux 64 bit on the virtual box:
+
+<ul>
+<li><a href="http://www.wikihow.com/Install-Ubuntu-on-VirtualBox">Ubuntu 64 bit</a> (my work setup)</li>
+<li><a href="http://www.itworld.com/software/230123/install-linux-mint-12-virtualbox">Mint 64 bit</a> (my home setup): not as detailed as the Ubuntu version &ndash; so if you get stuck refer to that one</li>
+</ul>
+</li>
+<li>Sharing of the code folder between Windows host and Linux virtual machine:
+
+<ul>
+<li>Setup local account on windows machine.</li>
+<li>Share code folder on windows machine &ndash; ensure that the local account you just created has both read and write.</li>
+<li>Go to /home/&lt;linux_username> and mkdir sourcecode (or whichever name you prefer)</li>
+<li>Go to Linux and edit /etc/fstab (for instance sudo gedit /etc/fstab should do the trick)</li>
+<li>Add the following at the bottom of the file (there are not supposed to be any line breaks in the command, white spaces are important, and commas likewise)</li>
+</ul>
+</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'> //&lt;ip_host&gt;/&lt;share&gt; /home/&lt;linux_username&gt;/sourcecode cifs 
+</span><span class='line'>rw,user,uid=&lt;your_linux_loginname&gt;,gid=&lt;linux_username&gt;,username=&lt;win_username&gt;,password=&lt;win_password&gt;,_netdev 0 0</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Neither Ubuntu nor Mint has a very new version of nodejs in their package repositories, thus I did as suggested in this (<a href="http://stackoverflow.com/questions/8074327/need-advice-latest-version-of-node-js-vs-using-synaptic-package-manager">http://stackoverflow.com/questions/8074327/need-advice-latest-version-of-node-js-vs-using-synaptic-package-manager</a>)</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:chris-lea/node.js
+</span><span class='line'>sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C7917B12
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install nodejs</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Getting mongo installed &ndash; this looks promising (have not tried yet): (<a href="http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages">http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages</a>)</li>
+<li>What editor to use?: Have not decided completely yet, but currently I am considering:
+
+<ul>
+<li><a href="http://www.sublimetext.com/2">sublime text</a>. I am testing right now, and so far it has really blown my mind &ndash; install the intellisence package to get the full power.</li>
+<li><a href="http://www.jetbrains.com/webstorm/">Webstorm</a>. I have been using for JavaScript for a while and I simply love it, so it says something about the promise of sulime 2 that I am testing it right now.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>That is it for now&hellip; Will write more when we have the last details of our environment up and running, such as mongo install and how to structure our nodejs application in folders etc.</p>
 </div>
 
 

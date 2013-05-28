@@ -91,8 +91,209 @@
   </header>
 
 
-<div class="entry-content"><div class='post'>
-<br />For the past half year or so I have been using Backbone. Besides the obvious questions of how to fit the different pieces together, when to use what, and in general understanding the library, I have experimented with different ways of extended the existing Backbone behavior.<br /><br />Having tried a lot of different methods I ended up using 2 different approaches for 2 different scenarios.<br /><br /><span style="font-size: large;">Mixin</span><br /><br />You can use the different Backbone modules&#8217; extend function (they all have the same, which is not to be confused with the underscore extend function) to achieve code reuse. For instance if you wanted to create a model with an additional function you could do like this, by extending Backbone.Model:<br /><br /><pre class="brush: javascript">var someModel = Backbone.Model.extend({<br />   someFunction: function(){ }<br />});<br /><br /></pre>This is the normal way to use extend on a model, and Backbone will ensure the prototype chain is set up correctly. This is often used to create hierarchy of base models some potentially with many functions leading to&nbsp;a huge object that is used to extend all models from, like:<br /><br /><pre class="brush: javascript">var motherOfAllModels = Backbone.Model.extend({<br />   someFunction: function(){ },<br />   someFunction2: function(){ },<br />   someFunction3: function(){ },<br />   someFunction4: function(){ },<br />   someFunction5: function(){ },<br />   someFunction6: function(){ },<br />});<br /><br />var myModel = motherOfAllModels.extend({});<br /></pre>However, at least in my opinion this is not necessarily a good way of using such a powerful feature. A given model can be extended with a number of features from different objects:  <br /><br /><pre class="brush: javascript">var niceObject = function() {<br />  return {<br />     someFunction: function(){}<br />  };<br />}();<br /><br />var niceObject2 = function() {<br />  return {<br />     someFunction2: function(){}<br />  };<br />}();<br /><br />var myModel = Backbone.Model.extend(niceObject).extend(niceObject2);<br /></pre><pre class="brush: javascript"><br /></pre>This way it lets you build features in small objects that are easy to test seperately. Basically, creating a model becomes a matter of picking the different features you would like have enabled instead of dragging around a huge &#8220;base&#8221; model or hierarchy of base model.<br /><br />There is a couple of problems with this use of the extend method. If the object contains methods with same names the last one to be mixed in (extended with) will overwrite the earlier ones and the prototype chain will be kinda of weird.<br /><br /><br /><span style="font-size: large;">Wrapping</span><br /><br />I have experimented with a number of ways of decorating the behavior of a Backbone modules, and basically found two feasible paths.<br /><br /><pre class="brush: javascript">var niceObject = function() {<br />var dog = Backbone.Model.extend({<br />    bark: function(){<br />       return 'vuf';<br />    }<br />});<br /><br />var bulldog = dog.extend({<br />    bark: function(){<br />       return 'vaf ' + dog.prototype.bark.call(this);<br />    }<br />});<br /><br />var frenchBulldog = bulldog.extend({<br />    bark: function(){<br />       return 'vif ' + bulldog.prototype.bark.call(this);<br />    }<br />});<br /><br />var muffin = new frenchBulldog();<br /><br />expect(muffin.bark()).toBe('vif vaf vuf');<br /></pre><br />This way is probably used widely by Backbone developers, but it has a few challenges.<br /><ul><li>It requires a named var like bulldog to access the prototype.</li><li>It is pretty much a prototype chain.</li><li>I can&#8217;t make Muffin a french bulldog without also making her a bulldog&#8230; (as if that would make sense).</li><li>Overview of what is happening - usually I will not be able to see that a french bulldog is actually a dog without going elsewhere to look in my code.</li></ul><div>Thus, I invented (probably not as the first person though!) a different way of wrapping a Backbone.Model with the behavior of my wishes.</div><pre class="brush: javascript">var asDog = function(model){<br /> var oldBark = model.prototype.bark;<br /> return model.extend({<br />  bark: function(){<br />   return this.noise + ' vif ' + oldBark.call(this);<br />  }<br /> });<br />};<br /><br />var asBulldog = function(model){<br /> var oldBark = model.prototype.bark;<br /> return model.extend({<br />  bark: function(){<br />   return this.noise + ' vaf ' + oldBark.call(this);<br />  }<br /> });<br />};<br /><br />var frenchBulldog = asBulldog(asDog(Backbone.Model.extend({<br /> noise: 'vuf',<br /> bark: function(){<br />  return this.noise;<br /> }<br />})));<br /><br />var muffin = new frenchBulldog();<br /><br />expect(muffin.bark()).toBe('vuf vaf vuf vif vuf');<br /><br /></pre><div><br /></div><div>What is like about this way is:<br /><br /><ul><li>I can &#8220;chain&#8221; the wrapping.</li><li>I can make a french bulldog a bulldog without making it a dog.</li><li>When I find the definition of a french bulldog I can see all the ways of it.</li></ul></div>I have not found anyone else who have done a similar implementation, maybe I have looked the wrong places , maybe I just got it wrong and it is really nice with a mother of all base model, or we really benefit from having a long prototype chain.<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></div>
+<div class="entry-content"><p>For the past half year or so I have been using Backbone. Besides the obvious questions of how to fit the different pieces together, when to use what, and in general understanding the library, I have experimented with different ways of extended the existing Backbone behavior.</p>
+
+<p>Having tried a lot of different methods I ended up using 2 different approaches for 2 different scenarios.</p>
+
+<h3>Mixin</h3>
+
+<p>You can use the different Backbone modules&#8217; extend function (they all have the same, which is not to be confused with the underscore extend function) to achieve code reuse. For instance if you wanted to create a model with an additional function you could do like this, by extending Backbone.Model:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">someModel</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">someFunction</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span> <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is the normal way to use extend on a model, and Backbone will ensure the prototype chain is set up correctly. This is often used to create hierarchy of base models some potentially with many functions leading to a huge object that is used to extend all models from, like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">motherOfAllModels</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>   <span class="nx">someFunction</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span> <span class="p">},</span>
+</span><span class='line'>   <span class="nx">someFunction2</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span> <span class="p">},</span>
+</span><span class='line'>   <span class="nx">someFunction3</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span> <span class="p">},</span>
+</span><span class='line'>   <span class="nx">someFunction4</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span> <span class="p">},</span>
+</span><span class='line'>   <span class="nx">someFunction5</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span> <span class="p">},</span>
+</span><span class='line'>   <span class="nx">someFunction6</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span> <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">myModel</span> <span class="o">=</span> <span class="nx">motherOfAllModels</span><span class="p">.</span><span class="nx">extend</span><span class="p">({});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>However, at least in my opinion this is not necessarily a good way of using such a powerful feature. A given model can be extended with a number of features from different objects:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">niceObject</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">someFunction</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){}</span>
+</span><span class='line'>  <span class="p">};</span>
+</span><span class='line'><span class="p">}();</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">niceObject2</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">someFunction2</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){}</span>
+</span><span class='line'>  <span class="p">};</span>
+</span><span class='line'><span class="p">}();</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">myModel</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">niceObject</span><span class="p">).</span><span class="nx">extend</span><span class="p">(</span><span class="nx">niceObject2</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This way it lets you build features in small objects that are easy to test seperately. Basically, creating a model becomes a matter of picking the different features you would like have enabled instead of dragging around a huge &ldquo;base&rdquo; model or hierarchy of base model.</p>
+
+<p>There is a couple of problems with this use of the extend method. If the object contains methods with same names the last one to be mixed in (extended with) will overwrite the earlier ones and the prototype chain will be kinda of weird.</p>
+
+<h3>Wrapping</h3>
+
+<p>I have experimented with a number of ways of decorating the behavior of a Backbone modules, and basically found two feasible paths.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">dog</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">bark</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>      <span class="k">return</span> <span class="s1">&#39;vuf&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">bulldog</span> <span class="o">=</span> <span class="nx">dog</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">bark</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>      <span class="k">return</span> <span class="s1">&#39;vaf &#39;</span> <span class="o">+</span> <span class="nx">dog</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">bark</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">frenchBulldog</span> <span class="o">=</span> <span class="nx">bulldog</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">bark</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>         <span class="k">return</span> <span class="s1">&#39;vif &#39;</span> <span class="o">+</span> <span class="nx">bulldog</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">bark</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">muffin</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">frenchBulldog</span><span class="p">();</span>
+</span><span class='line'><span class="nx">expect</span><span class="p">(</span><span class="nx">muffin</span><span class="p">.</span><span class="nx">bark</span><span class="p">()).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">&#39;vif vaf vuf&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This way is probably used widely by Backbone developers, but it has a few challenges.</p>
+
+<ul>
+<li>It requires a named var like bulldog to access the prototype.</li>
+<li>It is pretty much a prototype chain.</li>
+<li>I can&rsquo;t make Muffin a french bulldog without also making her a bulldog&hellip; (as if that would make sense).</li>
+<li>Overview of what is happening &ndash; usually I will not be able to see that a french bulldog is actually a dog without going elsewhere to look in my code.</li>
+</ul>
+
+
+<p>Thus, I invented (probably not as the first person though!) a different way of wrapping a Backbone.Model with the behavior of my wishes.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">asDog</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">model</span><span class="p">){</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">oldBark</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">bark</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">bark</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>          <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">noise</span> <span class="o">+</span> <span class="s1">&#39; vif &#39;</span> <span class="o">+</span> <span class="nx">oldBark</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">asBulldog</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">model</span><span class="p">){</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">oldBark</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">bark</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">bark</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>          <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">noise</span> <span class="o">+</span> <span class="s1">&#39; vaf &#39;</span> <span class="o">+</span> <span class="nx">oldBark</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">frenchBulldog</span> <span class="o">=</span> <span class="nx">asBulldog</span><span class="p">(</span><span class="nx">asDog</span><span class="p">(</span><span class="nx">Backbone</span><span class="p">.</span><span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">noise</span><span class="o">:</span> <span class="s1">&#39;vuf&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">bark</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">noise</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">})));</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">muffin</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">frenchBulldog</span><span class="p">();</span>
+</span><span class='line'><span class="nx">expect</span><span class="p">(</span><span class="nx">muffin</span><span class="p">.</span><span class="nx">bark</span><span class="p">()).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">&#39;vuf vaf vuf vif vuf&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>What is like about this way is:</p>
+
+<ul>
+<li>I can &ldquo;chain&rdquo; the wrapping.</li>
+<li>I can make a french bulldog a bulldog without making it a dog.</li>
+<li>When I find the definition of a french bulldog I can see all the ways of it.</li>
+</ul>
+
+
+<p>I have not found anyone else who have done a similar implementation, maybe I have looked the wrong places , maybe I just got it wrong and it is really nice with a mother of all base model, or we really benefit from having a long prototype chain.s</p>
 </div>
 
 
