@@ -91,8 +91,81 @@
   </header>
 
 
-<div class="entry-content"><div class='post'>
-<br /><br /><br />In the next couple of blog posts I will try to outline how I try to improve the maintainability and testability of pages written in the ASP.NET Web Forms framework.<br /><br /><h3>Don&#8217;t use ASP.NET Web Forms</h3><div>If you are not forced there is no good reason to use this technology. There are many better ways to write your web applications. If you wish to work with the .NET framework you might consider:</div><div><ul><li>ASP.NET MVC latest incarnation (if it just has to be Microsoft)</li><li>Nancy (nice open source framework)</li><li>&#8230; and other options</li></ul><div>If your wish to use something other than .NET there are also many options (the reason I base this decision on whether you want .NET or not is simply because we started out discussing alternatives to Web Forms):</div></div><div><ul><li>&nbsp;RAILS, Sinatra, Goliath and other options on Ruby.</li><li>Django on Python.</li><li>Node.js potentially with the express framework.</li><li>&#8230; and lots of other options.</li></ul><div>Point is: <b>First way to improve your Web (Forms) code is to not use Web Forms.</b></div></div><div><br /></div><h3>I Have no Choice</h3><div>If you are stuck building Web Forms, it is most likely due to working on a legacy system build with this technology. There are lots of those out there and they are not getting upgraded to better options (at least not all of them).</div><div><br /></div><div>Thus, we have to manage somehow.</div><div><br /></div><div>The main tactic I advocate for coping with the platform is a pattern called MVP (Model-View-Presenter):</div><div><br /></div><div><a href="http://martinfowler.com/eaaDev/uiArchs.html">http://martinfowler.com/eaaDev/uiArchs.html</a></div><div><br /></div><div>(Go down a bit to find the description)</div><div><br /></div><div>Now this may not be the most easily accessible description and potentially you might not be able to implement the pattern in your application from this description (or it would require quite some work).</div><div><br />There is a catch to the pattern though. If used correctly it can help make your code more testable and easier to reason about, but it adds complexity and will not save you from having to know about viewstate, page lifecycle and other details about Web Forms.</div><h3>Bits and Pieces</h3><div>Not&nbsp;surprisingly&nbsp;we need a class for each of the roles of Model, View, and Presenter (actually a bit more).</div><div><br /></div><h4>Model&nbsp;</h4><div>The model is just a PONO (plain old .NET object) and can be your domain model or alternatively a view model. When to use a view model is largely a matter of taste, but I prefer not to do it unless I actually use it for something as it does add an overhead of an extra class and mapping code (consider using a tool like automapper if you do have both models).</div><div><br /></div><h4>View</h4><div>The view in our ASP.NET webform MVP implementation is basically our code behind file and the aspx file can be considered a template for helping with rendering the html. The key is to keep the code behind file very very slim as the view can typically be very hard to test due to dependencies on ASP.NET.<br /><br />The responsibility of the view is to render html, retrieve values from the html (really being the viewstate), and kicking of the flow (that is the way webforms work).<br /><br />The view is hidden by an interface to save the Presenter from knowing the gritty details of webforms. This way the presenter could also be used in another application that is not necessarily for the web.</div><div><br />The view initializes the presenter with a reference to itself - typically in the pageload event, but that really depends on the purpose of the page.</div><div><h4>Presenter</h4></div><div>The presenter is somewhat similar to the Controller in the MVC pattern, at least in the way I use it. It is not triggered in the same way as in MVC, though, as the view has to start it up.</div><div><br /></div><div>Basically, the presenter handles the flow of the page, receiving data from the view when an event occurs (a button is clicked for instance), using lower level constructs (like data-layers or services) to manipulate data and then typically asking the view to render something. I would never have a presenter function return a value, as it is solely up to the presenter to determine what the view should do (not how though).</div><div><br /></div><div>The presenter will get a reference to the view through the interface in the constructor.</div><div><br /></div><div>In .NET this leaves us with 5 pieces:</div><div>- A View (for instance SearchDogView) which inherits from&nbsp;System.Web.UI.Page.</div><div>- A template used for rendering html for the view (the ASPX file).</div><div>- An interface for the view (ISearchDogView).</div><div>- A presenter (SearchDogPresenter)</div><div>- A model (or 2 if we decide to use a ViewModel)</div><div><br /></div><div><br /></div><div><a href="http://nikolajkn.blogspot.dk/2012/09/maintainable-aspnet-webforms-part-ii.html"> Part II: A tiny example </a></div><div><br /></div><div><br /></div><div><br /></div><div></div><div><br /></div><div><br /></div></div>
+<div class="entry-content"><p>In the next couple of blog posts I will try to outline how I try to improve the maintainability and testability of pages written in the ASP.NET Web Forms framework</p>
+
+<h3>Don&rsquo;t use ASP.NET Web Forms</h3>
+
+<p>If you are not forced there is no good reason to use this technology. There are many better ways to write your web applications. If you wish to work with the .NET framework you might consider:</p>
+
+<ul>
+<li>ASP.NET MVC latest incarnation (if it just has to be Microsoft)</li>
+<li>Nancy (nice open source framework)</li>
+<li>&hellip; and other options</li>
+</ul>
+
+
+<p>If your wish to use something other than .NET there are also many options (the reason I base this decision on whether you want .NET or not is simply because we started out discussing alternatives to Web Forms):</p>
+
+<ul>
+<li>RAILS, Sinatra, Goliath and other options on Ruby.</li>
+<li>Django on Python.</li>
+<li>Node.js potentially with the express framework.</li>
+<li>&hellip; and lots of other options.</li>
+</ul>
+
+
+<p>Point is: <em>First way to improve your Web (Forms) code is to not use Web Forms.</em></p>
+
+<h3>I Have no Choice</h3>
+
+<p>If you are stuck building Web Forms, it is most likely due to working on a legacy system build with this technology. There are lots of those out there and they are not getting upgraded to better options (at least not all of them).</p>
+
+<p>Thus, we have to manage somehow.</p>
+
+<p>The main tactic I advocate for coping with the platform is a pattern called MVP (Model-View-Presenter): <a href="http://martinfowler.com/eaaDev/uiArchs.html">MVP</a>(Go down a bit to find the description)</p>
+
+<p>Now this may not be the most easily accessible description and potentially you might not be able to implement the pattern in your application from this description (or it would require quite some work).</p>
+
+<p>There is a catch to the pattern though. If used correctly it can help make your code more testable and easier to reason about, but it adds complexity and will not save you from having to know about viewstate, page lifecycle and other details about Web Forms.</p>
+
+<h3>Bits and Pieces</h3>
+
+<p>Not surprisingly we need a class for each of the roles of Model, View, and Presenter (actually a bit more).</p>
+
+<h4>Model</h4>
+
+<p>The model is just a PONO (plain old .NET object) and can be your domain model or alternatively a view model. When to use a view model is largely a matter of taste, but I prefer not to do it unless I actually use it for something as it does add an overhead of an extra class and mapping code (consider using a tool like automapper if you do have both models).</p>
+
+<h4>View</h4>
+
+<p>The view in our ASP.NET webform MVP implementation is basically our code behind file and the aspx file can be considered a template for helping with rendering the html. The key is to keep the code behind file very very slim as the view can typically be very hard to test due to dependencies on ASP.NET.</p>
+
+<p>The responsibility of the view is to render html, retrieve values from the html (really being the viewstate), and kicking of the flow (that is the way webforms work).</p>
+
+<p>The view is hidden by an interface to save the Presenter from knowing the gritty details of webforms. This way the presenter could also be used in another application that is not necessarily for the web.</p>
+
+<p>The view initializes the presenter with a reference to the view itself &ndash; typically in the pageload event, but that really depends on the purpose of the page.</p>
+
+<h4>Presenter</h4>
+
+<p>The presenter is somewhat similar to the Controller in the MVC pattern, at least in the way I use it. It is not triggered in the same way as in MVC, though, as the view has to start it up.</p>
+
+<p>Basically, the presenter handles the flow of the page, receiving data from the view when an event occurs (a button is clicked for instance), using lower level constructs (like data-layers or services) to manipulate data and then typically asking the view to render something. I would never have a presenter function return a value, as it is solely up to the presenter to determine what the view should do (not how though).</p>
+
+<p>The presenter will get a reference to the view through the interface in the constructor.</p>
+
+<p>In .NET this leaves us with 5 pieces:</p>
+
+<ul>
+<li>A View (for instance SearchDogView) which inherits from System.Web.UI.Page.</li>
+<li>A template used for rendering html for the view (the ASPX file).</li>
+<li>An interface for the view (ISearchDogView).</li>
+<li>A presenter (SearchDogPresenter)</li>
+<li>A model (or 2 if we decide to use a ViewModel)</li>
+</ul>
+
+
+<p><a href="/blog/2012/09/08/maintainable-aspnet-webforms-part-ii">Part II: A tiny example</a></p>
 </div>
 
 

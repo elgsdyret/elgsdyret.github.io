@@ -9,7 +9,8 @@
   <meta name="author" content="Nikolaj Kaare Nørskov">
 
   
-  <meta name="description" content="In the last post I described how I believe that implementing the MVP pattern is a feasible way of improving ASP.NET Web Forms code:http://nikolajkn. &hellip;">
+  <meta name="description" content="In the last post I described how I believe that implementing the MVP pattern is a feasible way of improving ASP.NET Web Forms code:
+part 1 The most &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -91,16 +92,100 @@
   </header>
 
 
-<div class="entry-content"><div class='post'>
-<br /><br />In the last post I described how I believe that implementing the MVP pattern is a feasible way of improving ASP.NET Web Forms code:<br /><br /><a href="http://nikolajkn.blogspot.dk/2012/09/maintainable-aspnet-webforms-part-i.html">http://nikolajkn.blogspot.dk/2012/09/maintainable-aspnet-webforms-part-i.html</a><br /><br />The most important lesson is still that you should not use ASP.NET Web Forms unless you absolutely have to.<br /><br /><h4>The Example</h4>I have added a tiny example to github:&nbsp;<a href="https://github.com/elgsdyret/mvp-example">https://github.com/elgsdyret/mvp-example</a><br /><br />Like any contrived example it might be too simple and too silly to really show the power of implementing the pages this way, but here is a short walk-through of the flow anyways:<br />The view loads the presenter with a reference to itself and asks it to PresentAllDogs: <pre class="brush: c#">protected void Page_Load(object sender, EventArgs e)<br />{<br /> presenter = new DogSearchPresenter(this);<br /> presenter.PresentAllDogs();<br />}<br /></pre> The presenter then retrieves all the dogs (probably from some kind of data layer) and asks the view to render the dogs:  <pre class="brush: c#">public void PresentAllDogs()<br />{<br /> view.RenderDogs(Dog.All());<br />}<br /></pre> The view just assigns a local field with the values retrived (in some scenarios it might be doing a databind or similar, all depending on how the template aspx is used):  <script type="syntaxhighlighter" class="brush: c#"><![CDATA[ public void RenderDogs(IList<Dog> dogs) {  Dogs = dogs; } ]]></script> When the template is rendered it automatically renders the Dogs from the view:  <script type="syntaxhighlighter" class="brush: c#"><table> <tr><th>Name</th><th>Race</th></tr> <%foreach(var dog in Dogs)    { %>  <tr>   <td><%=dog.Name%></td>   <td><%=dog.Race%></td>  </tr>     <% } %></table></script> This way of rendering is my preferred as it puts just the right amount of rendering logic in the template. It does not work well if you need to manipulate specific rows of the table and have the viewstate handle which you clicked.  <br/><br/>For this you could use the listview control which is a decent compromise between using raw template rendering and having the view set values on elements using the runat server tag (I definetely prefer the first template rendering.)  <br/><br/>Happy coding!    </div>
+<div class="entry-content"><p>In the last post I described how I believe that implementing the MVP pattern is a feasible way of improving ASP.NET Web Forms code:
+<a href="/blog/2012/09/08/maintainable-aspnet-webforms-part-i">part 1</a></p>
+
+<p>The most important lesson is still that you should not use ASP.NET Web Forms unless you absolutely have to.</p>
+
+<h3>The Example</h3>
+
+<p>I have added a tiny example to github: <a href="https://github.com/elgsdyret/mvp-example">example</a></p>
+
+<p>Like any contrived example it might be too simple and too silly to really show the power of implementing the pages this way, but here is a short walk-through of the flow anyways:</p>
+
+<p>The view loads the presenter with a reference to itself and asks it to PresentAllDogs:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">protected</span> <span class="k">void</span> <span class="nf">Page_Load</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">presenter</span> <span class="p">=</span> <span class="k">new</span> <span class="n">DogSearchPresenter</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">presenter</span><span class="p">.</span><span class="n">PresentAllDogs</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The presenter then retrieves all the dogs (probably from some kind of data layer) and asks the view to render the dogs:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">PresentAllDogs</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">view</span><span class="p">.</span><span class="n">RenderDogs</span><span class="p">(</span><span class="n">Dog</span><span class="p">.</span><span class="n">All</span><span class="p">());</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The view just assigns a local field with the values retrived (in some scenarios it might be doing a databind or similar, all depending on how the template aspx is used):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">RenderDogs</span><span class="p">(</span><span class="n">IList</span><span class="p">&lt;</span><span class="n">Dog</span><span class="p">&gt;</span> <span class="n">dogs</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="n">Dogs</span> <span class="p">=</span> <span class="n">dogs</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>When the template is rendered it automatically renders the Dogs from the view:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="p">&lt;</span><span class="n">table</span><span class="p">&gt;</span>
+</span><span class='line'>  <span class="p">&lt;</span><span class="n">tr</span><span class="p">&gt;</span>
+</span><span class='line'>      <span class="p">&lt;</span><span class="n">th</span><span class="p">&gt;</span><span class="n">Name</span><span class="p">&lt;/</span><span class="n">th</span><span class="p">&gt;&lt;</span><span class="n">th</span><span class="p">&gt;</span><span class="n">Race</span><span class="p">&lt;/</span><span class="n">th</span><span class="p">&gt;</span>
+</span><span class='line'>  <span class="p">&lt;/</span><span class="n">tr</span><span class="p">&gt;</span>
+</span><span class='line'>  <span class="p">&lt;%</span><span class="k">foreach</span><span class="p">(</span><span class="kt">var</span> <span class="n">dog</span> <span class="k">in</span> <span class="n">Dogs</span><span class="p">)</span> <span class="p">{</span> <span class="p">%&gt;</span>
+</span><span class='line'>  <span class="p">&lt;</span><span class="n">tr</span><span class="p">&gt;</span>
+</span><span class='line'>      <span class="p">&lt;</span><span class="n">td</span><span class="p">&gt;&lt;%=</span><span class="n">dog</span><span class="p">.</span><span class="n">Name</span><span class="p">%&gt;&lt;/</span><span class="n">td</span><span class="p">&gt;</span>   <span class="p">&lt;</span><span class="n">td</span><span class="p">&gt;&lt;%=</span><span class="n">dog</span><span class="p">.</span><span class="n">Race</span><span class="p">%&gt;&lt;/</span><span class="n">td</span><span class="p">&gt;</span>
+</span><span class='line'>  <span class="p">&lt;/</span><span class="n">tr</span><span class="p">&gt;</span>
+</span><span class='line'>  <span class="p">&lt;%</span> <span class="p">}</span> <span class="p">%&gt;</span>
+</span><span class='line'><span class="p">&lt;/</span><span class="n">table</span><span class="p">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This way of rendering is my preferred as it puts just the right amount of rendering logic in the template. It does not work well if you need to manipulate specific rows of the table and have the viewstate handle which you clicked.</p>
+
+<p>For this you could use the listview control which is a decent compromise between using raw template rendering and having the view set values on elements using the runat server tag (I definetely prefer the first template rendering.)</p>
+
+<p>Happy coding!</p>
+
 <h2>Comments</h2>
-<div class='comments'>
-<div class='comment'>
-<div class='author'>Alexander Beletsky</div>
-<div class='content'>
-Good stuff.<br /><br />There is ASP.NET MVP framework. <br /><br />http://aspnetmvp.codeplex.com/<br /><br />But I also still prefer lightweight custom solutions.</div>
-</div>
-</div>
+
+<p>Alexander Beletsky</p>
+
+<p>Good stuff.</p>
+
+<p>There is ASP.NET MVP framework.</p>
+
+<p><a href="http://aspnetmvp.codeplex.com/">http://aspnetmvp.codeplex.com/</a></p>
+
+<p>But I also still prefer lightweight custom solutions.</p>
 </div>
 
 

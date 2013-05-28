@@ -91,8 +91,72 @@
   </header>
 
 
-<div class="entry-content"><div class='post'>
-<br /><br />Since the beginning of the year I have been working on building a new REST based API to be consumed by both internal and external clients in <a href="http://nodejs.org/">Node.js</a>.<br /><br />The main reason for choosing node and mongo as the main elements in our stack when we started the project was to alleviate a number of pains we experienced with the &#8220;old&#8221; stack of ASP.NET and SQL. Most of this was related to the amount of ceremony that goes in to doing even simple stuff on that stack, which was being made worse by the way the technologies were used. Most if not all of these pains were indeed alleviated, but we gained a couple of new ones, which can be mitigated to some extend.<br /><br /><h4>Debugging and Stack Trace</h4>Having spent many hours the last couple of weeks debugging errors in an application with a codebase that is gaining in size I have come to the conclusion that simply put, the debugging and stack trace in node is&nbsp;inferior to what you would get in a .NET based environment.<br /><br />I have found some of the error messages to be short non descriptive and very generic, making it often fairly hard to understand what is going on. Likely, it is a consequence of the lack of maturity of the technology combined with the lesser experience I have with it, but reading a stack trace in .NET would often mean I know exactly what the problem was, which is not the case with node.<br /><br />Probably, the callback nature of most of the API&#8217;s also is somewhat to blame for this.<br /><br />Most of these challenges can be minimized with a good and solid&nbsp;test suite, as it can help pinpoint more precisely where an error has&nbsp;occurred.<br /><br />A nice little addition to this is that the dynamic nature of the language means simple spelling mistakes in parts of the program that is not executed by tests (bad!) will not get caught. This is an easy problem to fix though - apply <a href="http://www.jshint.com/">J<span id="goog_981159054"></span><span id="goog_981159055"></span>SHint</a>, <a href="http://www.jslint.com/">JSLint</a>, or similar (do it from day one, you owe it to yourself).<br /><br />I tried to find a good &#8220;bad&#8221; error message to put here, but could not easily provoke one intentionally. Will keep a look out for it and make a new post next time I find a good one.<br /><br /><h4>Integration vs Unit Tests -&nbsp;Design and Architecture</h4>The way our application is designed means it is mostly implemented using <a href="http://expressjs.com/">express</a>&nbsp;middleware stack with a little bit of business logic sprinkled here and there. We quickly discovered that this was probably not the best architecture, but still have some leftovers and we have had some challenges to write code that can be unit tested in a meaningful way (without a ton of mocks and fake objects being build).<br /><br />This is mainly a design challenge and not a consequence of node, nor javascript, but it has lead to a side effect. Because the &#8220;units&#8221; are not easily testable, a large percentage of the codebase is mainly tested with integration style tests using &#8221;<a href="https://github.com/danwrong/restler">restler</a>&#8221; (I would actually recommend using &#8221;<a href="https://github.com/mikeal/request">request</a>&#8221; instead). These tests are as good or even better than unit tests to find errors, but (un)fortunately the error data returned from our API does not give me enough information to pinpoint what goes wrong.<br /><br />Thus, the conclusion I have come to is that the middleware should be extremely thin and always defer the bulk of the implementation to another module that can tested. This goes both for middleware implementing cross-cutting concerns and the actual end-point implementation.<br /><br />The platform does not have a large body of known design patterns for implementing maintainable applications. This easily leads to developers trying out a lot of different approaches with different merits and flaws, which means the codebase could suffer from inconsistencies making it hard to maintain.<br /><br /><h4>Hosting</h4>Figure out very early how you are going to host this. If you are going for a cloud based hosting vendor and you are based in the States, there is a number of options.<br /><br />The same options are available in Europe, but from the States, leading to a latency challenge. Trying to get a solid agreement with a hosting partner in Europe has been hard and we have been forced to settle for a worse agreement that we would like.<br /><br />The good part is that due to the traction of the platform almost everyday a new option pops up, and we can always fallback to running off amazon or azure and managing the setup ourselves.<br /><br /><h4>Picking the right Stack</h4>Node.js has been gaining a lot of traction and combined with some of the prime modules it is in general a very nice stack for building the kind of API we are building. I would pick it again if I had to make the choice again today, but this time with the knowledge of what is brings.<br /><br />It has taken longer, and been harder than expected (was almost expected), but we are getting close to being done and can reflect upon what worked and what did not work.<br /><br /><ul><li>Get JSHint or JSLint up and running (as early as possible).</li><li>Get CI up and running (as early as possible) - not after 4 months when you are trying to finish up the project.</li><li>The design and architecture is really important - do not let the speed with which you can whip up new features keep you from worrying about this. Design for tests that can tell you what is wrong with the application when changes are being made.&nbsp;</li><li>Decide as early as possible on standards (to enforce the design and architecture decisions), and make sure the application follows these before moving on. I would recommend starting out with the revealing module pattern, hoisted functions for callback nesting, avoiding control flow libraries such as <a href="https://github.com/caolan/async">async</a>, avoiding inheritance, considering every used external module very carefully, and most importantly keeping it dead simple.&nbsp;</li><li>Start out with testing hosting setups from day one:</li><ul><li>Deploy your app to different platform as service vendors, such as:</li><ul><li><a href="http://www.heroku.com/">Heroku</a></li><li><a href="http://nodejitsu.com/">Nodejitsu</a></li></ul><li>Deploy your app to amazon or similar - if nothing else to get an idea of how the server actually work and what is required.</li><li>Use these experiments to figure out how you want to run your application in production. Figure out which are &#8220;real&#8221; requirements and which are nice to have.&nbsp;</li></ul><li>Consider before you start whether to use <a href="http://coffeescript.org/">CoffeeScript</a>&nbsp;or javascript to write the application. It might seem like a straight forward choice to you, but at least do yourself the favor of spending just a little bit of time researching.</li></ul><br />Happy coding. <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /></div>
+<div class="entry-content"><p>Since the beginning of the year I have been working on building a new REST based API to be consumed by both internal and external clients in <a href="http://nodejs.org/">Node.js</a>.</p>
+
+<p>The main reason for choosing node and mongo as the main elements in our stack when we started the project was to alleviate a number of pains we experienced with the &ldquo;old&rdquo; stack of ASP.NET and SQL. Most of this was related to the amount of ceremony that goes in to doing even simple stuff on that stack, which was being made worse by the way the technologies were used. Most if not all of these pains were indeed alleviated, but we gained a couple of new ones, which can be mitigated to some extend.</p>
+
+<h3>Debugging and Stack Trace</h3>
+
+<p>Having spent many hours the last couple of weeks debugging errors in an application with a codebase that is gaining in size I have come to the conclusion that simply put, the debugging and stack trace in node is inferior to what you would get in a .NET based environment.</p>
+
+<p>I have found some of the error messages to be short non descriptive and very generic, making it often fairly hard to understand what is going on. Likely, it is a consequence of the lack of maturity of the technology combined with the lesser experience I have with it, but reading a stack trace in .NET would often mean I know exactly what the problem was, which is not the case with node.</p>
+
+<p>Probably, the callback nature of most of the API&rsquo;s also is somewhat to blame for this.</p>
+
+<p>Most of these challenges can be minimized with a good and solid test suite, as it can help pinpoint more precisely where an error has occurred.</p>
+
+<p>A nice little addition to this is that the dynamic nature of the language means simple spelling mistakes in parts of the program that is not executed by tests (bad!) will not get caught. This is an easy problem to fix though &ndash; apply <a href="http://www.jshint.com/">JSHint</a>, <a href="http://www.jslint.com/">JSLint</a>, or similar (do it from day one, you owe it to yourself).</p>
+
+<p>I tried to find a good &ldquo;bad&rdquo; error message to put here, but could not easily provoke one intentionally. Will keep a look out for it and make a new post next time I find a good one.</p>
+
+<h3>Integration vs Unit Tests &ndash; Design and Architecture</h3>
+
+<p>The way our application is designed means it is mostly implemented using <a href="http://expressjs.com/">express</a> middleware stack with a little bit of business logic sprinkled here and there. We quickly discovered that this was probably not the best architecture, but still have some leftovers and we have had some challenges to write code that can be unit tested in a meaningful way (without a ton of mocks and fake objects being build).</p>
+
+<p>This is mainly a design challenge and not a consequence of node, nor javascript, but it has lead to a side effect. Because the &ldquo;units&rdquo; are not easily testable, a large percentage of the codebase is mainly tested with integration style tests using &ldquo;<a href="https://github.com/danwrong/restler">restler</a>&rdquo; (I would actually recommend using &ldquo;<a href="https://github.com/mikeal/request">request</a>&rdquo; instead). These tests are as good or even better than unit tests to find errors, but (un)fortunately the error data returned from our API does not give me enough information to pinpoint what goes wrong.</p>
+
+<p>Thus, the conclusion I have come to is that the middleware should be extremely thin and always defer the bulk of the implementation to another module that can tested. This goes both for middleware implementing cross-cutting concerns and the actual end-point implementation.</p>
+
+<p>The platform does not have a large body of known design patterns for implementing maintainable applications. This easily leads to developers trying out a lot of different approaches with different merits and flaws, which means the codebase could suffer from inconsistencies making it hard to maintain.</p>
+
+<h3>Hosting</h3>
+
+<p>Figure out very early how you are going to host this. If you are going for a cloud based hosting vendor and you are based in the States, there is a number of options.</p>
+
+<p>The same options are available in Europe, but from the States, leading to a latency challenge. Trying to get a solid agreement with a hosting partner in Europe has been hard and we have been forced to settle for a worse agreement that we would like.</p>
+
+<p>The good part is that due to the traction of the platform almost everyday a new option pops up, and we can always fallback to running off amazon or azure and managing the setup ourselves.</p>
+
+<h3>Picking the right Stack</h3>
+
+<p>Node.js has been gaining a lot of traction and combined with some of the prime modules it is in general a very nice stack for building the kind of API we are building. I would pick it again if I had to make the choice again today, but this time with the knowledge of what is brings.</p>
+
+<p>It has taken longer, and been harder than expected (was almost expected), but we are getting close to being done and can reflect upon what worked and what did not work.</p>
+
+<ul>
+<li>Get JSHint or JSLint up and running (as early as possible).</li>
+<li>Get CI up and running (as early as possible) &ndash; not after 4 months when you are trying to finish up the project.</li>
+<li>The design and architecture is really important &ndash; do not let the speed with which you can whip up new features keep you from worrying about this. Design for tests that can tell you what is wrong with the application when changes are being made.</li>
+<li>Decide as early as possible on standards (to enforce the design and architecture decisions), and make sure the application follows these before moving on. I would recommend starting out with the revealing module pattern, hoisted functions for callback nesting, avoiding control flow libraries such as <a href="https://github.com/caolan/async">async</a>, avoiding inheritance, considering every used external module very carefully, and most importantly keeping it dead simple.</li>
+<li>Start out with testing hosting setups from day one:
+
+<ul>
+<li>Deploy your app to different platform as service vendors, such as:
+
+<ul>
+<li><a href="http://www.heroku.com/">Heroku</a></li>
+<li><a href="http://nodejitsu.com/">Nodejitsu</a></li>
+</ul>
+</li>
+<li>Deploy your app to amazon or similar &ndash; if nothing else to get an idea of how the server actually work and what is required.</li>
+<li>Use these experiments to figure out how you want to run your application in production. Figure out which are &ldquo; real&rdquo; requirements and which are nice to have.</li>
+</ul>
+</li>
+<li>Consider before you start whether to use <a href="http://coffeescript.org/">CoffeeScript</a> or javascript to write the application. It might seem like a straight forward choice to you, but at least do yourself the favor of spending just a little bit of time researching.</li>
+</ul>
+
+
+<p>Happy coding.</p>
 </div>
 
 

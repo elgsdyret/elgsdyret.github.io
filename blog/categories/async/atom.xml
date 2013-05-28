@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Async | Developer's Perception]]></title>
   <link href="http://elgsdyret.github.io/blog/categories/async/atom.xml" rel="self"/>
   <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-05-27T20:58:10+02:00</updated>
+  <updated>2013-05-28T09:56:12+02:00</updated>
   <id>http://elgsdyret.github.io/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
@@ -18,9 +18,151 @@
     <link href="http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences/"/>
     <updated>2012-04-09T10:51:00+02:00</updated>
     <id>http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences</id>
-    <content type="html"><![CDATA[<div class='post'>
-<br /><br />The last 3 months or so I have been busy working on a new backend built in node with mongo as the database. It has been lots of fun, with some frustration, and lots of heureka moments.<br /><br />This is my attempt at describing those experiences, some good and some bad.<br /><br />The two many reasons we opted to work with node was the following:<br /><br /><ul><li>Development speed, due to the simplicity of node and using the same language in both client and server.</li><li>Performance, most of the information we found indicated that we could easier get more performance from using node than the alternative of ASP.NET.</li></ul><br /><br /><span style="font-size: large;">Development Speed</span><br />It seems like the development speed has indeed been increased, but in reality we cannot really measure before we build the next module on top of node. Our first module has also been the proving grounds for the technology stack, as the maturity of the technology means there is not so much information to find on how to write the best node code. Thus, the progress has most likely been slower than what we can expect in the future (yet I still believe I have seen an improvement compared to old projects).<br /><br /><b>Same Language</b><br />So node being javascript, it is in fact the same language is we use in our browser client (built on top of backbone). But, due to the fact that node does not work in the same way as the browser with regards to the code it is not completely trivial to share code between server and client.<br /><br />A given file containing a function in node would have to use<br /><br /><pre class="brush: javascript">module.exports = myFunction; </pre><br />To expose it to being available for use elsewhere. In addition this file would have to be required for the code to actually be used elsewhere. One could argue this is much better than the browser where the same function would probably be attached to some global object (pretending to be a namespace).<br /><br />To give an example of how one could implement code usable for both browser and node, I have taken the liberty of showing a snippet from the brilliant underscore library doing exactly this:<br /><pre class="brush: javascript">if (typeof exports !== 'undefined') {<br />   if (typeof module !== 'undefined' &amp;&amp; module.exports) {<br />       exports = module.exports = _;<br />   }<br />   exports._ = _;<br />} else <br />   root['_'] = _;<br />}<br /></pre><b><br /></b><br /><b>Cross OS Platform</b><br />Having a cross OS platform gives us more freedom in which development machines to use and servers to run in production, which also gives us more freedom regarding hosting partners, whether in the cloud or not. Actually, all the developers are working on windows, as we have found the Webstorm IDE to be the best tool by far, and it does not work well on linux.<br /><br />Running development on windows and production on linux has not been without problems though. The node core is equally good on both OS, but some of the modules we have used have not been properly tested on windows. Additionally, the windows file system is case insensitive, while it is case sensitive on linux, which has led to one error deployment so far.<br /><br /><b>Pyramid of Doom</b><br />Much have been written about the problems the callback nature of most node api's lead to. Our solution has been to mainly use function hoisting:<br />Nested: <br /><pre class="brush: javascript">getSomeData(err, function(err, callback){<br />   doSomeStuff(err, function() {<br />   });<br />});<br /></pre>Hoisted: <br /><pre class="brush: javascript">getSomeData(err, dataRetrieved);<br /><br />function dataRetrieved(err, callback) {<br />   doSomeStuff(err, someStuffDone);<br />}<br /><br />function someStuffDone() {<br />}<br /></pre>This is working ok for scenarios where we have a fixed depth of nesting of functions (the example with 2 above is not a bad pyramid of doom by the way - try throwing in a couple of more levels of nesting and you will see the problem). Unfortunately, this method does not work with a dynamic level of nesting (think an array of functions generated and to be called in sequence), and this is where a library such as Async can help.<br /><br />Solving the pyramid of doom this way has not been without challenges, as there have been arguments about using Async or similar library even with a fixed amount of nesting. My standing on this is that code written with Async in that scenario (fixed level of nesting) is much harder to read, understand, and reason about.<br /><br /><b>Express and middleware</b><br />Like most developers doing services in node exposed on the web, we have chosen the express web framework. There are a lot of features built into express, and to be honest we only use a fraction of them. Mainly the middleware stack (from the connect sub module) has been used for good, but certainly also for bad.<br /><br />Cross cutting concerns like logging, authorization, and gzipping are all examples where benefit can be reaped from the stack and it is easy to apply a certain behaviour to all requests and responses. Unfortunately, the ease of implementation has lead to data access and business logic being implemented as middleware. This went well for a while, but it is harder to reuse and test the middleware as they are dependent on the (request, reponse, next) - triple &nbsp;of arguments, as opposed to business relevant objects.<br /><br />Thus, we are moving towards not using middleware for data access and business logic, having one function, registered as middleware, for each end-point which then delegates to business and data oriented modules.<br /><br /><b>Require (Cyclic)</b><br />As we move along and introduce more files and more modules, I have noticed a tendency to let all dependencies be resolved with require. This leads to some scenarios where we have fairly low level functionality (such as configuration api) require high level functionality (the user module). This easily leads to cyclic require loops, causing bugs that can be hard to resolve. Like any software it is good practise also in node to let high level functionality depend on low level functionality - not the other way.<br /><br />The solution to reusing bits is, as with many frameworks, to divide and conquer. If a high level module contains a function that would be really usable in a low level module, extract it in a seperate module and break the cycle that way.<br /><br /><b>Return Callback</b><br />Just an observation on the nature of some of the node code I have been writing recently:<br /><pre class="brush: javascript">function doSomeStuff(err, callback) {<br />     if (err) {<br />        callback(err, 'bad stuff happened');<br />     }<br />     callback(null, 'wuhuuuu bad stuff did not happen');<br />}<br /></pre>Did you find the bug? This is the most simple example I could come up with, but when it gets a bit more complex I find myself forgetting the return statement in front of the first callback, leading to some funky debugging session:<br /><pre class="brush: javascript">function doSomeStuff(err, callback) {<br />     if (err) {<br />        return callback(err, 'bad stuff happened');<br />     }<br />     callback(null, 'wuhuuuu bad stuff did not happen');<br />}<br /></pre>Maybe it is just a quirk of how many brain process the code, but consider yourself warned! ;-D<br /><br /><b>Simplicity</b><br />This is the one point where I believe node really shows its&nbsp;strength, it is dead simple to implement a server. Recently, we had a potential candidate who had written the server part of his test in less than 100 lines of coffee-script, and I really think this says it all.<br /><br /><span style="font-size: large;">Performance</span><br />I have written a lot about my experiences with developing on node, and very little regarding the awesome earth-shattering speed of node.<br /><br />Some claim that the way node works (event-loop and such) is the coolest thing since the invention of the wheel, while others claim that it is borderline stupid. I am not going to join that discussion, but just tell that what I have seen so far and the experiments done show that node is indeed fast, and also faster than what we did before. That being said our team does not have good large scale measurements or experiments of our own to prove this.<br /><br /><br />Is node the best choice available for us? Maybe, it could be, but at least until now it has proven to be a very good choice.<br /><br /></div>
+    <content type="html"><![CDATA[<p>The last 3 months or so I have been busy working on a new backend built in node with mongo as the database. It has been lots of fun, with some frustration, and lots of heureka moments.</p>
 
+<p>This is my attempt at describing those experiences, some good and some bad.</p>
+
+<p>The two many reasons we opted to work with node was the following:</p>
+
+<ul>
+<li>Development speed, due to the simplicity of node and using the same language in both client and server.</li>
+<li>Performance, most of the information we found indicated that we could easier get more performance from using node than the alternative of ASP.NET.</li>
+</ul>
+
+
+<h3>Development Speed</h3>
+
+<p>It seems like the development speed has indeed been increased, but in reality we cannot really measure before we build the next module on top of node. Our first module has also been the proving grounds for the technology stack, as the maturity of the technology means there is not so much information to find on how to write the best node code. Thus, the progress has most likely been slower than what we can expect in the future (yet I still believe I have seen an improvement compared to old projects).</p>
+
+<h3>Same Language</h3>
+
+<p>So node being javascript, it is in fact the same language is we use in our browser client (built on top of backbone). But, due to the fact that node does not work in the same way as the browser with regards to the code it is not completely trivial to share code between server and client.</p>
+
+<p>A given file containing a function in node would have to use</p>
+
+<p><code>javascript
+module.exports = myFunction;
+</code></p>
+
+<p>To expose it to being available for use elsewhere. In addition this file would have to be required for the code to actually be used elsewhere. One could argue this is much better than the browser where the same function would probably be attached to some global object (pretending to be a namespace).</p>
+
+<p>To give an example of how one could implement code usable for both browser and node, I have taken the liberty of showing a snippet from the brilliant underscore library doing exactly this:</p>
+
+<p>``` javascript
+if (typeof exports !== &lsquo;undefined&rsquo;) {</p>
+
+<pre><code>if (typeof module !== 'undefined' &amp;&amp; module.exports) {
+    exports = module.exports = _;
+</code></pre>
+
+<p>   }
+   exports.<em> = </em>;
+} else</p>
+
+<pre><code>root['_'] = _;
+</code></pre>
+
+<p>}
+```</p>
+
+<h3>Cross OS Platform</h3>
+
+<p>Having a cross OS platform gives us more freedom in which development machines to use and servers to run in production, which also gives us more freedom regarding hosting partners, whether in the cloud or not. Actually, all the developers are working on windows, as we have found the Webstorm IDE to be the best tool by far, and it does not work well on linux (when that linux is a virtual box at least.</p>
+
+<p>Running development on windows and production on linux has not been without problems though. The node core is equally good on both OS, but some of the modules we have used have not been properly tested on windows. Additionally, the windows file system is case insensitive, while it is case sensitive on linux, which has led to one error deployment so far.</p>
+
+<h3>Pyramid of Doom</h3>
+
+<p>Much have been written about the problems the callback nature of most node api&rsquo;s lead to. Our solution has been to mainly use function hoisting:</p>
+
+<p>Nested:</p>
+
+<p>``` javascript
+getSomeData(err, function(err, callback){</p>
+
+<pre><code>doSomeStuff(err, function() {
+});
+</code></pre>
+
+<p>});
+```</p>
+
+<p>Hoisted:</p>
+
+<p>``` javascript
+getSomeData(err, dataRetrieved);</p>
+
+<p>function dataRetrieved(err, callback) {</p>
+
+<pre><code>doSomeStuff(err, someStuffDone);
+</code></pre>
+
+<p>}</p>
+
+<p>function someStuffDone() {}
+```</p>
+
+<p>This is working ok for scenarios where we have a fixed depth of nesting of functions (the example with 2 above is not a bad pyramid of doom by the way &ndash; try throwing in a couple of more levels of nesting and you will see the problem). Unfortunately, this method does not work with a dynamic level of nesting (think an array of functions generated and to be called in sequence), and this is where a library such as Async can help.</p>
+
+<p>Solving the pyramid of doom this way has not been without challenges, as there have been arguments about using Async or similar library even with a fixed amount of nesting. My standing on this is that code written with Async in that scenario (fixed level of nesting) is much harder to read, understand, and reason about.</p>
+
+<h3>Express and middleware</h3>
+
+<p>Like most developers doing services in node exposed on the web, we have chosen the express web framework. There are a lot of features built into express, and to be honest we only use a fraction of them. Mainly the middleware stack (from the connect sub module) has been used for good, but certainly also for bad.</p>
+
+<p>Cross cutting concerns like logging, authorization, and gzipping are all examples where benefit can be reaped from the stack and it is easy to apply a certain behaviour to all requests and responses. Unfortunately, the ease of implementation has lead to data access and business logic being implemented as middleware. This went well for a while, but it is harder to reuse and test the middleware as they are dependent on the (request, reponse, next) &ndash; triple of arguments, as opposed to business relevant objects.</p>
+
+<p>Thus, we are moving towards not using middleware for data access and business logic, having one function, registered as middleware, for each end-point which then delegates to business and data oriented modules.</p>
+
+<h3>Require (Cyclic)</h3>
+
+<p>As we move along and introduce more files and more modules, I have noticed a tendency to let all dependencies be resolved with require. This leads to some scenarios where we have fairly low level functionality (such as configuration api) require high level functionality (the user module). This easily leads to cyclic require loops, causing bugs that can be hard to resolve. Like any software it is good practise also in node to let high level functionality depend on low level functionality &ndash; not the other way.</p>
+
+<p>The solution to reusing bits is, as with many frameworks, to divide and conquer. If a high level module contains a function that would be really usable in a low level module, extract it in a seperate module and break the cycle that way.</p>
+
+<h3>Return Callback</h3>
+
+<p>Just an observation on the nature of some of the node code I have been writing recently:</p>
+
+<p>``` javascript
+function doSomeStuff(err, callback) {</p>
+
+<pre><code>if (err) {
+    callback(err, 'bad stuff happened');
+}
+callback(null, 'wuhuuuu bad stuff did not happen');
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Did you find the bug? This is the most simple example I could come up with, but when it gets a bit more complex I find myself forgetting the return statement in front of the first callback, leading to some funky debugging session:</p>
+
+<p>``` javascript
+function doSomeStuff(err, callback) {</p>
+
+<pre><code>if (err) {
+    return callback(err, 'bad stuff happened');
+}
+callback(null, 'wuhuuuu bad stuff did not happen');
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Maybe it is just a quirk of how many brain process the code, but consider yourself warned! ;-D</p>
+
+<h3>Simplicity</h3>
+
+<p>This is the one point where I believe node really shows its strength, it is dead simple to implement a server. Recently, we had a potential candidate who had written the server part of his test in less than 100 lines of coffee-script, and I really think this says it all.</p>
+
+<h3>Performance</h3>
+
+<p>I have written a lot about my experiences with developing on node, and very little regarding the awesome earth-shattering speed of node.</p>
+
+<p>Some claim that the way node works (event-loop and such) is the coolest thing since the invention of the wheel, while others claim that it is borderline stupid. I am not going to join that discussion, but just tell that what I have seen so far and the experiments done show that node is indeed fast, and also faster than what we did before. That being said our team does not have good large scale measurements or experiments of our own to prove this.</p>
+
+<p>Is node the best choice available for us? Maybe, it could be, but at least until now it has proven to be a very good choice.</p>
 ]]></content>
   </entry>
   
