@@ -28,8 +28,8 @@
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
   
 
 </head>
@@ -95,7 +95,7 @@
 
 <blockquote><p>This is the longest blog post I have yet written. It contains no code, just ranting, and hopefully some insights.</p></blockquote>
 
-<h3>Possible Motivation</h3>
+<h2>Possible Motivation</h2>
 
 <p>Code generation is typically introduced to:</p>
 
@@ -112,7 +112,7 @@
 
 <p>Regarding tedious coding it would be wise to step back and consider why there is so much tedious coding? If the number of lines of code compared to the functionality it provides is so high that you consider using code generation, I would put it to you that your design is not very good. Basically, you are trying to hammer a square peg into a round hole, and instead of seeing the error of that you just get a bigger hammer (called code generation).</p>
 
-<h3>How to Determine what to Generate</h3>
+<h2>How to Determine what to Generate</h2>
 
 <p>Usually, you would determine what to generate based on an external resource (like XML files), examining the existing code structure using the reflection API, or annotating the existing code somehow (probably using attributes) and then examining that using the reflection API.</p>
 
@@ -124,7 +124,7 @@
 
 <blockquote><p><em>If you end up doing code generation despite all my attempts to get you to move away from it, do work dilligently on creating and maintaining documentation for you base generation format, whether it is XML based, annotations, or the structure of the code.</em></p></blockquote>
 
-<h3>How to Actually Generate the code</h3>
+<h2>How to Actually Generate the code</h2>
 
 <p>Once the motivation is in place and you have somehow figured out how to determine what the output code should look like, it is time to actually generate some code.</p>
 
@@ -142,7 +142,7 @@
 
 <blockquote><p><em>Do not start from scratch. Search the market for generation tools that can do the bulk of the lifting for you.</em></p></blockquote>
 
-<h3>Build Process</h3>
+<h2>Build Process</h2>
 
 <p>Once the code is generated there is a number of ways it can interact with the rest of the codebase:</p>
 
@@ -165,7 +165,7 @@
 
 <blockquote><p><em>Make sure the build process is not made more complicated (and slower) due to the code generation. Ensure that the code generation is an optional step that comes before the build. Consider only generating once and keeping the files in source control if feasible.</em></p></blockquote>
 
-<h3>Examples</h3>
+<h2>Examples</h2>
 
 <p>I am just going to run through some of the examples of code generation I have encountered sofar. One is bad, but ultimately not that harmful, two have been extremely costly, and one is maybe ok.</p>
 
@@ -205,7 +205,7 @@
 
 <p>The idea behind the .NET based SDK was that it should work in a RPC style, and it contained both proxy objects and data objects directly generated based on the data retrieved from the core entities. In itself exposing internal implementation details in this way is never a good idea. As a direct consequence of this I have introduced a bug by changing the naming of a function parameter, which reflected through the service layer and the SDK. This meant that consumers of the API suddenly experienced a breaking change.</p>
 
-<p>Nevertheless, the main problem stems from the design. The way the proxy object works in the SDK is that it does not contain any data. This means if for instance you access the name property of a customer object you will end up going over the wire to retrieve this data. Obviously, this leads to extremely chatty behaviour by the consumers of the SDK and eventhough it is possible to avoid it is not the perceived default. The main problem though is that 50 or so entities with an average of 10 properties leads to 50<em>10</em>2 (both get and set) = 1000 methods on the service layer to implement the proxy object (could have been done with a PATCH like operation for partially updates, but alas it is not). With the standard methods for entities (create, update, delete) and some queries the API ends up having approximately 1500 public methods.</p>
+<p>Nevertheless, the main problem stems from the design. The way the proxy object works in the SDK is that it does not contain any data. This means if for instance you access the name property of a customer object you will end up going over the wire to retrieve this data. Obviously, this leads to extremely chatty behaviour by the consumers of the SDK and eventhough it is possible to avoid it is not the perceived default. The main problem though is that 50 or so entities with an average of 10 properties leads to 50 X 10 X 2 (both get and set) = 1000 methods on the service layer to implement the proxy object (could have been done with a PATCH like operation for partially updates, but alas it is not). With the standard methods for entities (create, update, delete) and some queries the API ends up having approximately 1500 public methods.</p>
 
 <p>I have removed the code generation completely and changed every method to be a &lsquo;method as an object&rsquo; implementation. Combined with the template pattern this means that there is very little redundant code. Unfortunately, it does not change the fact that we have 1500 public methods, which is a nightmare to maintain for us, and equally bad for our consumers to understand and navigate. Fans of the code generation in question would probably argue that it is only a problem to maintain, because the code generation has been removed, and they would be partially right. But, taking into account the number of bugs in the code generation and the number of well hidden side effects I am very happy we got rid of it.</p>
 
@@ -299,35 +299,14 @@
   </footer>
 </article>
 
+
 </div>
 
 <aside class="sidebar">
   
     <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2013/05/27/porting-to-octopress/">Porting to Octopress</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/05/25/code-generation-in-net/">Code Generation in .NET</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/05/02/getting-started-with-go/">Getting Started With Go</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/22/working-effectively-with-aspnet-and/">Working Effectively With ASP.NET and HttpContext</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/03/24/playing-with-dynamic-keyword/">Playing With the Dynamic Keyword</a>
-      </li>
-    
-  </ul>
+  <h1>About Me</h1>
+  <p>I am a geek and grumpy developer, striving to get smarter all the time. Used to mainly work with the .NET platform, but recently I have mostly worked with JavaScript, both in the browser and in node.js.</p>
 </section>
 
 <section>
@@ -358,7 +337,6 @@
   </script>
   <script src="/javascripts/github.js" type="text/javascript"> </script>
 </section>
-
 
 
 
