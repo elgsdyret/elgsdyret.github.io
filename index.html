@@ -9,7 +9,7 @@
   <meta name="author" content="Nikolaj Kaare Nørskov">
 
   
-  <meta name="description" content="Just testing out the octopress blogging engine. I am considering moving away from blogger, mostly to enable me to write in markdown (I am not a fan &hellip;">
+  <meta name="description" content="I know more or less completed moving my blog from blogger to octopress. In general the experience has been quite good and I am impressed how easy it &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,76 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/">Moved My Blog From Blogger to Octopress</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-02T08:36:00+02:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2013</time>
+        
+         | <a href="/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I know more or less completed moving my blog from blogger to <a href="http://octopress.org/">octopress</a>. In general the experience has been quite good and I am impressed how easy it was to get everything going.</p>
+
+<h2>Why</h2>
+
+<p>I was not entirely happy with blogger, as I did not like the way the editing of the blog worked and the syntax highlighting of the code sections was done with javascript and was rather flaky when the code used characters that would cause problems in the pre tag.</p>
+
+<p>Thus, I was motivated to move away from blogger and I had already started writing posts in an editor, before deciding to move, and then copy pasting them online afterwards. I started out with just plain text with my own homemade notation for things like headers etc. Eventually, I discovered markdown, which I quickly fell completely in love with.</p>
+
+<p>Since, I like writing in markdown and prefer doing the editing offline the first criteria was to find a blog engine that can handle markdown.</p>
+
+<p>The second criteria was that I would like to have it hosted in a very easy way. Thus, I would like the blog to only depend on html, javascript, and css once it was running. That way I could even host it on dropbox or something similar if I wanted to.</p>
+
+<p>Finally, I wanted something that could do more or less all the stuff that a modern blog engine should do. Handle comments, categories, and so forth.</p>
+
+<p>When I also discovered that octopress allowed me to do code syntax highlighting with pure html and css and was dead easy to setup and use, I quickly decided to move.</p>
+
+<h2>The process</h2>
+
+<p>I am fortunate to have a good colleague named <a href="http://beletsky.net">Alexander Beletsky</a>, who was also considering making a similar move, and he was kind enough to forward some of the tricks he had found.</p>
+
+<p>First step was to get octopress working, which was fairly straightforward. Actually, the main challenge in this was that the version of ruby I had installed was not really working with octopress, but I simply solved this by installing ruby again using the guidelines given.</p>
+
+<p>Next step was to find somewhere to host it. I settled on using github pages, since I am a fan of the github functionality and have some experience with it. It also seems like a stable, fast, and free hosting option. Configuring this was simple following the guidelines from github and octopress (basically just create a new repository with a certain name in github and run one rake command in octopress and your done).</p>
+
+<p>Now I actually had a working blog, and wrote my first short octopress blogpost to test it out. I really wanted to move my old posts to the new blog so I exported them from blogger using the build in export functionality, and ran a script which I found here <a href="https://gist.github.com/dnagir/1765496">import.rb</a>. This left me with my old posts in html and I quickly included them in octopress.</p>
+
+<p>Unfortunately, due to the syntax highligthing some of the code snippets was in script tags instead of pre tags. This caused the exported html posts to mess up and no code being shown. Basically, I had the option of including the syntax highligthing javascript, modify the conversion script, write some code that could cleanup the posts, or do it by hand. Luckily, I only started blogging a few years ago and have not been as productive as I planned, so I was able to convert the posts to markdown in a couple of hours of boring work.</p>
+
+<p>In the start I had used the built in comments system of blogger, and those comments where included in the text of the posts now. That is ok with me as long as it is not lost. I also spend quite some time working on getting my disqus comments moved, but sofar it does not work completely. It is possible to comment, but the old comments does not appear in the new blog, even though, as far as I can see they have been ported succesfully. So this is still ongoing work.</p>
+
+<p>To get the look and feel you want for octopress you can either create a completely theme or find an existing one and modify it as you like. I chose the <a href="https://github.com/lucaslew/whitespace">whitespace</a> theme and changed it a bit to bring back the sidebar. Will probably modify it some more as I go along, but in general I think Lucas Lew has created a really nice looking and clean theme. You can find several 3rd party themes for octopress here <a href="https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes">themes</a>.</p>
+
+<p>All in all I am more than happy with octopress and really looking forward to working more with it.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1417,118 +1487,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/09/08/maintainable-aspnet-webforms-part-i/">Maintainable ASP.NET Webforms - Part I</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-08T11:04:00+02:00" pubdate data-updated="true">Sep 8<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/09/08/maintainable-aspnet-webforms-part-i/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In the next couple of blog posts I will try to outline how I try to improve the maintainability and testability of pages written in the ASP.NET Web Forms framework</p>
-
-<h3>Don&rsquo;t use ASP.NET Web Forms</h3>
-
-<p>If you are not forced there is no good reason to use this technology. There are many better ways to write your web applications. If you wish to work with the .NET framework you might consider:</p>
-
-<ul>
-<li>ASP.NET MVC latest incarnation (if it just has to be Microsoft)</li>
-<li>Nancy (nice open source framework)</li>
-<li>&hellip; and other options</li>
-</ul>
-
-
-<p>If your wish to use something other than .NET there are also many options (the reason I base this decision on whether you want .NET or not is simply because we started out discussing alternatives to Web Forms):</p>
-
-<ul>
-<li>RAILS, Sinatra, Goliath and other options on Ruby.</li>
-<li>Django on Python.</li>
-<li>Node.js potentially with the express framework.</li>
-<li>&hellip; and lots of other options.</li>
-</ul>
-
-
-<p>Point is: <em>First way to improve your Web (Forms) code is to not use Web Forms.</em></p>
-
-<h3>I Have no Choice</h3>
-
-<p>If you are stuck building Web Forms, it is most likely due to working on a legacy system build with this technology. There are lots of those out there and they are not getting upgraded to better options (at least not all of them).</p>
-
-<p>Thus, we have to manage somehow.</p>
-
-<p>The main tactic I advocate for coping with the platform is a pattern called MVP (Model-View-Presenter): <a href="http://martinfowler.com/eaaDev/uiArchs.html">MVP</a>(Go down a bit to find the description)</p>
-
-<p>Now this may not be the most easily accessible description and potentially you might not be able to implement the pattern in your application from this description (or it would require quite some work).</p>
-
-<p>There is a catch to the pattern though. If used correctly it can help make your code more testable and easier to reason about, but it adds complexity and will not save you from having to know about viewstate, page lifecycle and other details about Web Forms.</p>
-
-<h3>Bits and Pieces</h3>
-
-<p>Not surprisingly we need a class for each of the roles of Model, View, and Presenter (actually a bit more).</p>
-
-<h4>Model</h4>
-
-<p>The model is just a PONO (plain old .NET object) and can be your domain model or alternatively a view model. When to use a view model is largely a matter of taste, but I prefer not to do it unless I actually use it for something as it does add an overhead of an extra class and mapping code (consider using a tool like automapper if you do have both models).</p>
-
-<h4>View</h4>
-
-<p>The view in our ASP.NET webform MVP implementation is basically our code behind file and the aspx file can be considered a template for helping with rendering the html. The key is to keep the code behind file very very slim as the view can typically be very hard to test due to dependencies on ASP.NET.</p>
-
-<p>The responsibility of the view is to render html, retrieve values from the html (really being the viewstate), and kicking of the flow (that is the way webforms work).</p>
-
-<p>The view is hidden by an interface to save the Presenter from knowing the gritty details of webforms. This way the presenter could also be used in another application that is not necessarily for the web.</p>
-
-<p>The view initializes the presenter with a reference to the view itself &ndash; typically in the pageload event, but that really depends on the purpose of the page.</p>
-
-<h4>Presenter</h4>
-
-<p>The presenter is somewhat similar to the Controller in the MVC pattern, at least in the way I use it. It is not triggered in the same way as in MVC, though, as the view has to start it up.</p>
-
-<p>Basically, the presenter handles the flow of the page, receiving data from the view when an event occurs (a button is clicked for instance), using lower level constructs (like data-layers or services) to manipulate data and then typically asking the view to render something. I would never have a presenter function return a value, as it is solely up to the presenter to determine what the view should do (not how though).</p>
-
-<p>The presenter will get a reference to the view through the interface in the constructor.</p>
-
-<p>In .NET this leaves us with 5 pieces:</p>
-
-<ul>
-<li>A View (for instance SearchDogView) which inherits from System.Web.UI.Page.</li>
-<li>A template used for rendering html for the view (the ASPX file).</li>
-<li>An interface for the view (ISearchDogView).</li>
-<li>A presenter (SearchDogPresenter)</li>
-<li>A model (or 2 if we decide to use a ViewModel)</li>
-</ul>
-
-
-<p><a href="/blog/2012/09/08/maintainable-aspnet-webforms-part-ii">Part II: A tiny example</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1541,7 +1499,7 @@
   
     <section>
   <h1>About Me</h1>
-  <p>I am a geek and grumpy developer, striving to get smarter all the time. Used to mainly work with the .NET platform, but recently I have also alot worked with JavaScript, both in the browser and in node.js. I constantly play around with new languages and sometimes write about it.</p>
+  <p>I am a geek and grumpy developer, striving to get smarter all the time. Used to mainly work with the .NET platform, but recently I have also alot worked with JavaScript, both in the browser and in node.js. I constantly play around with new languages and sometimes I even write about it.</p>
 </section>
 
 <section>

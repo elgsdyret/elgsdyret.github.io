@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Moved My Blog From Blogger to Octopress - Developer's Perception</title>
+  <meta name="author" content="Nikolaj Kaare Nørskov">
+
+  
+  <meta name="description" content="I know more or less completed moving my blog from blogger to octopress. In general the experience has been quite good and I am impressed how easy it &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Perception" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Perception</a></h1>
+  
+    <h2>Odd thoughts from a developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:elgsdyret.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Moved My Blog From Blogger to Octopress</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-02T08:36:00+02:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I know more or less completed moving my blog from blogger to <a href="http://octopress.org/">octopress</a>. In general the experience has been quite good and I am impressed how easy it was to get everything going.</p>
+
+<h2>Why</h2>
+
+<p>I was not entirely happy with blogger, as I did not like the way the editing of the blog worked and the syntax highlighting of the code sections was done with javascript and was rather flaky when the code used characters that would cause problems in the pre tag.</p>
+
+<p>Thus, I was motivated to move away from blogger and I had already started writing posts in an editor, before deciding to move, and then copy pasting them online afterwards. I started out with just plain text with my own homemade notation for things like headers etc. Eventually, I discovered markdown, which I quickly fell completely in love with.</p>
+
+<p>Since, I like writing in markdown and prefer doing the editing offline the first criteria was to find a blog engine that can handle markdown.</p>
+
+<p>The second criteria was that I would like to have it hosted in a very easy way. Thus, I would like the blog to only depend on html, javascript, and css once it was running. That way I could even host it on dropbox or something similar if I wanted to.</p>
+
+<p>Finally, I wanted something that could do more or less all the stuff that a modern blog engine should do. Handle comments, categories, and so forth.</p>
+
+<p>When I also discovered that octopress allowed me to do code syntax highlighting with pure html and css and was dead easy to setup and use, I quickly decided to move.</p>
+
+<h2>The process</h2>
+
+<p>I am fortunate to have a good colleague named <a href="http://beletsky.net">Alexander Beletsky</a>, who was also considering making a similar move, and he was kind enough to forward some of the tricks he had found.</p>
+
+<p>First step was to get octopress working, which was fairly straightforward. Actually, the main challenge in this was that the version of ruby I had installed was not really working with octopress, but I simply solved this by installing ruby again using the guidelines given.</p>
+
+<p>Next step was to find somewhere to host it. I settled on using github pages, since I am a fan of the github functionality and have some experience with it. It also seems like a stable, fast, and free hosting option. Configuring this was simple following the guidelines from github and octopress (basically just create a new repository with a certain name in github and run one rake command in octopress and your done).</p>
+
+<p>Now I actually had a working blog, and wrote my first short octopress blogpost to test it out. I really wanted to move my old posts to the new blog so I exported them from blogger using the build in export functionality, and ran a script which I found here <a href="https://gist.github.com/dnagir/1765496">import.rb</a>. This left me with my old posts in html and I quickly included them in octopress.</p>
+
+<p>Unfortunately, due to the syntax highligthing some of the code snippets was in script tags instead of pre tags. This caused the exported html posts to mess up and no code being shown. Basically, I had the option of including the syntax highligthing javascript, modify the conversion script, write some code that could cleanup the posts, or do it by hand. Luckily, I only started blogging a few years ago and have not been as productive as I planned, so I was able to convert the posts to markdown in a couple of hours of boring work.</p>
+
+<p>In the start I had used the built in comments system of blogger, and those comments where included in the text of the posts now. That is ok with me as long as it is not lost. I also spend quite some time working on getting my disqus comments moved, but sofar it does not work completely. It is possible to comment, but the old comments does not appear in the new blog, even though, as far as I can see they have been ported succesfully. So this is still ongoing work.</p>
+
+<p>To get the look and feel you want for octopress you can either create a completely theme or find an existing one and modify it as you like. I chose the <a href="https://github.com/lucaslew/whitespace">whitespace</a> theme and changed it a bit to bring back the sidebar. Will probably modify it some more as I go along, but in general I think Lucas Lew has created a really nice looking and clean theme. You can find several 3rd party themes for octopress here <a href="https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes">themes</a>.</p>
+
+<p>All in all I am more than happy with octopress and really looking forward to working more with it.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Nikolaj Kaare Nørskov</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-02T08:36:00+02:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/blog/'>Blog</a>, <a class='category' href='/blog/categories/octopress/'>Octopress</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/" data-via="nikolaj_k_n" data-counturl="http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/05/27/porting-to-octopress/" title="Previous Post: Porting to Octopress">&laquo; Porting to Octopress</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <p>I am a geek and grumpy developer, striving to get smarter all the time. Used to mainly work with the .NET platform, but recently I have also alot worked with JavaScript, both in the browser and in node.js. I constantly play around with new languages and sometimes I even write about it.</p>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/elgsdyret">@elgsdyret</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'elgsdyret',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Nikolaj Kaare Nørskov -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'developersperception';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/';
+        var disqus_url = 'http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

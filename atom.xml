@@ -4,7 +4,7 @@
   <title><![CDATA[Developer's Perception]]></title>
   <link href="http://elgsdyret.github.io/atom.xml" rel="self"/>
   <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-05-31T13:31:28+02:00</updated>
+  <updated>2013-06-02T09:32:37+02:00</updated>
   <id>http://elgsdyret.github.io/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
@@ -12,6 +12,47 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Moved My Blog From Blogger to Octopress]]></title>
+    <link href="http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/"/>
+    <updated>2013-06-02T08:36:00+02:00</updated>
+    <id>http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress</id>
+    <content type="html"><![CDATA[<p>I know more or less completed moving my blog from blogger to <a href="http://octopress.org/">octopress</a>. In general the experience has been quite good and I am impressed how easy it was to get everything going.</p>
+
+<h2>Why</h2>
+
+<p>I was not entirely happy with blogger, as I did not like the way the editing of the blog worked and the syntax highlighting of the code sections was done with javascript and was rather flaky when the code used characters that would cause problems in the pre tag.</p>
+
+<p>Thus, I was motivated to move away from blogger and I had already started writing posts in an editor, before deciding to move, and then copy pasting them online afterwards. I started out with just plain text with my own homemade notation for things like headers etc. Eventually, I discovered markdown, which I quickly fell completely in love with.</p>
+
+<p>Since, I like writing in markdown and prefer doing the editing offline the first criteria was to find a blog engine that can handle markdown.</p>
+
+<p>The second criteria was that I would like to have it hosted in a very easy way. Thus, I would like the blog to only depend on html, javascript, and css once it was running. That way I could even host it on dropbox or something similar if I wanted to.</p>
+
+<p>Finally, I wanted something that could do more or less all the stuff that a modern blog engine should do. Handle comments, categories, and so forth.</p>
+
+<p>When I also discovered that octopress allowed me to do code syntax highlighting with pure html and css and was dead easy to setup and use, I quickly decided to move.</p>
+
+<h2>The process</h2>
+
+<p>I am fortunate to have a good colleague named <a href="http://beletsky.net">Alexander Beletsky</a>, who was also considering making a similar move, and he was kind enough to forward some of the tricks he had found.</p>
+
+<p>First step was to get octopress working, which was fairly straightforward. Actually, the main challenge in this was that the version of ruby I had installed was not really working with octopress, but I simply solved this by installing ruby again using the guidelines given.</p>
+
+<p>Next step was to find somewhere to host it. I settled on using github pages, since I am a fan of the github functionality and have some experience with it. It also seems like a stable, fast, and free hosting option. Configuring this was simple following the guidelines from github and octopress (basically just create a new repository with a certain name in github and run one rake command in octopress and your done).</p>
+
+<p>Now I actually had a working blog, and wrote my first short octopress blogpost to test it out. I really wanted to move my old posts to the new blog so I exported them from blogger using the build in export functionality, and ran a script which I found here <a href="https://gist.github.com/dnagir/1765496">import.rb</a>. This left me with my old posts in html and I quickly included them in octopress.</p>
+
+<p>Unfortunately, due to the syntax highligthing some of the code snippets was in script tags instead of pre tags. This caused the exported html posts to mess up and no code being shown. Basically, I had the option of including the syntax highligthing javascript, modify the conversion script, write some code that could cleanup the posts, or do it by hand. Luckily, I only started blogging a few years ago and have not been as productive as I planned, so I was able to convert the posts to markdown in a couple of hours of boring work.</p>
+
+<p>In the start I had used the built in comments system of blogger, and those comments where included in the text of the posts now. That is ok with me as long as it is not lost. I also spend quite some time working on getting my disqus comments moved, but sofar it does not work completely. It is possible to comment, but the old comments does not appear in the new blog, even though, as far as I can see they have been ported succesfully. So this is still ongoing work.</p>
+
+<p>To get the look and feel you want for octopress you can either create a completely theme or find an existing one and modify it as you like. I chose the <a href="https://github.com/lucaslew/whitespace">whitespace</a> theme and changed it a bit to bring back the sidebar. Will probably modify it some more as I go along, but in general I think Lucas Lew has created a really nice looking and clean theme. You can find several 3rd party themes for octopress here <a href="https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes">themes</a>.</p>
+
+<p>All in all I am more than happy with octopress and really looking forward to working more with it.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Porting to Octopress]]></title>
