@@ -1,107 +1,95 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>
-            http://elgsdyret.github.io/blog/2011/09/29/basket-frameworks-empowerment-and-holy/
-        </loc>
+        <loc>http://nikolajkn.dk/blog/2011/09/29/basket-frameworks-empowerment-and-holy/</loc>
         <lastmod>2013-05-30T19:13:47+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2011/11/13/oredev-good-parts/</loc>
+        <loc>http://nikolajkn.dk/blog/2011/11/13/oredev-good-parts/</loc>
         <lastmod>2013-05-30T19:13:47+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2011/11/13/oredev-bad-parts/</loc>
+        <loc>http://nikolajkn.dk/blog/2011/11/13/oredev-bad-parts/</loc>
         <lastmod>2013-05-30T19:13:47+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2012/01/18/extending-backbone/</loc>
+        <loc>http://nikolajkn.dk/blog/2012/01/18/extending-backbone/</loc>
         <lastmod>2013-05-31T13:28:51+02:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://elgsdyret.github.io/blog/2012/01/21/linux-with-nodejs-and-mongo-on-windows/
-        </loc>
+        <loc>http://nikolajkn.dk/blog/2012/01/21/linux-with-nodejs-and-mongo-on-windows/</loc>
         <lastmod>2013-05-31T13:28:45+02:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://elgsdyret.github.io/blog/2012/01/22/linux-with-nodejs-and-mongo-on-windows_22/
-        </loc>
+        <loc>http://nikolajkn.dk/blog/2012/01/22/linux-with-nodejs-and-mongo-on-windows_22/</loc>
         <lastmod>2013-05-31T13:28:40+02:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://elgsdyret.github.io/blog/2012/01/29/mapping-screen-mockup-to-backboneviews/
-        </loc>
+        <loc>http://nikolajkn.dk/blog/2012/01/29/mapping-screen-mockup-to-backboneviews/</loc>
         <lastmod>2013-05-31T13:28:35+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences/</loc>
+        <loc>http://nikolajkn.dk/blog/2012/04/09/nodejs-first-experiences/</loc>
         <lastmod>2013-05-31T13:28:25+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2012/06/01/nodejs-when-honeymoon-is-over/</loc>
+        <loc>http://nikolajkn.dk/blog/2012/06/01/nodejs-when-honeymoon-is-over/</loc>
         <lastmod>2013-05-31T13:28:19+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-i/</loc>
+        <loc>http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-i/</loc>
         <lastmod>2013-05-31T13:28:14+02:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/
-        </loc>
+        <loc>http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/</loc>
         <lastmod>2013-05-31T13:28:05+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2012/09/11/cors-vs-aspnet-session/</loc>
+        <loc>http://nikolajkn.dk/blog/2012/09/11/cors-vs-aspnet-session/</loc>
         <lastmod>2013-05-31T13:28:00+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2012/11/18/polyglot-javascript/</loc>
+        <loc>http://nikolajkn.dk/blog/2012/11/18/polyglot-javascript/</loc>
         <lastmod>2013-05-31T13:27:51+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2013/03/16/devops-days-london-2013/</loc>
+        <loc>http://nikolajkn.dk/blog/2013/03/16/devops-days-london-2013/</loc>
         <lastmod>2013-05-31T13:27:45+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2013/03/24/playing-with-dynamic-keyword/</loc>
+        <loc>http://nikolajkn.dk/blog/2013/03/24/playing-with-dynamic-keyword/</loc>
         <lastmod>2013-05-31T13:27:39+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and/</loc>
+        <loc>http://nikolajkn.dk/blog/2013/04/22/working-effectively-with-aspnet-and/</loc>
         <lastmod>2013-05-31T13:27:34+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2013/05/02/getting-started-with-go/</loc>
+        <loc>http://nikolajkn.dk/blog/2013/05/02/getting-started-with-go/</loc>
         <lastmod>2013-06-02T09:35:21+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2013/05/25/code-generation-in-net/</loc>
+        <loc>http://nikolajkn.dk/blog/2013/05/25/code-generation-in-net/</loc>
         <lastmod>2013-05-31T13:27:20+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress/</loc>
+        <loc>http://nikolajkn.dk/blog/2013/05/27/porting-to-octopress/</loc>
         <lastmod>2013-05-30T19:13:47+02:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/
-        </loc>
+        <loc>http://nikolajkn.dk/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/</loc>
         <lastmod>2013-06-02T09:31:46+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/robots.txt</loc>
+        <loc>http://nikolajkn.dk/robots.txt</loc>
         <lastmod>2013-05-30T19:13:47+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/blog/archives/</loc>
+        <loc>http://nikolajkn.dk/blog/archives/</loc>
         <lastmod>2013-06-02T09:35:21+02:00</lastmod>
     </url>
     <url>
-        <loc>http://elgsdyret.github.io/</loc>
+        <loc>http://nikolajkn.dk/</loc>
         <lastmod>2013-06-02T09:35:21+02:00</lastmod>
     </url>
 </urlset>

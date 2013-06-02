@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: ASP.NET | Developer's Perception]]></title>
-  <link href="http://elgsdyret.github.io/blog/categories/asp-dot-net/atom.xml" rel="self"/>
-  <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-06-02T09:35:32+02:00</updated>
-  <id>http://elgsdyret.github.io/</id>
+  <link href="http://nikolajkn.dk/blog/categories/asp-dot-net/atom.xml" rel="self"/>
+  <link href="http://nikolajkn.dk/"/>
+  <updated>2013-06-02T09:47:24+02:00</updated>
+  <id>http://nikolajkn.dk/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Working Effectively with ASP.NET and HttpContext]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and/"/>
+    <link href="http://nikolajkn.dk/blog/2013/04/22/working-effectively-with-aspnet-and/"/>
     <updated>2013-04-22T19:15:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and</id>
+    <id>http://nikolajkn.dk/blog/2013/04/22/working-effectively-with-aspnet-and</id>
     <content type="html"><![CDATA[<p>Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.</p>
 
 <p>This often appears in the form of code like this:</p>
@@ -173,9 +173,9 @@ DoSomeMoreCoreStuff(userId);
   
   <entry>
     <title type="html"><![CDATA[CORS vs ASP.NET Session]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/09/11/cors-vs-aspnet-session/"/>
+    <link href="http://nikolajkn.dk/blog/2012/09/11/cors-vs-aspnet-session/"/>
     <updated>2012-09-11T20:02:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/09/11/cors-vs-aspnet-session</id>
+    <id>http://nikolajkn.dk/blog/2012/09/11/cors-vs-aspnet-session</id>
     <content type="html"><![CDATA[<p>The last couple of days I have been trying to implement a pure javascript client that could connect to our SOAP API.</p>
 
 <p>To do that we need to enable <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Cross-origin resource sharing</a> (called CORS for short). Basically, as a security measure browsers implement Same origin policy ensuring that only programs loaded from the same domain can query resources on that domain.</p>
@@ -257,9 +257,9 @@ httpApplication.Response.StatusCode = 204;
   
   <entry>
     <title type="html"><![CDATA[Maintainable ASP.NET Webforms - Part II]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/"/>
+    <link href="http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/"/>
     <updated>2012-09-08T13:36:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-ii</id>
+    <id>http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-ii</id>
     <content type="html"><![CDATA[<p>In the last post I described how I believe that implementing the MVP pattern is a feasible way of improving ASP.NET Web Forms code:
 <a href="/blog/2012/09/08/maintainable-aspnet-webforms-part-i">part 1</a></p>
 
@@ -347,9 +347,9 @@ public void RenderDogs(IList<Dog> dogs)
   
   <entry>
     <title type="html"><![CDATA[Maintainable ASP.NET Webforms - Part I]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-i/"/>
+    <link href="http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-i/"/>
     <updated>2012-09-08T11:04:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-i</id>
+    <id>http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-i</id>
     <content type="html"><![CDATA[<p>In the next couple of blog posts I will try to outline how I try to improve the maintainability and testability of pages written in the ASP.NET Web Forms framework</p>
 
 <h3>Don&rsquo;t use ASP.NET Web Forms</h3>

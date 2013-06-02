@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Basketball | Developer's Perception]]></title>
-  <link href="http://elgsdyret.github.io/blog/categories/basketball/atom.xml" rel="self"/>
-  <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-06-02T09:35:26+02:00</updated>
-  <id>http://elgsdyret.github.io/</id>
+  <link href="http://nikolajkn.dk/blog/categories/basketball/atom.xml" rel="self"/>
+  <link href="http://nikolajkn.dk/"/>
+  <updated>2013-06-02T09:47:24+02:00</updated>
+  <id>http://nikolajkn.dk/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Basket, Frameworks, Empowerment, and the Holy Goat]]></title>
-    <link href="http://elgsdyret.github.io/blog/2011/09/29/basket-frameworks-empowerment-and-holy/"/>
+    <link href="http://nikolajkn.dk/blog/2011/09/29/basket-frameworks-empowerment-and-holy/"/>
     <updated>2011-09-29T09:40:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2011/09/29/basket-frameworks-empowerment-and-holy</id>
+    <id>http://nikolajkn.dk/blog/2011/09/29/basket-frameworks-empowerment-and-holy</id>
     <content type="html"><![CDATA[<p>First of a few disclaimers : The title of this post probably does not make a lot of sense (if any). Any perceived person and/or organization in this blog post is not intended &ndash; it is based on my experience in several projects, for different companies, and different clients.</p>
 
 <p>This is my first blog post ever!</p>

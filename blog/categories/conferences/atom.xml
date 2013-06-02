@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: conferences | Developer's Perception]]></title>
-  <link href="http://elgsdyret.github.io/blog/categories/conferences/atom.xml" rel="self"/>
-  <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-06-02T09:35:32+02:00</updated>
-  <id>http://elgsdyret.github.io/</id>
+  <link href="http://nikolajkn.dk/blog/categories/conferences/atom.xml" rel="self"/>
+  <link href="http://nikolajkn.dk/"/>
+  <updated>2013-06-02T09:47:24+02:00</updated>
+  <id>http://nikolajkn.dk/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[#oredev The Bad Parts]]></title>
-    <link href="http://elgsdyret.github.io/blog/2011/11/13/oredev-bad-parts/"/>
+    <link href="http://nikolajkn.dk/blog/2011/11/13/oredev-bad-parts/"/>
     <updated>2011-11-13T10:59:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2011/11/13/oredev-bad-parts</id>
+    <id>http://nikolajkn.dk/blog/2011/11/13/oredev-bad-parts</id>
     <content type="html"><![CDATA[<p>Thankfully, this post if going to be a lot shorter than the <a href="/blog/2011/11/13/oredev-good-parts/">good parts</a>, but I think with a bit of improvement Øredev can move from being a very good conference, to a brilliant conference.</p>
 
 <ul>
@@ -65,9 +65,9 @@ WiFi was muuuch better than last year..</div>
   
   <entry>
     <title type="html"><![CDATA[#oredev - The Good Parts]]></title>
-    <link href="http://elgsdyret.github.io/blog/2011/11/13/oredev-good-parts/"/>
+    <link href="http://nikolajkn.dk/blog/2011/11/13/oredev-good-parts/"/>
     <updated>2011-11-13T09:42:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2011/11/13/oredev-good-parts</id>
+    <id>http://nikolajkn.dk/blog/2011/11/13/oredev-good-parts</id>
     <content type="html"><![CDATA[<p>The Øredev conference 2011 is now over and at this point I have even managed to catch up on missing sleep and cut down on the coffee usage!</p>
 
 <p>As usual the conference was a success (from my perspective) with brilliant speakers and interesting topics, and this is my presentation of the good parts.</p>

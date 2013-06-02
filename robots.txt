@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://elgsdyret.github.io/sitemap.xml 
+Sitemap: http://nikolajkn.dk/sitemap.xml 

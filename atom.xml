@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Developer's Perception]]></title>
-  <link href="http://elgsdyret.github.io/atom.xml" rel="self"/>
-  <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-06-02T09:35:26+02:00</updated>
-  <id>http://elgsdyret.github.io/</id>
+  <link href="http://nikolajkn.dk/atom.xml" rel="self"/>
+  <link href="http://nikolajkn.dk/"/>
+  <updated>2013-06-02T09:47:24+02:00</updated>
+  <id>http://nikolajkn.dk/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Moved My Blog From Blogger to Octopress]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/"/>
+    <link href="http://nikolajkn.dk/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/"/>
     <updated>2013-06-02T08:36:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress</id>
+    <id>http://nikolajkn.dk/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress</id>
     <content type="html"><![CDATA[<p>I know more or less completed moving my blog from blogger to <a href="http://octopress.org/">octopress</a>. In general the experience has been quite good and I am impressed how easy it was to get everything going.</p>
 
 <h2>Why</h2>
@@ -56,9 +56,9 @@
   
   <entry>
     <title type="html"><![CDATA[Porting to Octopress]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress/"/>
+    <link href="http://nikolajkn.dk/blog/2013/05/27/porting-to-octopress/"/>
     <updated>2013-05-27T19:16:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/05/27/porting-to-octopress</id>
+    <id>http://nikolajkn.dk/blog/2013/05/27/porting-to-octopress</id>
     <content type="html"><![CDATA[<p>Just  testing out the octopress blogging engine. I am considering moving away from blogger, mostly to enable me to write in markdown (I am not a fan of editing in the browser) and to get the control of whats going one.</p>
 
 <p>Sofar it has been easy enough to get working, but I imagine it will require quite a bit of work to set it up completely as my main blogging outlet.</p>
@@ -67,9 +67,9 @@
   
   <entry>
     <title type="html"><![CDATA[Code Generation in .NET]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/05/25/code-generation-in-net/"/>
+    <link href="http://nikolajkn.dk/blog/2013/05/25/code-generation-in-net/"/>
     <updated>2013-05-25T12:39:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/05/25/code-generation-in-net</id>
+    <id>http://nikolajkn.dk/blog/2013/05/25/code-generation-in-net</id>
     <content type="html"><![CDATA[<p>Code generation has over time turned into one of my pet peeves when working in .NET (although most of it will apply to similar platforms like JAVA). Let me be very clear from the beginning of this post. I am advocating that you should use extreme caution before even considering using code generation to solve whatever real or perceived problems you might find it useful for. I have yet to see an implementation that has not caused extra problems. That does not necessarily mean that it cannot be valuable tool, but please take a step back and think before continuing down that path.</p>
 
 <blockquote><p>This is the longest blog post I have yet written. It contains no code, just ranting, and hopefully some insights.</p></blockquote>
@@ -229,9 +229,9 @@
   
   <entry>
     <title type="html"><![CDATA[Getting Started with Go]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/05/02/getting-started-with-go/"/>
+    <link href="http://nikolajkn.dk/blog/2013/05/02/getting-started-with-go/"/>
     <updated>2013-05-02T16:08:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/05/02/getting-started-with-go</id>
+    <id>http://nikolajkn.dk/blog/2013/05/02/getting-started-with-go</id>
     <content type="html"><![CDATA[<p>In late 2007 Google started an open source initiative to develop a new programming language named Go. The goal of the language was to make it as efficient as statically compiled languages, but as easy to use as dynamic languages.</p>
 
 <p>Furthermore, the language aims to solve the challenges of concurrent programming in an intuitive way. This makes a lot of sense as computers are getting more and more CPUs with more and more cores. A lot of current programming initiatives are actually focused on enabling us to easier write concurrent programs.</p>
@@ -453,9 +453,9 @@
   
   <entry>
     <title type="html"><![CDATA[Working Effectively with ASP.NET and HttpContext]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and/"/>
+    <link href="http://nikolajkn.dk/blog/2013/04/22/working-effectively-with-aspnet-and/"/>
     <updated>2013-04-22T19:15:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and</id>
+    <id>http://nikolajkn.dk/blog/2013/04/22/working-effectively-with-aspnet-and</id>
     <content type="html"><![CDATA[<p>Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.</p>
 
 <p>This often appears in the form of code like this:</p>
@@ -654,9 +654,9 @@
   
   <entry>
     <title type="html"><![CDATA[Playing With the dynamic Keyword]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/03/24/playing-with-dynamic-keyword/"/>
+    <link href="http://nikolajkn.dk/blog/2013/03/24/playing-with-dynamic-keyword/"/>
     <updated>2013-03-24T09:28:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/03/24/playing-with-dynamic-keyword</id>
+    <id>http://nikolajkn.dk/blog/2013/03/24/playing-with-dynamic-keyword</id>
     <content type="html"><![CDATA[<p>I have not yet had a chance to play around with the dynamic features that was introduced with .NET 4, probably because I have yet to find a good scenario for using it and probably because I am mostly stuck on doing work on the .NET 3.5.</p>
 
 <p>Fortunately, I am currently working on a new REST API build in Nancy and the dynamic features of .NET 4 seems perfect to implement HTTP PATCH.</p>
@@ -815,9 +815,9 @@
   
   <entry>
     <title type="html"><![CDATA[DevOps Days London 2013]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/03/16/devops-days-london-2013/"/>
+    <link href="http://nikolajkn.dk/blog/2013/03/16/devops-days-london-2013/"/>
     <updated>2013-03-16T21:38:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/03/16/devops-days-london-2013</id>
+    <id>http://nikolajkn.dk/blog/2013/03/16/devops-days-london-2013</id>
     <content type="html"><![CDATA[<p>The devops &ldquo;thingy&rdquo; is only a few years old. I use the word &ldquo;thingy&rdquo; (if it can be considered a word) as it is seemingly hard to describe precisely what exactly devops is.</p>
 
 <p>I am new to devops, but went to devops days in London anyways. This is my attempt to clear my head of some of the thoughts, ideas, and impressions that have been rambling around my head for these two days, and probably will for quite some time.</p>
@@ -839,9 +839,9 @@
   
   <entry>
     <title type="html"><![CDATA[ Polyglot JavaScript]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/11/18/polyglot-javascript/"/>
+    <link href="http://nikolajkn.dk/blog/2012/11/18/polyglot-javascript/"/>
     <updated>2012-11-18T13:14:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/11/18/polyglot-javascript</id>
+    <id>http://nikolajkn.dk/blog/2012/11/18/polyglot-javascript</id>
     <content type="html"><![CDATA[<p>Over time JavaScript has gained a lot of traction as it is the default option for running code in the browser, and it has become a valid server option with the rise of node. This progress has largely been fueled by an arms race between the major browser vendor continuously trying to wield the fastest environment for running JavaScript.</p>
 
 <p>Thus, as JavaScript can be run everywhere and with the notion that this language like any other has its rough spots (partly due to the history of it&rsquo;s creation, a notion supported by the famous book by Douglas Crockford &ldquo;JavaScript the Good Parts&rdquo;) it is no wonder that alternatives that compiles to JavaScript have been popping up for a while.</p>
@@ -934,9 +934,9 @@
   
   <entry>
     <title type="html"><![CDATA[CORS vs ASP.NET Session]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/09/11/cors-vs-aspnet-session/"/>
+    <link href="http://nikolajkn.dk/blog/2012/09/11/cors-vs-aspnet-session/"/>
     <updated>2012-09-11T20:02:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/09/11/cors-vs-aspnet-session</id>
+    <id>http://nikolajkn.dk/blog/2012/09/11/cors-vs-aspnet-session</id>
     <content type="html"><![CDATA[<p>The last couple of days I have been trying to implement a pure javascript client that could connect to our SOAP API.</p>
 
 <p>To do that we need to enable <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Cross-origin resource sharing</a> (called CORS for short). Basically, as a security measure browsers implement Same origin policy ensuring that only programs loaded from the same domain can query resources on that domain.</p>
@@ -1044,11 +1044,11 @@
   
   <entry>
     <title type="html"><![CDATA[Maintainable ASP.NET Webforms - Part II]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/"/>
+    <link href="http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/"/>
     <updated>2012-09-08T13:36:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-ii</id>
+    <id>http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-ii</id>
     <content type="html"><![CDATA[<p>In the last post I described how I believe that implementing the MVP pattern is a feasible way of improving ASP.NET Web Forms code:
-<a href="http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-i">part 1</a></p>
+<a href="http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-i">part 1</a></p>
 
 <p>The most important lesson is still that you should not use ASP.NET Web Forms unless you absolutely have to.</p>
 
@@ -1146,9 +1146,9 @@
   
   <entry>
     <title type="html"><![CDATA[Maintainable ASP.NET Webforms - Part I]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-i/"/>
+    <link href="http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-i/"/>
     <updated>2012-09-08T11:04:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-i</id>
+    <id>http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-i</id>
     <content type="html"><![CDATA[<p>In the next couple of blog posts I will try to outline how I try to improve the maintainability and testability of pages written in the ASP.NET Web Forms framework</p>
 
 <h3>Don&rsquo;t use ASP.NET Web Forms</h3>
@@ -1223,15 +1223,15 @@
 </ul>
 
 
-<p><a href="http://elgsdyret.github.io/blog/2012/09/08/maintainable-aspnet-webforms-part-ii">Part II: A tiny example</a></p>
+<p><a href="http://nikolajkn.dk/blog/2012/09/08/maintainable-aspnet-webforms-part-ii">Part II: A tiny example</a></p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[Node.js When The Honeymoon is Over]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/06/01/nodejs-when-honeymoon-is-over/"/>
+    <link href="http://nikolajkn.dk/blog/2012/06/01/nodejs-when-honeymoon-is-over/"/>
     <updated>2012-06-01T05:33:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/06/01/nodejs-when-honeymoon-is-over</id>
+    <id>http://nikolajkn.dk/blog/2012/06/01/nodejs-when-honeymoon-is-over</id>
     <content type="html"><![CDATA[<p>Since the beginning of the year I have been working on building a new REST based API to be consumed by both internal and external clients in <a href="http://nodejs.org/">Node.js</a>.</p>
 
 <p>The main reason for choosing node and mongo as the main elements in our stack when we started the project was to alleviate a number of pains we experienced with the &ldquo;old&rdquo; stack of ASP.NET and SQL. Most of this was related to the amount of ceremony that goes in to doing even simple stuff on that stack, which was being made worse by the way the technologies were used. Most if not all of these pains were indeed alleviated, but we gained a couple of new ones, which can be mitigated to some extend.</p>
@@ -1303,9 +1303,9 @@
   
   <entry>
     <title type="html"><![CDATA[Node.js First Experiences]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences/"/>
+    <link href="http://nikolajkn.dk/blog/2012/04/09/nodejs-first-experiences/"/>
     <updated>2012-04-09T10:51:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences</id>
+    <id>http://nikolajkn.dk/blog/2012/04/09/nodejs-first-experiences</id>
     <content type="html"><![CDATA[<p>The last 3 months or so I have been busy working on a new backend built in node with mongo as the database. It has been lots of fun, with some frustration, and lots of heureka moments.</p>
 
 <p>This is my attempt at describing those experiences, some good and some bad.</p>
@@ -1470,16 +1470,16 @@
   
   <entry>
     <title type="html"><![CDATA[Mapping Screen Mockup to Backbone.View(s)]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/01/29/mapping-screen-mockup-to-backboneviews/"/>
+    <link href="http://nikolajkn.dk/blog/2012/01/29/mapping-screen-mockup-to-backboneviews/"/>
     <updated>2012-01-29T10:38:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/01/29/mapping-screen-mockup-to-backboneviews</id>
+    <id>http://nikolajkn.dk/blog/2012/01/29/mapping-screen-mockup-to-backboneviews</id>
     <content type="html"><![CDATA[<p>One thing I have noticed after working on a Backbone powered application for 4 months is that developers have very different views on how to split a screen mockup into Backbone views in the code.</p>
 
 <p>I have seen re-use of code with each and every input field being wrapped by a view and named as a control (&hellip;smells like ASP.NET web forms controls &ndash; shudders&hellip;.) and potentially you could also have all the markup handled by one view.</p>
 
 <p>Given a small example screen mockup for gathering simple information about a person, like this:</p>
 
-<p><img src="http://elgsdyret.github.io/images/Simple_Mockup.png"></p>
+<p><img src="http://nikolajkn.dk/images/Simple_Mockup.png"></p>
 
 <p>Lets try to look at the different ways we could implement this with Backbone views, but first let us look at the requirements:</p>
 
@@ -1549,9 +1549,9 @@
   
   <entry>
     <title type="html"><![CDATA[Linux with nodejs and mongo on Windows Host - Part 2]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/01/22/linux-with-nodejs-and-mongo-on-windows_22/"/>
+    <link href="http://nikolajkn.dk/blog/2012/01/22/linux-with-nodejs-and-mongo-on-windows_22/"/>
     <updated>2012-01-22T11:53:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/01/22/linux-with-nodejs-and-mongo-on-windows_22</id>
+    <id>http://nikolajkn.dk/blog/2012/01/22/linux-with-nodejs-and-mongo-on-windows_22</id>
     <content type="html"><![CDATA[<p>I promised to get back when I had mongo-db up and running.</p>
 
 <p>In my blog post yesterday I pointed to his url : (<a href="http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages">http://www.mongodb.org/display/DOCS/Ubuntu+and+Debian+packages</a>)</p>
@@ -1592,9 +1592,9 @@
   
   <entry>
     <title type="html"><![CDATA[Linux with nodejs and mongo on Windows Host]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/01/21/linux-with-nodejs-and-mongo-on-windows/"/>
+    <link href="http://nikolajkn.dk/blog/2012/01/21/linux-with-nodejs-and-mongo-on-windows/"/>
     <updated>2012-01-21T12:28:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/01/21/linux-with-nodejs-and-mongo-on-windows</id>
+    <id>http://nikolajkn.dk/blog/2012/01/21/linux-with-nodejs-and-mongo-on-windows</id>
     <content type="html"><![CDATA[<p>So finally the time has come where we have decided to give the node and mongo combination a closer look at my work. Not that we are going to migrate everything to such a platform tomorrow, but the combination of node and mongo is so promising that we decided to give it a try to see how far we can get.</p>
 
 <h3>Basic Setup</h3>
@@ -1662,9 +1662,9 @@
   
   <entry>
     <title type="html"><![CDATA[Extending Backbone]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/01/18/extending-backbone/"/>
+    <link href="http://nikolajkn.dk/blog/2012/01/18/extending-backbone/"/>
     <updated>2012-01-18T20:29:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/01/18/extending-backbone</id>
+    <id>http://nikolajkn.dk/blog/2012/01/18/extending-backbone</id>
     <content type="html"><![CDATA[<p>For the past half year or so I have been using Backbone. Besides the obvious questions of how to fit the different pieces together, when to use what, and in general understanding the library, I have experimented with different ways of extended the existing Backbone behavior.</p>
 
 <p>Having tried a lot of different methods I ended up using 2 different approaches for 2 different scenarios.</p>
@@ -1873,10 +1873,10 @@
   
   <entry>
     <title type="html"><![CDATA[#oredev The Bad Parts]]></title>
-    <link href="http://elgsdyret.github.io/blog/2011/11/13/oredev-bad-parts/"/>
+    <link href="http://nikolajkn.dk/blog/2011/11/13/oredev-bad-parts/"/>
     <updated>2011-11-13T10:59:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2011/11/13/oredev-bad-parts</id>
-    <content type="html"><![CDATA[<p>Thankfully, this post if going to be a lot shorter than the <a href="http://elgsdyret.github.io/blog/2011/11/13/oredev-good-parts/">good parts</a>, but I think with a bit of improvement Øredev can move from being a very good conference, to a brilliant conference.</p>
+    <id>http://nikolajkn.dk/blog/2011/11/13/oredev-bad-parts</id>
+    <content type="html"><![CDATA[<p>Thankfully, this post if going to be a lot shorter than the <a href="http://nikolajkn.dk/blog/2011/11/13/oredev-good-parts/">good parts</a>, but I think with a bit of improvement Øredev can move from being a very good conference, to a brilliant conference.</p>
 
 <ul>
 <li>The WiFi was a disgrace! Shouldn&rsquo;t be that hard to get working.</li>
@@ -1923,9 +1923,9 @@ WiFi was muuuch better than last year..</div>
   
   <entry>
     <title type="html"><![CDATA[#oredev - The Good Parts]]></title>
-    <link href="http://elgsdyret.github.io/blog/2011/11/13/oredev-good-parts/"/>
+    <link href="http://nikolajkn.dk/blog/2011/11/13/oredev-good-parts/"/>
     <updated>2011-11-13T09:42:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2011/11/13/oredev-good-parts</id>
+    <id>http://nikolajkn.dk/blog/2011/11/13/oredev-good-parts</id>
     <content type="html"><![CDATA[<p>The Øredev conference 2011 is now over and at this point I have even managed to catch up on missing sleep and cut down on the coffee usage!</p>
 
 <p>As usual the conference was a success (from my perspective) with brilliant speakers and interesting topics, and this is my presentation of the good parts.</p>
@@ -1991,16 +1991,16 @@ That sounds like a great boost you got there).. Øredev is cool, hope some video
   
   <entry>
     <title type="html"><![CDATA[Basket, Frameworks, Empowerment, and the Holy Goat]]></title>
-    <link href="http://elgsdyret.github.io/blog/2011/09/29/basket-frameworks-empowerment-and-holy/"/>
+    <link href="http://nikolajkn.dk/blog/2011/09/29/basket-frameworks-empowerment-and-holy/"/>
     <updated>2011-09-29T09:40:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2011/09/29/basket-frameworks-empowerment-and-holy</id>
+    <id>http://nikolajkn.dk/blog/2011/09/29/basket-frameworks-empowerment-and-holy</id>
     <content type="html"><![CDATA[<p>First of a few disclaimers : The title of this post probably does not make a lot of sense (if any). Any perceived person and/or organization in this blog post is not intended &ndash; it is based on my experience in several projects, for different companies, and different clients.</p>
 
 <p>This is my first blog post ever!</p>
 
 <p>Chronologically, considering the title of the post, I should write something about basket first. Actually, this post is not about basket at all, but just had to show this great picture of developers from Ukraine and Denmark after playing a bit of basket in the sun.</p>
 
-<p><img src="http://elgsdyret.github.io/images/basket.jpg"></p>
+<p><img src="http://nikolajkn.dk/images/basket.jpg"></p>
 
 <p>After this short detour lets get back on the track to what I actually want to write a bit about &ndash; what motivates a developer.</p>
 

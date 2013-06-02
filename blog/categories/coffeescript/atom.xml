@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: coffeescript | Developer's Perception]]></title>
-  <link href="http://elgsdyret.github.io/blog/categories/coffeescript/atom.xml" rel="self"/>
-  <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-06-02T09:35:26+02:00</updated>
-  <id>http://elgsdyret.github.io/</id>
+  <link href="http://nikolajkn.dk/blog/categories/coffeescript/atom.xml" rel="self"/>
+  <link href="http://nikolajkn.dk/"/>
+  <updated>2013-06-02T09:47:24+02:00</updated>
+  <id>http://nikolajkn.dk/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[ Polyglot JavaScript]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/11/18/polyglot-javascript/"/>
+    <link href="http://nikolajkn.dk/blog/2012/11/18/polyglot-javascript/"/>
     <updated>2012-11-18T13:14:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/11/18/polyglot-javascript</id>
+    <id>http://nikolajkn.dk/blog/2012/11/18/polyglot-javascript</id>
     <content type="html"><![CDATA[<p>Over time JavaScript has gained a lot of traction as it is the default option for running code in the browser, and it has become a valid server option with the rise of node. This progress has largely been fueled by an arms race between the major browser vendor continuously trying to wield the fastest environment for running JavaScript.</p>
 
 <p>Thus, as JavaScript can be run everywhere and with the notion that this language like any other has its rough spots (partly due to the history of it&rsquo;s creation, a notion supported by the famous book by Douglas Crockford &ldquo;JavaScript the Good Parts&rdquo;) it is no wonder that alternatives that compiles to JavaScript have been popping up for a while.</p>

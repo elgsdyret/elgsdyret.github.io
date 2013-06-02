@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: .NET | Developer's Perception]]></title>
-  <link href="http://elgsdyret.github.io/blog/categories/dot-net/atom.xml" rel="self"/>
-  <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-06-02T09:35:26+02:00</updated>
-  <id>http://elgsdyret.github.io/</id>
+  <link href="http://nikolajkn.dk/blog/categories/dot-net/atom.xml" rel="self"/>
+  <link href="http://nikolajkn.dk/"/>
+  <updated>2013-06-02T09:47:24+02:00</updated>
+  <id>http://nikolajkn.dk/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Code Generation in .NET]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/05/25/code-generation-in-net/"/>
+    <link href="http://nikolajkn.dk/blog/2013/05/25/code-generation-in-net/"/>
     <updated>2013-05-25T12:39:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/05/25/code-generation-in-net</id>
+    <id>http://nikolajkn.dk/blog/2013/05/25/code-generation-in-net</id>
     <content type="html"><![CDATA[<p>Code generation has over time turned into one of my pet peeves when working in .NET (although most of it will apply to similar platforms like JAVA). Let me be very clear from the beginning of this post. I am advocating that you should use extreme caution before even considering using code generation to solve whatever real or perceived problems you might find it useful for. I have yet to see an implementation that has not caused extra problems. That does not necessarily mean that it cannot be valuable tool, but please take a step back and think before continuing down that path.</p>
 
 <blockquote><p>This is the longest blog post I have yet written. It contains no code, just ranting, and hopefully some insights.</p></blockquote>
@@ -177,9 +177,9 @@
   
   <entry>
     <title type="html"><![CDATA[Working Effectively with ASP.NET and HttpContext]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and/"/>
+    <link href="http://nikolajkn.dk/blog/2013/04/22/working-effectively-with-aspnet-and/"/>
     <updated>2013-04-22T19:15:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/04/22/working-effectively-with-aspnet-and</id>
+    <id>http://nikolajkn.dk/blog/2013/04/22/working-effectively-with-aspnet-and</id>
     <content type="html"><![CDATA[<p>Often in an ASP.NET WebForms application you will get up with unmanageable depencencies on the ASP.NET web stack expressed through the HttpContext class.</p>
 
 <p>This often appears in the form of code like this:</p>
@@ -335,9 +335,9 @@ DoSomeMoreCoreStuff(userId);
   
   <entry>
     <title type="html"><![CDATA[Playing With the dynamic Keyword]]></title>
-    <link href="http://elgsdyret.github.io/blog/2013/03/24/playing-with-dynamic-keyword/"/>
+    <link href="http://nikolajkn.dk/blog/2013/03/24/playing-with-dynamic-keyword/"/>
     <updated>2013-03-24T09:28:00+01:00</updated>
-    <id>http://elgsdyret.github.io/blog/2013/03/24/playing-with-dynamic-keyword</id>
+    <id>http://nikolajkn.dk/blog/2013/03/24/playing-with-dynamic-keyword</id>
     <content type="html"><![CDATA[<p>I have not yet had a chance to play around with the dynamic features that was introduced with .NET 4, probably because I have yet to find a good scenario for using it and probably because I am mostly stuck on doing work on the .NET 3.5.</p>
 
 <p>Fortunately, I am currently working on a new REST API build in Nancy and the dynamic features of .NET 4 seems perfect to implement HTTP PATCH.</p>

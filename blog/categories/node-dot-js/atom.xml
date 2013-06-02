@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: node.js | Developer's Perception]]></title>
-  <link href="http://elgsdyret.github.io/blog/categories/node-dot-js/atom.xml" rel="self"/>
-  <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-06-02T09:35:26+02:00</updated>
-  <id>http://elgsdyret.github.io/</id>
+  <link href="http://nikolajkn.dk/blog/categories/node-dot-js/atom.xml" rel="self"/>
+  <link href="http://nikolajkn.dk/"/>
+  <updated>2013-06-02T09:47:24+02:00</updated>
+  <id>http://nikolajkn.dk/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Node.js When The Honeymoon is Over]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/06/01/nodejs-when-honeymoon-is-over/"/>
+    <link href="http://nikolajkn.dk/blog/2012/06/01/nodejs-when-honeymoon-is-over/"/>
     <updated>2012-06-01T05:33:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/06/01/nodejs-when-honeymoon-is-over</id>
+    <id>http://nikolajkn.dk/blog/2012/06/01/nodejs-when-honeymoon-is-over</id>
     <content type="html"><![CDATA[<p>Since the beginning of the year I have been working on building a new REST based API to be consumed by both internal and external clients in <a href="http://nodejs.org/">Node.js</a>.</p>
 
 <p>The main reason for choosing node and mongo as the main elements in our stack when we started the project was to alleviate a number of pains we experienced with the &ldquo;old&rdquo; stack of ASP.NET and SQL. Most of this was related to the amount of ceremony that goes in to doing even simple stuff on that stack, which was being made worse by the way the technologies were used. Most if not all of these pains were indeed alleviated, but we gained a couple of new ones, which can be mitigated to some extend.</p>
@@ -89,9 +89,9 @@
   
   <entry>
     <title type="html"><![CDATA[Node.js First Experiences]]></title>
-    <link href="http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences/"/>
+    <link href="http://nikolajkn.dk/blog/2012/04/09/nodejs-first-experiences/"/>
     <updated>2012-04-09T10:51:00+02:00</updated>
-    <id>http://elgsdyret.github.io/blog/2012/04/09/nodejs-first-experiences</id>
+    <id>http://nikolajkn.dk/blog/2012/04/09/nodejs-first-experiences</id>
     <content type="html"><![CDATA[<p>The last 3 months or so I have been busy working on a new backend built in node with mongo as the database. It has been lots of fun, with some frustration, and lots of heureka moments.</p>
 
 <p>This is my attempt at describing those experiences, some good and some bad.</p>
