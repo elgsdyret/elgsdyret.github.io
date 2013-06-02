@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Backbone | Developer's Perception]]></title>
   <link href="http://elgsdyret.github.io/blog/categories/backbone/atom.xml" rel="self"/>
   <link href="http://elgsdyret.github.io/"/>
-  <updated>2013-06-02T09:32:37+02:00</updated>
+  <updated>2013-06-02T09:35:32+02:00</updated>
   <id>http://elgsdyret.github.io/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
@@ -24,7 +24,7 @@
 
 <p>Given a small example screen mockup for gathering simple information about a person, like this:</p>
 
-<p><img src="/images/Simple_Mockup.png"></p>
+<p>{% img /images/Simple_Mockup.png %}</p>
 
 <p>Lets try to look at the different ways we could implement this with Backbone views, but first let us look at the requirements:</p>
 
