@@ -4,7 +4,7 @@
   <title><![CDATA[Developer's Perception]]></title>
   <link href="http://nikolajkn.dk/atom.xml" rel="self"/>
   <link href="http://nikolajkn.dk/"/>
-  <updated>2013-06-02T09:47:24+02:00</updated>
+  <updated>2013-06-05T10:15:05+02:00</updated>
   <id>http://nikolajkn.dk/</id>
   <author>
     <name><![CDATA[Nikolaj Kaare Nørskov]]></name>
@@ -12,6 +12,191 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[TDD in go]]></title>
+    <link href="http://nikolajkn.dk/blog/2013/06/05/tdd-in-go/"/>
+    <updated>2013-06-05T09:07:00+02:00</updated>
+    <id>http://nikolajkn.dk/blog/2013/06/05/tdd-in-go</id>
+    <content type="html"><![CDATA[<p>Lately I have been playing around with the go language. One of the first things I look for in a new language or framework is how tests can be written and whether it is feasible to do test driven development (TDD).</p>
+
+<p>Assume that I am building a math package for go called funkymath (I chose the name to be fairly certain I do not conflict with any existing math packages).</p>
+
+<p>To run tests for a package in go you run a simple command</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>go test funkymath</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Not surprisingly I get an error results telling me that it cannot load the funkymath package, which makes sense since I did not create it:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>can't load package: package funkymath: cannot find package "funkymath" in any of:
+</span><span class='line'>  /usr/local/go/src/pkg/funkymath (from $GOROOT)
+</span><span class='line'>  /home/nkn/Dropbox/SourceCode/go/src/funkymath (from $GOPATH)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>To create a package you put the code in one of the defined paths for packages, which is also conveniently presented in the error message. It suggests the default location for packages from the go installation and an extra one in my dropbox folder I have configured in .profile.</p>
+
+<p>Thus, I create a folder named funkymath and put an addition.go file in there and run the test command once again.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>can't load package: package funkymath: 
+</span><span class='line'>addition.go:1:1: expected 'package', found 'EOF'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Again not suprisingly I get an error, as I did not put anything in the file. In many languages you would throw an exception to indicate that a method was not implemented yet.</p>
+
+<p>As far as I have been able to find it seems to be idiomatic go to return both the result and an error (using the fact that go allows multiple return values) instead (maybe I am mistaken).</p>
+
+<p>Thus, I created the following basic &lsquo;not implemented&rsquo; implementation of a Plus function:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">funkymath</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">Plus</span><span class="p">(</span><span class="nx">a</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;not implemented yet&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And run the test command again, this time with the information that it does not contain any tests.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="err">?</span>     <span class="nx">funkymath</span>   <span class="p">[</span><span class="nx">no</span> <span class="nx">test</span> <span class="nx">files</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So the next step is to create a test file. Test files are located inside the package folder and are identified by go using the naming convention of the file name underscore test.</p>
+
+<p>Thus, I create an addition_test.go file next to addition.go and put in the first test:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">funkymath</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;testing&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">TestPlus_TwoNumbers_ShouldNotReturnAnError</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>    
+</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="nx">b</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">Plus</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;Plus(%v, %v) produces error %v, expected result %v&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">err</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Test functions are identified by the naming convention that they start with &lsquo;Test&rsquo;, and are automatically parsed a reference to the testing object. Will get back to the specifics of the test function a bit later.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">.</span><span class="o">/</span><span class="nx">addition_test</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span> <span class="nx">result</span> <span class="nx">declared</span> <span class="nx">and</span> <span class="nx">not</span> <span class="nx">used</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ofcourse I cannot run this test function as I am not using result for anything. In general I really like this feature of the language, but sometimes it catches me ofguard. Thus, I inform go that I am not really interested in the first return value:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">funkymath</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;testing&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">TestPlus_TwoNumbers_ShouldNotReturnAnError</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>    
+</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="nx">b</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">Plus</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;Plus(%v, %v) produces error %v, expected result %v&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">err</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And finally get the test error I was looking for:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="o">---</span> <span class="nx">FAIL</span><span class="p">:</span> <span class="nx">TestPlus_TwoNumbers_ShouldNotReturnAnError</span> <span class="p">(</span><span class="mf">0.00</span> <span class="nx">seconds</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">addition_test</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span> <span class="nx">Plus</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="nx">produces</span> <span class="kt">error</span> <span class="nx">not</span> <span class="nx">implemented</span> <span class="nx">yet</span><span class="p">,</span> <span class="nx">expected</span> <span class="nx">result</span> <span class="mi">4</span>
+</span><span class='line'><span class="nx">FAIL</span>
+</span><span class='line'><span class="nx">FAIL</span>  <span class="nx">funkymath</span>   <span class="mf">0.013</span><span class="nx">s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Next step is then to implement the functionality. It can always be argued whether to use triangulation or obvious implementation, but I choose to just return a constant.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">funkymath</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">Plus</span><span class="p">(</span><span class="nx">a</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">4</span><span class="p">,</span> <span class="kc">nil</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And the result of running the tests:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">ok</span>     <span class="nx">funkymath</span>   <span class="mf">0.006</span><span class="nx">s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>YAY! I managed to complete the RED-GREEN TDD cycle in go.</p>
+
+<p>This is an extremely simple example, but there is still a couple of valid points to make.</p>
+
+<p>The convention for tests in go is to locate test files inside the package folder and name them filename_test.go. Test functions inside those files are named TestSomething.</p>
+
+<p>The language does not have a rich DSL for writing tests like you would find in .NET using NUnit (or others) or in javascript using jasmine. You have to test values using built in language constructs like &lsquo;if&rsquo; and even format the error messages yourself.</p>
+
+<p>This is a bit cumbersome, but I guess that it is fine that the default way works like this, as 3rd party packages can built DSL&rsquo;s on top of this like <a href="https://github.com/bmizerany/assert">Asserts for go</a>.</p>
+
+<p>Next step is to play some more with building a webserver in go. If it is not on the web it did not happen.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Moved My Blog From Blogger to Octopress]]></title>
@@ -1986,57 +2171,6 @@ That sounds like a great boost you got there).. Øredev is cool, hope some video
 </div>
 </div>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Basket, Frameworks, Empowerment, and the Holy Goat]]></title>
-    <link href="http://nikolajkn.dk/blog/2011/09/29/basket-frameworks-empowerment-and-holy/"/>
-    <updated>2011-09-29T09:40:00+02:00</updated>
-    <id>http://nikolajkn.dk/blog/2011/09/29/basket-frameworks-empowerment-and-holy</id>
-    <content type="html"><![CDATA[<p>First of a few disclaimers : The title of this post probably does not make a lot of sense (if any). Any perceived person and/or organization in this blog post is not intended &ndash; it is based on my experience in several projects, for different companies, and different clients.</p>
-
-<p>This is my first blog post ever!</p>
-
-<p>Chronologically, considering the title of the post, I should write something about basket first. Actually, this post is not about basket at all, but just had to show this great picture of developers from Ukraine and Denmark after playing a bit of basket in the sun.</p>
-
-<p><img src="http://nikolajkn.dk/images/basket.jpg"></p>
-
-<p>After this short detour lets get back on the track to what I actually want to write a bit about &ndash; what motivates a developer.</p>
-
-<p>Ramble: It seems to be the perception from people looking at developers from the outside, be it managers, project managers, or people from the street that all developers care about is playing with new toys (languages, frameworks, new hardware, or gadgets).</p>
-
-<p>While most developers love new toys (like women love new shoes), what motivates a developer is actually far more nuanced than just the urge to try new stuff. Albeit, some developers are motivated by money, most I have met (including myself) are motivated by an urge to craft software and learn. We want to craft stuff smarter, faster, with fewer bugs, and better features.</p>
-
-<p>This is probably why developers in start-up companies seem to be more motivated &ndash; they have a clean slate and can craft and learn according to what is the smartest (perceived!) way of working at that point in time. After a few years what was smartest back in the beginning is probably not the smartest anymore, but more importantly the developers have learned a lot, and can now do even smarter (again perceived) stuff. But at this time the products and systems they work on have a lot of customers, thus the level of risk the business is willing to take decrease dramatically &ndash; meaning the developers get to craft and learn less. Thus, eventually the developers will become demotivated (seems to be close to a law of nature &ndash; at least from my personal experience).</p>
-
-<p>There are a couple of challenges with demotivated developers.</p>
-
-<ul>
-<li>Retention becomes harder.</li>
-<li>Hiring becomes harder.</li>
-</ul>
-
-
-<p>In the very best scenarios the developers are also very professional people (they do get paid) and will do their job adequately &ndash; but they will never do a GREAT job. For that they need to be motivated.</p>
-
-<h3>Avoiding this trap?</h3>
-
-<p>If it was easy less software products/ projects would fail. Nevertheless, I believe there is a path. Good developers have the urge to craft and learn just as strongly as all other developers, maybe even stronger. But, more importantly good developers also understand the business and the customers. Thus, a good developer would be able to determine quite well when to take which risks regarding which frameworks, languages, platforms, methodologies, etc. are used. A good developer also understands that not all risks should be taken at the same time: In general the good developer will be able to help guide the direction of the software.</p>
-
-<p>Thus, to have motivated developers your need to empower the developer (does not mean no control &ndash; just more influence). This may sound risky, and indeed it is. If you empower a bad developer the results will not be nice &ndash; probably close to catastrophic. If you empower a good developer you are not guaranteed success, but you know that at the very least he will fight to succeed.</p>
-
-<p>Soooo&hellip; empowerment is risky even with good developers (if you are choosing not to empower your developers because you believe they are bad I can only ask why the hell you are hiring bad developers (and keeping them)).</p>
-
-<p>What&rsquo;s the alternative? Demotivated developers&hellip;. I honestly do not believe you can successfully run a business based on software with demotivated developers working on it &ndash; it will fail, sooner or later &ndash; if you don&rsquo;t change.</p>
-
-<h3>How much?</h3>
-
-<p>So how much should you empower your developers? This is not easy either &ndash; for some developers you can give almost free reins &ndash; while others need a quite firm hand controlling.</p>
-
-<p>If I find the solution for this last bit, I will be sure to let you know :&ndash;)</p>
-
-<p>/Ramble</p>
 ]]></content>
   </entry>
   

@@ -9,7 +9,7 @@
   <meta name="author" content="Nikolaj Kaare Nørskov">
 
   
-  <meta name="description" content="I know more or less completed moving my blog from blogger to octopress. In general the experience has been quite good and I am impressed how easy it &hellip;">
+  <meta name="description" content="Lately I have been playing around with the go language. One of the first things I look for in a new language or framework is how tests can be written &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,220 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/05/tdd-in-go/">TDD in Go</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-05T09:07:00+02:00" pubdate data-updated="true">Jun 5<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/06/05/tdd-in-go/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Lately I have been playing around with the go language. One of the first things I look for in a new language or framework is how tests can be written and whether it is feasible to do test driven development (TDD).</p>
+
+<p>Assume that I am building a math package for go called funkymath (I chose the name to be fairly certain I do not conflict with any existing math packages).</p>
+
+<p>To run tests for a package in go you run a simple command</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>go test funkymath</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Not surprisingly I get an error results telling me that it cannot load the funkymath package, which makes sense since I did not create it:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>can't load package: package funkymath: cannot find package "funkymath" in any of:
+</span><span class='line'>  /usr/local/go/src/pkg/funkymath (from $GOROOT)
+</span><span class='line'>  /home/nkn/Dropbox/SourceCode/go/src/funkymath (from $GOPATH)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>To create a package you put the code in one of the defined paths for packages, which is also conveniently presented in the error message. It suggests the default location for packages from the go installation and an extra one in my dropbox folder I have configured in .profile.</p>
+
+<p>Thus, I create a folder named funkymath and put an addition.go file in there and run the test command once again.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>can't load package: package funkymath: 
+</span><span class='line'>addition.go:1:1: expected 'package', found 'EOF'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Again not suprisingly I get an error, as I did not put anything in the file. In many languages you would throw an exception to indicate that a method was not implemented yet.</p>
+
+<p>As far as I have been able to find it seems to be idiomatic go to return both the result and an error (using the fact that go allows multiple return values) instead (maybe I am mistaken).</p>
+
+<p>Thus, I created the following basic &lsquo;not implemented&rsquo; implementation of a Plus function:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">funkymath</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">Plus</span><span class="p">(</span><span class="nx">a</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;not implemented yet&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And run the test command again, this time with the information that it does not contain any tests.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="err">?</span>     <span class="nx">funkymath</span>   <span class="p">[</span><span class="nx">no</span> <span class="nx">test</span> <span class="nx">files</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So the next step is to create a test file. Test files are located inside the package folder and are identified by go using the naming convention of the file name underscore test.</p>
+
+<p>Thus, I create an addition_test.go file next to addition.go and put in the first test:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">funkymath</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;testing&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">TestPlus_TwoNumbers_ShouldNotReturnAnError</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>    
+</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="nx">b</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">Plus</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;Plus(%v, %v) produces error %v, expected result %v&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">err</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Test functions are identified by the naming convention that they start with &lsquo;Test&rsquo;, and are automatically parsed a reference to the testing object. Will get back to the specifics of the test function a bit later.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">.</span><span class="o">/</span><span class="nx">addition_test</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span> <span class="nx">result</span> <span class="nx">declared</span> <span class="nx">and</span> <span class="nx">not</span> <span class="nx">used</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ofcourse I cannot run this test function as I am not using result for anything. In general I really like this feature of the language, but sometimes it catches me ofguard. Thus, I inform go that I am not really interested in the first return value:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">funkymath</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;testing&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">TestPlus_TwoNumbers_ShouldNotReturnAnError</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>    
+</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="nx">b</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">Plus</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;Plus(%v, %v) produces error %v, expected result %v&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">err</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And finally get the test error I was looking for:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="o">---</span> <span class="nx">FAIL</span><span class="p">:</span> <span class="nx">TestPlus_TwoNumbers_ShouldNotReturnAnError</span> <span class="p">(</span><span class="mf">0.00</span> <span class="nx">seconds</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">addition_test</span><span class="p">.</span><span class="k">go</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span> <span class="nx">Plus</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="nx">produces</span> <span class="kt">error</span> <span class="nx">not</span> <span class="nx">implemented</span> <span class="nx">yet</span><span class="p">,</span> <span class="nx">expected</span> <span class="nx">result</span> <span class="mi">4</span>
+</span><span class='line'><span class="nx">FAIL</span>
+</span><span class='line'><span class="nx">FAIL</span>  <span class="nx">funkymath</span>   <span class="mf">0.013</span><span class="nx">s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Next step is then to implement the functionality. It can always be argued whether to use triangulation or obvious implementation, but I choose to just return a constant.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">funkymath</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">Plus</span><span class="p">(</span><span class="nx">a</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">4</span><span class="p">,</span> <span class="kc">nil</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And the result of running the tests:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">ok</span>     <span class="nx">funkymath</span>   <span class="mf">0.006</span><span class="nx">s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>YAY! I managed to complete the RED-GREEN TDD cycle in go.</p>
+
+<p>This is an extremely simple example, but there is still a couple of valid points to make.</p>
+
+<p>The convention for tests in go is to locate test files inside the package folder and name them filename_test.go. Test functions inside those files are named TestSomething.</p>
+
+<p>The language does not have a rich DSL for writing tests like you would find in .NET using NUnit (or others) or in javascript using jasmine. You have to test values using built in language constructs like &lsquo;if&rsquo; and even format the error messages yourself.</p>
+
+<p>This is a bit cumbersome, but I guess that it is fine that the default way works like this, as 3rd party packages can built DSL&rsquo;s on top of this like <a href="https://github.com/bmizerany/assert">Asserts for go</a>.</p>
+
+<p>Next step is to play some more with building a webserver in go. If it is not on the web it did not happen.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1349,137 +1563,6 @@
 <p>Anyone has any hacks worth trying?</p>
 
 <p>Next step&hellip;. Something more usable than SOAP&hellip;&hellip;. Not using ASP.NET Session</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/">Maintainable ASP.NET Webforms - Part II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-08T13:36:00+02:00" pubdate data-updated="true">Sep 8<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/09/08/maintainable-aspnet-webforms-part-ii/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In the last post I described how I believe that implementing the MVP pattern is a feasible way of improving ASP.NET Web Forms code:
-<a href="/blog/2012/09/08/maintainable-aspnet-webforms-part-i">part 1</a></p>
-
-<p>The most important lesson is still that you should not use ASP.NET Web Forms unless you absolutely have to.</p>
-
-<h3>The Example</h3>
-
-<p>I have added a tiny example to github: <a href="https://github.com/elgsdyret/mvp-example">example</a></p>
-
-<p>Like any contrived example it might be too simple and too silly to really show the power of implementing the pages this way, but here is a short walk-through of the flow anyways:</p>
-
-<p>The view loads the presenter with a reference to itself and asks it to PresentAllDogs:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">protected</span> <span class="k">void</span> <span class="nf">Page_Load</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">presenter</span> <span class="p">=</span> <span class="k">new</span> <span class="n">DogSearchPresenter</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">presenter</span><span class="p">.</span><span class="n">PresentAllDogs</span><span class="p">();</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The presenter then retrieves all the dogs (probably from some kind of data layer) and asks the view to render the dogs:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">PresentAllDogs</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">view</span><span class="p">.</span><span class="n">RenderDogs</span><span class="p">(</span><span class="n">Dog</span><span class="p">.</span><span class="n">All</span><span class="p">());</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The view just assigns a local field with the values retrived (in some scenarios it might be doing a databind or similar, all depending on how the template aspx is used):</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">RenderDogs</span><span class="p">(</span><span class="n">IList</span><span class="p">&lt;</span><span class="n">Dog</span><span class="p">&gt;</span> <span class="n">dogs</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="n">Dogs</span> <span class="p">=</span> <span class="n">dogs</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>When the template is rendered it automatically renders the Dogs from the view:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='c#'><span class='line'><span class="p">&lt;</span><span class="n">table</span><span class="p">&gt;</span>
-</span><span class='line'>  <span class="p">&lt;</span><span class="n">tr</span><span class="p">&gt;</span>
-</span><span class='line'>      <span class="p">&lt;</span><span class="n">th</span><span class="p">&gt;</span><span class="n">Name</span><span class="p">&lt;/</span><span class="n">th</span><span class="p">&gt;&lt;</span><span class="n">th</span><span class="p">&gt;</span><span class="n">Race</span><span class="p">&lt;/</span><span class="n">th</span><span class="p">&gt;</span>
-</span><span class='line'>  <span class="p">&lt;/</span><span class="n">tr</span><span class="p">&gt;</span>
-</span><span class='line'>  <span class="p">&lt;%</span><span class="k">foreach</span><span class="p">(</span><span class="kt">var</span> <span class="n">dog</span> <span class="k">in</span> <span class="n">Dogs</span><span class="p">)</span> <span class="p">{</span> <span class="p">%&gt;</span>
-</span><span class='line'>  <span class="p">&lt;</span><span class="n">tr</span><span class="p">&gt;</span>
-</span><span class='line'>      <span class="p">&lt;</span><span class="n">td</span><span class="p">&gt;&lt;%=</span><span class="n">dog</span><span class="p">.</span><span class="n">Name</span><span class="p">%&gt;&lt;/</span><span class="n">td</span><span class="p">&gt;</span>   <span class="p">&lt;</span><span class="n">td</span><span class="p">&gt;&lt;%=</span><span class="n">dog</span><span class="p">.</span><span class="n">Race</span><span class="p">%&gt;&lt;/</span><span class="n">td</span><span class="p">&gt;</span>
-</span><span class='line'>  <span class="p">&lt;/</span><span class="n">tr</span><span class="p">&gt;</span>
-</span><span class='line'>  <span class="p">&lt;%</span> <span class="p">}</span> <span class="p">%&gt;</span>
-</span><span class='line'><span class="p">&lt;/</span><span class="n">table</span><span class="p">&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This way of rendering is my preferred as it puts just the right amount of rendering logic in the template. It does not work well if you need to manipulate specific rows of the table and have the viewstate handle which you clicked.</p>
-
-<p>For this you could use the listview control which is a decent compromise between using raw template rendering and having the view set values on elements using the runat server tag (I definetely prefer the first template rendering.)</p>
-
-<p>Happy coding!</p>
-
-<h2>Comments</h2>
-
-<p>Alexander Beletsky</p>
-
-<p>Good stuff.</p>
-
-<p>There is ASP.NET MVP framework.</p>
-
-<p><a href="http://aspnetmvp.codeplex.com/">http://aspnetmvp.codeplex.com/</a></p>
-
-<p>But I also still prefer lightweight custom solutions.</p>
 </div>
   
   

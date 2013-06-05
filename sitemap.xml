@@ -2,15 +2,15 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://nikolajkn.dk/blog/2011/09/29/basket-frameworks-empowerment-and-holy/</loc>
-        <lastmod>2013-05-30T19:13:47+02:00</lastmod>
+        <lastmod>2013-05-30T14:45:29+02:00</lastmod>
     </url>
     <url>
         <loc>http://nikolajkn.dk/blog/2011/11/13/oredev-good-parts/</loc>
-        <lastmod>2013-05-30T19:13:47+02:00</lastmod>
+        <lastmod>2013-05-30T14:45:29+02:00</lastmod>
     </url>
     <url>
         <loc>http://nikolajkn.dk/blog/2011/11/13/oredev-bad-parts/</loc>
-        <lastmod>2013-05-30T19:13:47+02:00</lastmod>
+        <lastmod>2013-05-30T14:45:29+02:00</lastmod>
     </url>
     <url>
         <loc>http://nikolajkn.dk/blog/2012/01/18/extending-backbone/</loc>
@@ -66,7 +66,7 @@
     </url>
     <url>
         <loc>http://nikolajkn.dk/blog/2013/05/02/getting-started-with-go/</loc>
-        <lastmod>2013-06-02T09:35:21+02:00</lastmod>
+        <lastmod>2013-05-31T13:27:28+02:00</lastmod>
     </url>
     <url>
         <loc>http://nikolajkn.dk/blog/2013/05/25/code-generation-in-net/</loc>
@@ -74,22 +74,26 @@
     </url>
     <url>
         <loc>http://nikolajkn.dk/blog/2013/05/27/porting-to-octopress/</loc>
-        <lastmod>2013-05-30T19:13:47+02:00</lastmod>
+        <lastmod>2013-05-30T14:45:29+02:00</lastmod>
     </url>
     <url>
         <loc>http://nikolajkn.dk/blog/2013/06/02/moved-my-blog-from-blogger-to-octopress/</loc>
-        <lastmod>2013-06-02T09:31:46+02:00</lastmod>
+        <lastmod>2013-06-02T09:31:34+02:00</lastmod>
     </url>
     <url>
-        <loc>http://nikolajkn.dk/robots.txt</loc>
-        <lastmod>2013-05-30T19:13:47+02:00</lastmod>
-    </url>
-    <url>
-        <loc>http://nikolajkn.dk/blog/archives/</loc>
-        <lastmod>2013-06-02T09:35:21+02:00</lastmod>
+        <loc>http://nikolajkn.dk/blog/2013/06/05/tdd-in-go/</loc>
+        <lastmod>2013-06-05T10:05:08+02:00</lastmod>
     </url>
     <url>
         <loc>http://nikolajkn.dk/</loc>
-        <lastmod>2013-06-02T09:35:21+02:00</lastmod>
+        <lastmod>2013-06-05T10:05:08+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://nikolajkn.dk/robots.txt</loc>
+        <lastmod>2013-05-27T16:11:38+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://nikolajkn.dk/blog/archives/</loc>
+        <lastmod>2013-06-05T10:05:08+02:00</lastmod>
     </url>
 </urlset>
